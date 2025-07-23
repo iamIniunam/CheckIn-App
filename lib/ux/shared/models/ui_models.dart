@@ -41,16 +41,16 @@ class Course {
 }
 
 class Session {
-  final int sessionNumber;
+  final int weekNumber;
   final String date;
   final String status;
 
-  String get session => 'Session $sessionNumber';
+  String get session => 'Week $weekNumber';
 
   Color get getStatusColor => statusColor(status);
 
   Session({
-    required this.sessionNumber,
+    required this.weekNumber,
     required this.date,
     required this.status,
   });

@@ -111,7 +111,7 @@ class _ScanPageState extends State<ScanPage> {
                     controller?.stopCamera();
                     Navigation.back(context: context);
                   },
-                  child: Container(
+                  child: Ink(
                     width: 85,
                     padding: const EdgeInsets.only(left: 5, top: 5, bottom: 5),
                     child: const Row(
@@ -192,7 +192,7 @@ class _ScanPageState extends State<ScanPage> {
               topRight: Radius.circular(26.5),
               bottomRight: Radius.circular(26.5)),
       onTap: onTap,
-      child: Container(
+      child: Ink(
         height: 50,
         width: 70,
         padding: const EdgeInsets.symmetric(horizontal: 10),

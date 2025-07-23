@@ -165,7 +165,7 @@ class _ProfilePageState extends State<ProfilePage> {
       {required String title, required String value, VoidCallback? onTap}) {
     return AppMaterial(
       onTap: onTap ?? () {},
-      child: Container(
+      child: Ink(
         padding: const EdgeInsets.only(top: 16, bottom: 12),
         decoration: BoxDecoration(
           border: Border(

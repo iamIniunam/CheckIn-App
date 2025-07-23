@@ -193,7 +193,7 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
                           showAttendanceCancelDialog();
                         }
                       },
-                  child: Container(
+                  child: Ink(
                     width: 85,
                     padding: const EdgeInsets.only(left: 5, top: 5, bottom: 5),
                     child: const Row(

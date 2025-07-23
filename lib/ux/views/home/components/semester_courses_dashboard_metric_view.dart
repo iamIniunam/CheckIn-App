@@ -79,7 +79,7 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
               lecturer: course.lecturer ?? '',
             ));
       },
-      child: Container(
+      child: Ink(
         padding:
             const EdgeInsets.only(left: 12, top: 10, right: 12, bottom: 12),
         decoration: BoxDecoration(

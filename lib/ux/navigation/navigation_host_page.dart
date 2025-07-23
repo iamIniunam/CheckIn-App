@@ -71,7 +71,7 @@ class _NavigationHostPageState extends State<NavigationHostPage> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16.0),
       inkwellBorderRadius: BorderRadius.circular(16.0),
-      child: Container(
+      child: Ink(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: isSelected
             ? BoxDecoration(

@@ -27,7 +27,7 @@ class CourseCard extends StatelessWidget {
             ),
           );
         },
-        child: Container(
+        child: Ink(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
             children: [

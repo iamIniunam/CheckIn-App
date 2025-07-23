@@ -76,7 +76,7 @@ class ViewProfileImagePageState extends State<ViewProfileImagePage> {
                   onTap: () {
                     // selectNewProfilePhoto();
                   },
-                  child: Container(
+                  child: Ink(
                     padding: const EdgeInsets.all(7),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),

@@ -76,7 +76,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
       {required IconData icon, required String title, required String body}) {
     return AppMaterial(
       onTap: () {},
-      child: Container(
+      child: Ink(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

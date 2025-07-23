@@ -26,11 +26,16 @@ class CustomAppBar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                       color: AppColors.defaultColor,
                       fontSize: 24,
                       fontWeight: FontWeight.bold)),
-              Text(subtitle, style: const TextStyle(color: Colors.grey)),
+              Text(subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: Colors.grey)),
             ],
           ),
           Row(
@@ -63,7 +68,7 @@ class CustomAppBar extends StatelessWidget {
       borderRadius: BorderRadius.circular(10),
       inkwellBorderRadius: BorderRadius.circular(10),
       onTap: onTap,
-      child: Container(
+      child: Ink(
         padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),

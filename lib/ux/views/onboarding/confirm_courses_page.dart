@@ -254,7 +254,7 @@ class _ConfirmCoursesPageState extends State<ConfirmCoursesPage> {
         borderRadius: BorderRadius.circular(10),
         inkwellBorderRadius: BorderRadius.circular(10),
         onTap: onTap,
-        child: Container(
+        child: Ink(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),

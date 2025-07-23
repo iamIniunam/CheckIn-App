@@ -19,31 +19,31 @@ class CourseDetailsPage extends StatefulWidget {
 class _CourseDetailsPageState extends State<CourseDetailsPage> {
   List<Session> sessions = [
     Session(
-        sessionNumber: 1,
+        weekNumber: 1,
         date: DateTime.now().friendlySlashDate(),
         status: AppStrings.absent),
     Session(
-        sessionNumber: 2,
+        weekNumber: 2,
         date: DateTime.now().friendlySlashDate(),
         status: AppStrings.present),
     Session(
-        sessionNumber: 3,
+        weekNumber: 3,
         date: DateTime.now().friendlySlashDate(),
         status: AppStrings.present),
     Session(
-        sessionNumber: 4,
+        weekNumber: 4,
         date: DateTime.now().friendlySlashDate(),
         status: AppStrings.late),
     Session(
-        sessionNumber: 5,
+        weekNumber: 5,
         date: DateTime.now().friendlySlashDate(),
         status: AppStrings.present),
     Session(
-        sessionNumber: 6,
+        weekNumber: 6,
         date: DateTime.now().friendlySlashDate(),
         status: AppStrings.present),
     Session(
-        sessionNumber: 7,
+        weekNumber: 7,
         date: DateTime.now().friendlySlashDate(),
         status: AppStrings.present),
   ];
