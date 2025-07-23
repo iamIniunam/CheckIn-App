@@ -2,7 +2,7 @@ class AppStrings {
   AppStrings._();
 
   //General
-  static const appName = 'Attendify';
+  static const appName = 'CheckIn';
   static const sampleAttendanceThresholdMessage =
       'Your CS103 attendance is approaching the minimum thresholds';
   static const search = 'Search';
