@@ -42,7 +42,7 @@ class InformationBanner extends StatelessWidget {
                   Flexible(
                     child: Text(
                       text,
-                      maxLines: 2,
+                      maxLines: 1,
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
