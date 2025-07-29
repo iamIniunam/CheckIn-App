@@ -22,39 +22,38 @@ class CustomAppBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                      color: AppColors.defaultColor,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold)),
-              Text(subtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.grey)),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        color: AppColors.defaultColor,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold)),
+                Text(subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.grey)),
+              ],
+            ),
           ),
-          Row(
-            children: [
-              appBarAction(
-                  icon: Icons.notifications,
-                  onTap: () {
-                    Navigation.navigateToScreen(
-                        context: context, screen: const NotificationsPage());
-                  }),
-              const SizedBox(width: 10),
-              appBarAction(
-                icon: Icons.person_rounded,
-                onTap: () {
-                  Navigation.navigateToScreen(
-                      context: context, screen: const ProfilePage());
-                },
-              ),
-            ],
+          const SizedBox(width: 10),
+          appBarAction(
+              icon: Icons.notifications,
+              onTap: () {
+                Navigation.navigateToScreen(
+                    context: context, screen: const NotificationsPage());
+              }),
+          const SizedBox(width: 10),
+          appBarAction(
+            icon: Icons.person_rounded,
+            onTap: () {
+              Navigation.navigateToScreen(
+                  context: context, screen: const ProfilePage());
+            },
           ),
         ],
       ),

@@ -14,9 +14,7 @@ class CourseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(
-        bottom: 2,
-      ),
+      padding: const EdgeInsets.only(bottom: 2),
       child: AppMaterial(
         onTap: () {
           Navigation.navigateToScreen(
@@ -57,42 +55,35 @@ class CourseCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(
-                width: 12,
-              ),
+              const SizedBox(width: 12),
               Expanded(
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            course.courseCode,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                color: AppColors.defaultColor,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600),
-                          ),
-                          const SizedBox(
-                            height: 4,
-                          ),
-                          Text(
-                            course.courseTitle ?? '',
-                            style: const TextStyle(
-                              color: AppColors.defaultColor,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
+                    Text(
+                      course.courseCode,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          color: AppColors.defaultColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      course.courseTitle ?? '',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.defaultColor,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
               ),
+              const SizedBox(width: 12),
               Column(
                 children: [
                   Text(
