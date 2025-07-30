@@ -21,4 +21,5 @@ class AppColors {
   static const Color boxColor7 = Color(0xffEFFFFA);
   static const Color boxColor8 = Color(0xFFFDF4FF);
   static const Color field = Color(0xFFF2F4F5);
+  static const red500 = Color(0XFFF00707);
 }

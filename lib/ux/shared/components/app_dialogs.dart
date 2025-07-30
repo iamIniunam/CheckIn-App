@@ -69,23 +69,18 @@ class AppAlertDialog extends StatelessWidget {
               children: [
                 Expanded(
                   child: PrimaryOutlinedButton(
-                    borderColor: borderColor ?? AppColors.defaultColor,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                     onTap: onFirstOptionTap,
-                    child: Text(
-                      firstOption,
-                      style: TextStyle(
-                        color: textColor ?? AppColors.defaultColor,
-                        fontFamily: 'Nunito',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+                    child: Text(firstOption),
                   ),
                 ),
                 const SizedBox(width: 15),
                 Expanded(
                   child: PrimaryButton(
-                    backgroundColor: backgroundColor ?? AppColors.defaultColor,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    backgroundColor: AppColors.red500,
                     onTap: onSecondOptionTap,
                     child: Text(secondOption),
                   ),

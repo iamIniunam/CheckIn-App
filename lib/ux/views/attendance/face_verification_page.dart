@@ -1,8 +1,11 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:ui';
+
 import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
 import 'package:attendance_app/ux/shared/components/app_dialogs.dart';
 import 'package:attendance_app/ux/shared/components/app_material.dart';
+import 'package:attendance_app/ux/shared/components/blurred_loading_overlay.dart';
 import 'package:attendance_app/ux/shared/components/global_functions.dart';
 import 'package:attendance_app/ux/shared/resources/app_buttons.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
@@ -91,13 +94,13 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
           return AppAlertDialog(
             title: AppStrings.cancelFaceVerification,
             desc: AppStrings.ifYouExitNowYourAttendanceWont,
-            firstOption: AppStrings.yesCancel,
-            secondOption: 'No',
+            secondOption: AppStrings.yesCancel,
+            firstOption: 'No',
             onFirstOptionTap: () {
-              Navigation.back(context: context, result: true);
+              Navigation.back(context: context, result: false);
             },
             onSecondOptionTap: () {
-              Navigation.back(context: context, result: false);
+              Navigation.back(context: context, result: true);
             },
           );
         });
@@ -118,13 +121,13 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
           return AppAlertDialog(
             title: AppStrings.cancelFaceRegistration,
             desc: AppStrings.youreInTheMiddleOfRegistering,
-            firstOption: AppStrings.yesCancel,
-            secondOption: AppStrings.stay,
+            firstOption: AppStrings.stay,
+            secondOption: AppStrings.yesCancel,
             onFirstOptionTap: () {
-              Navigation.back(context: context, result: true);
+              Navigation.back(context: context, result: false);
             },
             onSecondOptionTap: () {
-              Navigation.back(context: context, result: false);
+              Navigation.back(context: context, result: true);
             },
           );
         });
@@ -224,19 +227,22 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
                 padding:
                     const EdgeInsets.only(left: 30, right: 30, bottom: 50.0),
                 child: PrimaryButton(
-                  onTap: isVerifying ? null : verifyFace,
-                  child: isVerifying
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2.5, color: AppColors.white))
-                      : Text(widget.mode == FaceVerificationMode.signUp
+                  onTap: verifyFace,
+                  child:
+                      // isVerifying
+                      //     ? const SizedBox(
+                      //         height: 20,
+                      //         width: 20,
+                      //         child: CircularProgressIndicator(
+                      //             strokeWidth: 2.5, color: AppColors.white))
+                      //     :
+                      Text(widget.mode == FaceVerificationMode.signUp
                           ? AppStrings.registerFace
                           : AppStrings.verifyFace),
                 ),
               ),
             ),
+            BlurredLoadingOverlay(showLoader: isVerifying),
           ],
         ),
       ),
