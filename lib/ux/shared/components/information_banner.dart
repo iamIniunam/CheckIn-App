@@ -31,14 +31,9 @@ class InformationBanner extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   icon ??
-                      const Icon(
-                        Icons.info_outline,
-                        color: AppColors.defaultColor,
-                        size: 20,
-                      ),
-                  const SizedBox(
-                    width: 8,
-                  ),
+                      const Icon(Icons.info_outline,
+                          color: AppColors.defaultColor, size: 20),
+                  const SizedBox(width: 8),
                   Flexible(
                     child: Text(
                       text,

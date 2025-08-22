@@ -33,7 +33,7 @@ class AppStrings {
   static const history = 'History';
 
   //Profile
-  static const profile = 'Profile';
+  static const studentProfile = 'Student Profile';
   static const sampleFullName = 'Jermaine Lamar Cole';
   static const sampleCourse = 'BEng. Computer Engineering';
   static const studentIdNumber = 'Student ID Number';
@@ -79,9 +79,9 @@ class AppStrings {
       "Evening check-in — let’s finish strong.";
   static const semesterCourses = 'Semester Courses';
   static const todaysClasses = "Today's Classes";
-  static const upcoming = 'Upcoming';
-  static const sampleUpcomingClass = 'CS104 - Data Structures and Algorithms';
-  static const sampleUpcomingClassTime = '8:30AM - 11:30AM';
+  static const currentClass = 'Current Class';
+  static const sampleCurrentClass = 'CS104 - Data Structures and Algorithms';
+  static const sampleCurrentClassTime = '8:30AM - 11:30AM';
   static const markAttendance = 'Mark attendance';
   static const allCourses = 'All Courses';
 

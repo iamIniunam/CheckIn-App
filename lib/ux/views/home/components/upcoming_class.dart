@@ -23,14 +23,14 @@ class UpcomingClass extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              AppStrings.upcoming,
+              AppStrings.currentClass,
               style: TextStyle(
                 color: Colors.grey,
                 fontSize: 16,
               ),
             ),
             const Text(
-              AppStrings.sampleUpcomingClass,
+              AppStrings.sampleCurrentClass,
               style: TextStyle(
                   color: AppColors.defaultColor,
                   fontSize: 16,
@@ -40,10 +40,10 @@ class UpcomingClass extends StatelessWidget {
             const SizedBox(height: 16),
             const Center(
               child: Text(
-                AppStrings.sampleUpcomingClassTime,
+                AppStrings.sampleCurrentClassTime,
                 style: TextStyle(
                   color: AppColors.defaultColor,
-                  fontSize: 36,
+                  fontSize: 34,
                   fontWeight: FontWeight.bold,
                 ),
               ),
