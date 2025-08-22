@@ -8,7 +8,6 @@ import 'package:attendance_app/ux/shared/components/global_functions.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/views/attendance/face_verification_page.dart';
 import 'package:flutter/material.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
 // import 'package:attendance_app/platform/extensions/date_time_extensions.dart';
 
 class ScanPage extends StatefulWidget {
@@ -20,59 +19,59 @@ class ScanPage extends StatefulWidget {
 
 class _ScanPageState extends State<ScanPage> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  Barcode? result;
-  QRViewController? controller;
+  // Barcode? result;
+  // QRViewController? controller;
 
-  // In order to get hot reload to work we need to pause the camera if the platform
-  // is android, or resume the camera if the platform is iOS.
-  @override
-  void reassemble() {
-    super.reassemble();
-    if (Platform.isAndroid) {
-      controller?.pauseCamera();
-    } else if (Platform.isIOS) {
-      controller?.resumeCamera();
-    }
-  }
+  // // In order to get hot reload to work we need to pause the camera if the platform
+  // // is android, or resume the camera if the platform is iOS.
+  // @override
+  // void reassemble() {
+  //   super.reassemble();
+  //   if (Platform.isAndroid) {
+  //     controller?.pauseCamera();
+  //   } else if (Platform.isIOS) {
+  //     controller?.resumeCamera();
+  //   }
+  // }
 
-  void _onQRViewCreated(QRViewController controller) {
-    this.controller = controller;
-    controller.scannedDataStream.listen(
-      (scanData) async {
-        result = scanData;
-        print(result?.code);
-        if (result?.code == 'res') {
-          setState(() {
-            isLoading = true;
-          });
-          controller.stopCamera();
+  // void _onQRViewCreated(QRViewController controller) {
+  //   this.controller = controller;
+  //   controller.scannedDataStream.listen(
+  //     (scanData) async {
+  //       result = scanData;
+  //       print(result?.code);
+  //       if (result?.code == 'res') {
+  //         setState(() {
+  //           isLoading = true;
+  //         });
+  //         controller.stopCamera();
 
-          await Future.delayed(const Duration(milliseconds: 500));
+  //         await Future.delayed(const Duration(milliseconds: 500));
 
-          Navigation.navigateToScreenAndClearOnePrevious(
-              context: context,
-              screen: const FaceVerificationPage(
-                mode: FaceVerificationMode.attendance,
-              ));
-        } else {
-          controller.stopCamera();
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Oops! 🚫 This QR code doesn’t match today\'s '
-                  'class session. Please let your lecturer know.'),
-            ),
-          );
-          Navigator.pop(context);
-        }
-      },
-    );
-  }
+  //         Navigation.navigateToScreenAndClearOnePrevious(
+  //             context: context,
+  //             screen: const FaceVerificationPage(
+  //               mode: FaceVerificationMode.attendance,
+  //             ));
+  //       } else {
+  //         controller.stopCamera();
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           const SnackBar(
+  //             content: Text('Oops! 🚫 This QR code doesn’t match today\'s '
+  //                 'class session. Please let your lecturer know.'),
+  //           ),
+  //         );
+  //         Navigator.pop(context);
+  //       }
+  //     },
+  //   );
+  // }
 
-  @override
-  void dispose() {
-    controller?.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   controller?.dispose();
+  //   super.dispose();
+  // }
 
   bool flash = false;
   bool isLoading = false;
@@ -81,25 +80,25 @@ class _ScanPageState extends State<ScanPage> {
     return PopScope(
       canPop: true,
       onPopInvoked: (didPop) {
-        controller?.stopCamera();
+        // controller?.stopCamera();
       },
       child: Scaffold(
         body: Stack(
           children: [
-            SizedBox(
-              height: MediaQuery.sizeOf(context).height,
-              width: double.infinity,
-              child: QRView(
-                key: qrKey,
-                onQRViewCreated: _onQRViewCreated,
-                overlay: QrScannerOverlayShape(
-                    overlayColor: const Color.fromRGBO(71, 37, 37, 0.6),
-                    borderColor: Colors.white,
-                    borderWidth: 10,
-                    borderRadius: 2,
-                    cutOutSize: 300),
-              ),
-            ),
+            // SizedBox(
+            //   height: MediaQuery.sizeOf(context).height,
+            //   width: double.infinity,
+            //   child: QRView(
+            //     key: qrKey,
+            //     onQRViewCreated: _onQRViewCreated,
+            //     overlay: QrScannerOverlayShape(
+            //         overlayColor: const Color.fromRGBO(71, 37, 37, 0.6),
+            //         borderColor: Colors.white,
+            //         borderWidth: 10,
+            //         borderRadius: 2,
+            //         cutOutSize: 300),
+            //   ),
+            // ),
             Align(
               alignment: Alignment.topRight,
               child: Padding(
@@ -108,7 +107,7 @@ class _ScanPageState extends State<ScanPage> {
                 child: AppMaterial(
                   inkwellBorderRadius: BorderRadius.circular(10),
                   onTap: () {
-                    controller?.stopCamera();
+                    // controller?.stopCamera();
                     Navigation.back(context: context);
                   },
                   child: Ink(
@@ -151,7 +150,7 @@ class _ScanPageState extends State<ScanPage> {
                       iconBox(
                           icon: Icons.flip_camera_android,
                           onTap: () {
-                            controller?.flipCamera();
+                            // controller?.flipCamera();
                           }),
                       Container(
                         width: 1,
@@ -160,7 +159,7 @@ class _ScanPageState extends State<ScanPage> {
                       iconBox(
                           icon: flash ? Icons.flash_off : Icons.flash_on,
                           onTap: () async {
-                            await controller?.toggleFlash();
+                            // await controller?.toggleFlash();
                             setState(() {
                               flash = !flash;
                             });
