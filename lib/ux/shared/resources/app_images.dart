@@ -5,8 +5,9 @@ class AppImages {
   AppImages._();
 
   //Images
-  static AssetImage appLogo =
-      const AssetImage('assets/images/app_logo.png');
+  static AssetImage appLogo = const AssetImage('assets/images/app_logo.png');
+  static AssetImage appLogoIos =
+      const AssetImage('assets/images/app_logo_ios.png');
   static AssetImage backgroundImage =
       const AssetImage('assets/images/background_image.png');
   static AssetImage sampleProfilePhoto =
@@ -24,6 +25,8 @@ class AppImages {
   static SvgPicture svgCloseBottomSheetIcon =
       SvgPicture.asset('assets/svgs/close_bottom_sheet_icon.svg');
   static SvgPicture svgChatIcon = SvgPicture.asset('assets/svgs/chat_icon.svg');
-  static SvgPicture svgChatIcon2 = SvgPicture.asset('assets/svgs/chat_icon_2.svg');
-  static SvgPicture svgSearchIcon = SvgPicture.asset('assets/svgs/search_icon.svg');
+  static SvgPicture svgChatIcon2 =
+      SvgPicture.asset('assets/svgs/chat_icon_2.svg');
+  static SvgPicture svgSearchIcon =
+      SvgPicture.asset('assets/svgs/search_icon.svg');
 }

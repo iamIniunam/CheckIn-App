@@ -84,6 +84,8 @@ class AppStrings {
   static const sampleCurrentClassTime = '8:30AM - 11:30AM';
   static const markAttendance = 'Mark attendance';
   static const allCourses = 'All Courses';
+  static const qrCodeExpirationWarning =
+      'QR codes expire 30 minutes after generation — scan quickly!';
 
   //Attendance History
   static const attendanceHistory = 'Attendance History';

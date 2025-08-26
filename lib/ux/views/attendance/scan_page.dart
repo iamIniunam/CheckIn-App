@@ -102,16 +102,13 @@ class _ScanPageState extends State<ScanPage> {
             ),
 
             /// Dark overlay outside scan window
-            Container(
-              color: const Color.fromRGBO(0, 0, 0, 0.6),
-              child: Center(
-                child: Container(
-                  width: 300,
-                  height: 300,
-                  decoration: BoxDecoration(
-                      border: Border.all(color: Colors.white, width: 0),
-                      borderRadius: BorderRadius.circular(12)),
-                ),
+            Center(
+              child: Container(
+                width: 300,
+                height: 300,
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white, width: 0),
+                    borderRadius: BorderRadius.circular(12)),
               ),
             ),
 

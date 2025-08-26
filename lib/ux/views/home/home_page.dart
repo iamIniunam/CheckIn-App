@@ -4,9 +4,7 @@ import 'package:attendance_app/ux/shared/resources/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/utils/general_ui_utils.dart';
 import 'package:attendance_app/ux/views/home/components/semester_courses_dashboard_metric_view.dart';
-import 'package:attendance_app/ux/views/home/components/todays_classes.dart';
 import 'package:attendance_app/ux/views/home/components/upcoming_class.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -17,26 +15,26 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final _auth = FirebaseAuth.instance;
-  User? loggedInUser;
+  // final _auth = FirebaseAuth.instance;
+  // User? loggedInUser;
 
-  @override
-  void initState() {
-    super.initState();
-    getCurrentUser();
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   getCurrentUser();
+  // }
 
-  void getCurrentUser() {
-    try {
-      final user = _auth.currentUser;
-      if (user != null) {
-        loggedInUser = user;
-        // print(loggedInUser?.email);
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
+  // void getCurrentUser() {
+  //   try {
+  //     final user = _auth.currentUser;
+  //     if (user != null) {
+  //       loggedInUser = user;
+  //       // print(loggedInUser?.email);
+  //     }
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -45,13 +43,13 @@ class _HomePageState extends State<HomePage> {
       headerTitle: UiUtils.getGreetingTitle(AppStrings.sampleAppUser),
       headerSubtitle: UiUtils.getGreetingSubtitle(),
       showInformationBanner: true,
-      informationBannerText: AppStrings.sampleAttendanceThresholdMessage,
+      informationBannerText: AppStrings.qrCodeExpirationWarning,
       hasRefreshIndicator: true,
       body: ListView(
-        children: [
-          const UpcomingClass(),
-          const SemesterCoursesDashboardMetricView(),
-          TodaysClasses(),
+        children: const [
+          UpcomingClass(),
+          SemesterCoursesDashboardMetricView(),
+          // TodaysClasses(),
         ],
       ),
     );

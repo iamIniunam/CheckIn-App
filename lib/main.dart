@@ -2,9 +2,8 @@
 
 import 'package:attendance_app/platform/providers/course_provider.dart';
 import 'package:attendance_app/platform/providers/student_info_provider.dart';
-import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
-import 'package:attendance_app/ux/views/onboarding/sign_up_page.dart';
+import 'package:attendance_app/ux/views/onboarding/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -60,7 +59,7 @@ class MyApp extends StatelessWidget {
           surfaceTintColor: AppColors.white,
         ),
       ),
-      home: isLoggedIn ? const NavigationHostPage() : const SignUpPage(),
+      home: const SplashScreen(),
     );
   }
 }
