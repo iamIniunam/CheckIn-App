@@ -58,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
                   const Padding(
                     padding: EdgeInsets.only(bottom: 18),
                     child: Text(
-                      AppStrings.appName,
+                      AppStrings.login,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 45,
@@ -76,15 +76,15 @@ class _LoginPageState extends State<LoginPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
-                          AppStrings.login,
-                          style: TextStyle(
-                            color: AppColors.defaultColor,
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
+                        // const Text(
+                        //   AppStrings.login,
+                        //   style: TextStyle(
+                        //     color: AppColors.defaultColor,
+                        //     fontSize: 30,
+                        //     fontWeight: FontWeight.bold,
+                        //   ),
+                        // ),
+                        // const SizedBox(height: 20),
                         Form(
                           key: formKey,
                           child: Column(

@@ -83,7 +83,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     const Padding(
                       padding: EdgeInsets.only(bottom: 18),
                       child: Text(
-                        AppStrings.appName,
+                        AppStrings.signUp,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: AppColors.white,
@@ -101,16 +101,16 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       child: Column(
                         children: [
-                          const Text(
-                            AppStrings.signUp,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: AppColors.defaultColor,
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
+                          // const Text(
+                          //   AppStrings.signUp,
+                          //   textAlign: TextAlign.center,
+                          //   style: TextStyle(
+                          //     color: AppColors.defaultColor,
+                          //     fontSize: 30,
+                          //     fontWeight: FontWeight.bold,
+                          //   ),
+                          // ),
+                          // const SizedBox(height: 20),
                           Form(
                             key: formKey,
                             child: Column(
