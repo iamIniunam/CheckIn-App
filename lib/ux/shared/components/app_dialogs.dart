@@ -80,7 +80,7 @@ class AppAlertDialog extends StatelessWidget {
                   child: PrimaryButton(
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 12),
-                    backgroundColor: AppColors.red500,
+                    backgroundColor: backgroundColor ?? AppColors.red500,
                     onTap: onSecondOptionTap,
                     child: Text(secondOption),
                   ),

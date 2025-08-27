@@ -1,15 +1,14 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
-import 'package:attendance_app/ux/shared/components/app_dialogs.dart';
+import 'package:attendance_app/platform/utils/permission_utils.dart';
 import 'package:attendance_app/ux/shared/components/app_material.dart';
 import 'package:attendance_app/ux/shared/components/blurred_loading_overlay.dart';
 import 'package:attendance_app/ux/shared/components/global_functions.dart';
 import 'package:attendance_app/ux/shared/resources/app_buttons.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
+import 'package:attendance_app/ux/views/attendance/alert_dialogs/cancel_dialog.dart';
 import 'package:attendance_app/ux/views/onboarding/confirm_courses_page.dart';
-import 'package:attendance_app/ux/views/onboarding/sign_up_page.dart';
 import 'package:attendance_app/ux/views/attendance/verification_success_page.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
@@ -39,23 +38,34 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
   }
 
   Future<void> initializeCamera() async {
-    cameras = await availableCameras();
-    cameraController = CameraController(
-      cameras.firstWhere(
-        (camera) {
-          return camera.lensDirection == CameraLensDirection.front;
-        },
-        orElse: () {
-          return cameras.first;
-        },
-      ),
-      ResolutionPreset.medium,
-    );
-    await cameraController?.initialize();
-    if (mounted) {
-      setState(() {
-        isCameraInitialized = true;
-      });
+    try {
+      final permissionGranted = await PermissionUtils.requestCameraPermission(
+          showSettingsOption: true);
+
+      if (!permissionGranted) {
+        debugPrint("Camera permission not granted, stopping initialization.");
+        return;
+      }
+      cameras = await availableCameras();
+      cameraController = CameraController(
+          cameras.firstWhere(
+            (camera) {
+              return camera.lensDirection == CameraLensDirection.front;
+            },
+            orElse: () {
+              return cameras.first;
+            },
+          ),
+          ResolutionPreset.medium,
+          enableAudio: false);
+      await cameraController?.initialize();
+      if (mounted) {
+        setState(() {
+          isCameraInitialized = true;
+        });
+      }
+    } catch (e) {
+      debugPrint("Unexpected Camera Error: $e");
     }
   }
 
@@ -85,60 +95,6 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
     }
   }
 
-  Future<void> showAttendanceCancelDialog() async {
-    final result = await showAdaptiveDialog(
-        context: context,
-        builder: (context) {
-          return AppAlertDialog(
-            title: AppStrings.cancelFaceVerification,
-            desc: AppStrings.ifYouExitNowYourAttendanceWont,
-            secondOption: AppStrings.yesCancel,
-            firstOption: 'No',
-            onFirstOptionTap: () {
-              Navigation.back(context: context, result: false);
-            },
-            onSecondOptionTap: () {
-              Navigation.back(context: context, result: true);
-            },
-          );
-        });
-    if (result == true) {
-      await cameraController?.dispose();
-      cameraController = null;
-      if (mounted) {
-        Navigation.navigateToScreen(
-            context: context, screen: const NavigationHostPage());
-      }
-    }
-  }
-
-  Future<void> showSignUpCancelDialog() async {
-    final result = await showAdaptiveDialog(
-        context: context,
-        builder: (context) {
-          return AppAlertDialog(
-            title: AppStrings.cancelFaceRegistration,
-            desc: AppStrings.youreInTheMiddleOfRegistering,
-            firstOption: AppStrings.stay,
-            secondOption: AppStrings.yesCancel,
-            onFirstOptionTap: () {
-              Navigation.back(context: context, result: false);
-            },
-            onSecondOptionTap: () {
-              Navigation.back(context: context, result: true);
-            },
-          );
-        });
-    if (result == true) {
-      await cameraController?.dispose();
-      cameraController = null;
-      if (mounted) {
-        Navigation.navigateToScreen(
-            context: context, screen: const SignUpPage());
-      }
-    }
-  }
-
   @override
   void dispose() {
     cameraController?.dispose();
@@ -153,9 +109,11 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
       canPop: false,
       onPopInvoked: (result) {
         if (widget.mode == FaceVerificationMode.signUp) {
-          showSignUpCancelDialog();
+          SignUpCancelDialog.show(
+              context: context, cameraController: cameraController);
         } else {
-          showAttendanceCancelDialog();
+          AttendanceCancelDialog.show(
+              context: context, cameraController: cameraController);
         }
       },
       child: Scaffold(
@@ -189,9 +147,13 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
                   onTap: widget.onExit ??
                       () {
                         if (widget.mode == FaceVerificationMode.signUp) {
-                          showSignUpCancelDialog();
+                          SignUpCancelDialog.show(
+                              context: context,
+                              cameraController: cameraController);
                         } else {
-                          showAttendanceCancelDialog();
+                          AttendanceCancelDialog.show(
+                              context: context,
+                              cameraController: cameraController);
                         }
                       },
                   child: Ink(
