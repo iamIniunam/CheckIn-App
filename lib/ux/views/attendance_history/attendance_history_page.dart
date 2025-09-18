@@ -2,7 +2,7 @@ import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/views/attendance_history/components/period.dart';
-import 'package:attendance_app/ux/views/home/components/course_card.dart';
+import 'package:attendance_app/ux/views/course/components/course_card.dart';
 import 'package:flutter/material.dart';
 
 class AttendanceHistoryPage extends StatefulWidget {
@@ -24,21 +24,18 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
       Course(
         courseCode: 'CS101',
         courseTitle: 'Introduction to Computer Science',
-        lecturer: 'FRANCIS AVEVOR',
         status: AppStrings.present,
         showStatus: true,
       ),
       Course(
         courseCode: 'CS101',
         courseTitle: 'Introduction to Computer Science',
-        lecturer: 'FRANCIS AVEVOR',
         status: AppStrings.late,
         showStatus: true,
       ),
       Course(
         courseCode: 'CS101',
         courseTitle: 'Introduction to Computer Science',
-        lecturer: 'FRANCIS AVEVOR',
         status: AppStrings.absent,
         showStatus: true,
       ),
@@ -47,21 +44,18 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
       Course(
         courseCode: 'CS101',
         courseTitle: 'Introduction to Computer Science',
-        lecturer: 'FRANCIS AVEVOR',
         status: AppStrings.absent,
         showStatus: true,
       ),
       Course(
         courseCode: 'CS101',
         courseTitle: 'Introduction to Computer Science',
-        lecturer: 'FRANCIS AVEVOR',
         status: AppStrings.absent,
         showStatus: true,
       ),
       Course(
         courseCode: 'CS101',
         courseTitle: 'Introduction to Computer Science',
-        lecturer: 'FRANCIS AVEVOR',
         status: AppStrings.present,
         showStatus: true,
       ),
@@ -70,28 +64,24 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
       Course(
         courseCode: 'CS101',
         courseTitle: 'Introduction to Computer Science',
-        lecturer: 'FRANCIS AVEVOR',
         status: AppStrings.late,
         showStatus: true,
       ),
       Course(
         courseCode: 'CS101',
         courseTitle: 'Introduction to Computer Science',
-        lecturer: 'FRANCIS AVEVOR',
         status: AppStrings.late,
         showStatus: true,
       ),
       Course(
         courseCode: 'CS101',
         courseTitle: 'Introduction to Computer Science',
-        lecturer: 'FRANCIS AVEVOR',
         status: AppStrings.present,
         showStatus: true,
       ),
       Course(
         courseCode: 'CS101',
         courseTitle: 'Introduction to Computer Science',
-        lecturer: 'FRANCIS AVEVOR',
         status: AppStrings.absent,
         showStatus: true,
       ),

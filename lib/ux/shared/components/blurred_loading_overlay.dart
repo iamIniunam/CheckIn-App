@@ -15,7 +15,7 @@ class BlurredLoadingOverlay extends StatelessWidget {
     return Positioned.fill(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
-        child: Container(
+        child: ColoredBox(
           color: AppColors.black.withOpacity(0.2),
           child: const Center(
             child: CircularProgressIndicator(

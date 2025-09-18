@@ -41,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
         child: Scaffold(
           resizeToAvoidBottomInset:
               false, //this stops the background image from moving anytime the keyboard is initiated
-          body: Container(
+          body: DecoratedBox(
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: AppImages.backgroundImage,

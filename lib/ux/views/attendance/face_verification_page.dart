@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:attendance_app/platform/utils/permission_utils.dart';
 import 'package:attendance_app/ux/shared/components/app_material.dart';
 import 'package:attendance_app/ux/shared/components/blurred_loading_overlay.dart';
@@ -156,7 +154,7 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
                               cameraController: cameraController);
                         }
                       },
-                  child: Ink(
+                  child: Container(
                     width: 85,
                     padding: const EdgeInsets.only(left: 5, top: 5, bottom: 5),
                     child: const Row(

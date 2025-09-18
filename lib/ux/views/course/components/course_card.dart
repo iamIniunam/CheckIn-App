@@ -21,11 +21,11 @@ class CourseCard extends StatelessWidget {
             context: context,
             screen: CourseDetailsPage(
               courseCode: course.courseCode,
-              lecturer: course.lecturer ?? '',
+              courseTitle: course.courseTitle ?? '',
             ),
           );
         },
-        child: Ink(
+        child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
             children: [

@@ -2,6 +2,7 @@ import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
+import 'package:attendance_app/ux/views/home/components/full_course_list_course_detail.dart';
 import 'package:flutter/material.dart';
 
 class FullCourseListPage extends StatefulWidget {
@@ -57,10 +58,11 @@ class _FullCourseListPageState extends State<FullCourseListPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      courseDetails(detail: course.courseTitle ?? ''),
-                      courseDetails(
-                          detail: '${course.creditHours} Credit Hour(s)'),
-                      courseDetails(detail: course.lecturer ?? 'TBD'),
+                      FullCourseListCourseDetail(
+                          detail: course.courseTitle ?? ''),
+                      FullCourseListCourseDetail(
+                        detail: '${course.creditHours} Credit Hour(s)',
+                      ),
                     ],
                   ),
                 ),
@@ -69,16 +71,6 @@ class _FullCourseListPageState extends State<FullCourseListPage> {
           );
         },
       ),
-    );
-  }
-
-  Widget courseDetails({required String detail}) {
-    return Text(
-      detail,
-      style: const TextStyle(
-          color: AppColors.defaultColor,
-          fontSize: 14,
-          fontWeight: FontWeight.w500),
     );
   }
 }

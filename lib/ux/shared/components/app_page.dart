@@ -80,7 +80,7 @@ class AppPageScaffold extends StatelessWidget {
                   ),
                   automaticallyImplyLeading: false,
                   leading: showBackButton
-                      ? Container(
+                      ? Padding(
                           padding: const EdgeInsets.all(16),
                           child: InkResponse(
                             radius: 28,

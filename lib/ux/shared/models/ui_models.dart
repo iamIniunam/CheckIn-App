@@ -10,7 +10,6 @@ class Course {
   final String? status;
   final bool showStatus;
   late final Color color;
-  final String? lecturer;
 
   static const List<Color> courseColors = [
     AppColors.boxColor1,
@@ -35,7 +34,6 @@ class Course {
     this.creditHours,
     this.status,
     this.showStatus = false,
-    this.lecturer,
     int? index,
   }) : color = Course.getColorByIndex(index ?? 0);
 }

@@ -66,7 +66,7 @@ class _SignUpPageState extends State<SignUpPage> {
               false, //this stops the background image from moving anytime the keyboard is initiated
           body: ModalProgressHUD(
             inAsyncCall: showSpinner,
-            child: Container(
+            child: DecoratedBox(
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AppImages.backgroundImage,

@@ -9,10 +9,10 @@ import 'package:flutter/material.dart';
 
 class CourseDetailsPage extends StatefulWidget {
   const CourseDetailsPage(
-      {super.key, required this.courseCode, required this.lecturer});
+      {super.key, required this.courseCode, required this.courseTitle});
 
   final String courseCode;
-  final String lecturer;
+  final String courseTitle;
 
   @override
   State<CourseDetailsPage> createState() => _CourseDetailsPageState();
@@ -75,7 +75,7 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
                             fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        widget.lecturer,
+                        widget.courseTitle,
                         style: const TextStyle(
                             color: Colors.grey,
                             // fontSize: 16,
@@ -92,9 +92,13 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
                         ),
                         child: const Column(
                           children: [
-                            CourseDetailItem(title: AppStrings.attendanceThreshold, value: '18/20'),
-                            CourseDetailItem(title: AppStrings.midSemester, value: '6/10'),
-                            CourseDetailItem(title: AppStrings.endOfSemester, value: '6/20'),
+                            CourseDetailItem(
+                                title: AppStrings.attendanceThreshold,
+                                value: '18/20'),
+                            CourseDetailItem(
+                                title: AppStrings.midSemester, value: '6/10'),
+                            CourseDetailItem(
+                                title: AppStrings.endOfSemester, value: '6/20'),
                           ],
                         ),
                       ),

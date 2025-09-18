@@ -32,15 +32,12 @@ class SectionHeader extends StatelessWidget {
               ),
             ),
             if (hasAction == true)
-              Container(
-                decoration: const BoxDecoration(
+              const DecoratedBox(
+                decoration: BoxDecoration(
                   color: AppColors.primaryTeal,
                   shape: BoxShape.circle,
-                  // border: Border.all(
-                  //   color: AppColors.primaryTeal,
-                  // ),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.keyboard_arrow_right_rounded,
                   color: AppColors.defaultColor,
                 ),

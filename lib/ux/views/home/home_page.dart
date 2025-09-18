@@ -4,7 +4,7 @@ import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/utils/general_ui_utils.dart';
 import 'package:attendance_app/ux/views/home/components/semester_courses_dashboard_metric_view.dart';
-import 'package:attendance_app/ux/views/home/components/upcoming_class.dart';
+import 'package:attendance_app/ux/views/home/components/current_class.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -47,7 +47,7 @@ class _HomePageState extends State<HomePage> {
       hasRefreshIndicator: true,
       body: ListView(
         children: const [
-          UpcomingClass(),
+          CurrentClass(),
           SemesterCoursesDashboardMetricView(),
           // TodaysClasses(),
         ],

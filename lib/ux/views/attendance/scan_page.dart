@@ -122,7 +122,7 @@ class _ScanPageState extends State<ScanPage> {
                   controller.stop();
                   Navigation.back(context: context);
                 },
-                child: Ink(
+                child: Container(
                   width: 85,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
@@ -198,7 +198,7 @@ Widget iconBox({required IconData icon, required VoidCallback onTap}) {
             topRight: Radius.circular(26.5),
             bottomRight: Radius.circular(26.5)),
     onTap: onTap,
-    child: Ink(
+    child: Container(
       height: 50,
       width: 70,
       padding: const EdgeInsets.symmetric(horizontal: 10),

@@ -5,8 +5,8 @@ import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/views/attendance/scan_page.dart';
 import 'package:flutter/material.dart';
 
-class UpcomingClass extends StatelessWidget {
-  const UpcomingClass({super.key});
+class CurrentClass extends StatelessWidget {
+  const CurrentClass({super.key});
 
   @override
   Widget build(BuildContext context) {

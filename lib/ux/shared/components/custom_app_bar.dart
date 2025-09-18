@@ -67,11 +67,8 @@ class CustomAppBar extends StatelessWidget {
       borderRadius: BorderRadius.circular(10),
       inkwellBorderRadius: BorderRadius.circular(10),
       onTap: onTap,
-      child: Ink(
+      child: Padding(
         padding: const EdgeInsets.all(6),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-        ),
         child: Icon(
           icon,
           color: AppColors.defaultColor,

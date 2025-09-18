@@ -3,10 +3,7 @@ import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class SessionHistory extends StatelessWidget {
-  const SessionHistory({
-    super.key,
-    required this.session
-  });
+  const SessionHistory({super.key, required this.session});
 
   final Session session;
 
@@ -24,13 +21,17 @@ class SessionHistory extends StatelessWidget {
               Text(
                 session.session,
                 style: const TextStyle(
-                    color: AppColors.defaultColor, fontWeight: FontWeight.bold),
+                  color: AppColors.defaultColor,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
                 session.date,
                 style: TextStyle(
-                    color: Colors.grey.shade600, fontWeight: FontWeight.w600),
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -42,7 +43,9 @@ class SessionHistory extends StatelessWidget {
             child: Text(
               session.status,
               style: TextStyle(
-                  color: session.getStatusColor, fontWeight: FontWeight.w600),
+                color: session.getStatusColor,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

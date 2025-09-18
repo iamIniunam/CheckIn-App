@@ -139,7 +139,7 @@ class _ConfirmCoursesPageState extends State<ConfirmCoursesPage> {
                 AppMaterial(
                   inkwellBorderRadius: BorderRadius.circular(8),
                   onTap: toggleSelectAll,
-                  child: Container(
+                  child: Padding(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     child: Row(
@@ -147,8 +147,9 @@ class _ConfirmCoursesPageState extends State<ConfirmCoursesPage> {
                         const Text(
                           AppStrings.selectAll,
                           style: TextStyle(
-                              color: AppColors.defaultColor,
-                              fontWeight: FontWeight.w500),
+                            color: AppColors.defaultColor,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                         const SizedBox(width: 8),
                         Icon(
@@ -254,7 +255,7 @@ class _ConfirmCoursesPageState extends State<ConfirmCoursesPage> {
         borderRadius: BorderRadius.circular(10),
         inkwellBorderRadius: BorderRadius.circular(10),
         onTap: onTap,
-        child: Ink(
+        child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),

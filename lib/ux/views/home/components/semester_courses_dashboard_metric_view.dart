@@ -28,7 +28,6 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
               creditHours: entry.value.creditHours,
               status: entry.value.status,
               showStatus: entry.value.showStatus,
-              lecturer: entry.value.lecturer,
               index: entry.key,
             ))
         .toList();
@@ -76,15 +75,12 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
             context: context,
             screen: CourseDetailsPage(
               courseCode: course.courseCode,
-              lecturer: course.lecturer ?? '',
+              courseTitle: course.courseTitle ?? '',
             ));
       },
-      child: Ink(
+      child: Padding(
         padding:
             const EdgeInsets.only(left: 12, top: 10, right: 12, bottom: 12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-        ),
         child: Column(
           children: [
             Text(
