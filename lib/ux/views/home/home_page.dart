@@ -1,6 +1,6 @@
 // ignore_for_file: avoid_print
 
-import 'package:attendance_app/ux/shared/resources/app_page.dart';
+import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/utils/general_ui_utils.dart';
 import 'package:attendance_app/ux/views/home/components/semester_courses_dashboard_metric_view.dart';

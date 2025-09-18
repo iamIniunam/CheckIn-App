@@ -1,9 +1,9 @@
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/components/global_functions.dart';
-import 'package:attendance_app/ux/shared/resources/app_buttons.dart';
+import 'package:attendance_app/ux/shared/components/app_buttons.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
-import 'package:attendance_app/ux/shared/resources/app_form_fields.dart';
-import 'package:attendance_app/ux/shared/resources/app_page.dart';
+import 'package:attendance_app/ux/shared/components/app_form_fields.dart';
+import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/views/attendance/face_verification_page.dart';
 import 'package:flutter/material.dart';

@@ -1,7 +1,7 @@
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
-import 'package:attendance_app/ux/shared/resources/app_colors.dart';
-import 'package:attendance_app/ux/shared/resources/app_page.dart';
+import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
+import 'package:attendance_app/ux/views/attendance_history/components/period.dart';
 import 'package:attendance_app/ux/views/home/components/course_card.dart';
 import 'package:flutter/material.dart';
 
@@ -111,27 +111,13 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              period(period: periods[index]),
+              Period(period: periods[index]),
               ...courseHistory[index]
                   .map((course) => CourseCard(course: course))
                   .toList(),
             ],
           );
         },
-      ),
-    );
-  }
-
-  Widget period({required String period}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Text(
-        period,
-        style: const TextStyle(
-          color: AppColors.defaultColor,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
       ),
     );
   }

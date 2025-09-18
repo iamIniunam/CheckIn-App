@@ -282,33 +282,33 @@ class CustomPrimaryTextFormField extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Visibility(
-          //   visible: labelText != null,
-          //   child: Padding(
-          //     padding: const EdgeInsets.only(bottom: 6),
-          //     child: Row(
-          //       children: [
-          //         Text(
-          //           labelText ?? '',
-          // style: const TextStyle(
-          //     color: Colors.black,
-          //     fontSize: 14,
-          //     fontWeight: FontWeight.w400),
-          //         ),
-          //         Visibility(
-          //           visible: required,
-          //           child: const Text(
-          //             '*',
-          //             style: TextStyle(
-          //                 color: Color.fromRGBO(255, 54, 36, 0.5),
-          //                 fontSize: 14,
-          //                 fontWeight: FontWeight.w400),
-          //           ),
-          //         ),
-          //       ],
-          //     ),
-          //   ),
-          // ),
+          Visibility(
+            visible: labelText != null,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                children: [
+                  Text(
+                    labelText ?? '',
+          style: const TextStyle(
+              color: Colors.black,
+              fontSize: 14,
+              fontWeight: FontWeight.w400),
+                  ),
+                  Visibility(
+                    visible: required,
+                    child: const Text(
+                      '*',
+                      style: TextStyle(
+                          color: Color.fromRGBO(255, 54, 36, 0.5),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           SizedBox(
             height: 60,
             child: TextFormField(

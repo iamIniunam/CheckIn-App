@@ -55,14 +55,14 @@ class PrimaryButton extends StatelessWidget {
         if (states.contains(MaterialState.disabled)) {
           return Colors.grey.shade300;
         }
-        return backgroundColor; // Defer to the widget's default.
+        return backgroundColor;
       }),
       foregroundColor: MaterialStateProperty.resolveWith<Color?>(
           (Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return Colors.grey;
         }
-        return foregroundColor; // Defer to the widget's default.
+        return foregroundColor;
       }),
     );
   }

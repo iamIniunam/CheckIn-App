@@ -1,7 +1,7 @@
 import 'package:attendance_app/platform/extensions/date_time_extensions.dart';
 import 'package:attendance_app/ux/shared/components/app_material.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
-import 'package:attendance_app/ux/shared/resources/app_page.dart';
+import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/views/home/components/notifications_page_empty_state.dart';
 import 'package:flutter/material.dart';

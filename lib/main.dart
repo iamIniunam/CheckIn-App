@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:attendance_app/platform/providers/course_provider.dart';
 import 'package:attendance_app/platform/providers/student_info_provider.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
@@ -21,7 +19,7 @@ void main() async {
             messagingSenderId: '',
             projectId: 'attendance-app-2759d'));
   } catch (e) {
-    print(e);
+    debugPrint('$e');
   }
   SharedPreferences prefs = await SharedPreferences.getInstance();
   isLoggedIn = prefs.getBool('isLoggedIn') ?? false;

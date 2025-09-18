@@ -1,5 +1,5 @@
 import 'package:attendance_app/ux/navigation/navigation.dart';
-import 'package:attendance_app/ux/shared/resources/app_buttons.dart';
+import 'package:attendance_app/ux/shared/components/app_buttons.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/views/attendance/scan_page.dart';

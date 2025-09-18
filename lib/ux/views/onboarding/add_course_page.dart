@@ -1,5 +1,5 @@
-import 'package:attendance_app/ux/shared/resources/app_form_fields.dart';
-import 'package:attendance_app/ux/shared/resources/app_page.dart';
+import 'package:attendance_app/ux/shared/components/app_form_fields.dart';
+import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:flutter/material.dart';
 

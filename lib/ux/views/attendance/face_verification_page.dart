@@ -4,7 +4,7 @@ import 'package:attendance_app/platform/utils/permission_utils.dart';
 import 'package:attendance_app/ux/shared/components/app_material.dart';
 import 'package:attendance_app/ux/shared/components/blurred_loading_overlay.dart';
 import 'package:attendance_app/ux/shared/components/global_functions.dart';
-import 'package:attendance_app/ux/shared/resources/app_buttons.dart';
+import 'package:attendance_app/ux/shared/components/app_buttons.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/views/attendance/alert_dialogs/cancel_dialog.dart';

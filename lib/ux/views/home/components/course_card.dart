@@ -3,7 +3,7 @@ import 'package:attendance_app/platform/extensions/date_time_extensions.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
-import 'package:attendance_app/ux/views/course_details_page.dart';
+import 'package:attendance_app/ux/views/course/course_details_page.dart';
 import 'package:flutter/material.dart';
 
 class CourseCard extends StatelessWidget {

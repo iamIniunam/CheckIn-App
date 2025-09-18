@@ -5,7 +5,7 @@ import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
-import 'package:attendance_app/ux/views/course_details_page.dart';
+import 'package:attendance_app/ux/views/course/course_details_page.dart';
 import 'package:attendance_app/ux/views/home/components/section_header.dart';
 import 'package:attendance_app/ux/views/home/full_course_list_page.dart';
 import 'package:flutter/material.dart';
