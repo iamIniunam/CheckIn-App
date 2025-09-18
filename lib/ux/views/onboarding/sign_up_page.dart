@@ -1,6 +1,3 @@
-// ignore_for_file: unused_field, use_build_context_synchronously, avoid_print
-
-import 'package:attendance_app/platform/providers/student_info_provider.dart';
 import 'package:attendance_app/ux/shared/components/global_functions.dart';
 import 'package:attendance_app/ux/shared/components/app_buttons.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
@@ -8,13 +5,11 @@ import 'package:attendance_app/ux/shared/components/app_form_fields.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/resources/app_images.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
+import 'package:attendance_app/ux/shared/view_models.dart/auth_view_model.dart';
 import 'package:attendance_app/ux/views/attendance/face_verification_page.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:provider/provider.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:attendance_app/ux/shared/components/global_functions.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -24,21 +19,17 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  final _auth = FirebaseAuth.instance;
+  late AuthViewModel viewModel;
+  final formKey = GlobalKey<FormState>();
 
-  final TextEditingController idNumberController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
-  final TextEditingController levelController = TextEditingController();
-  final TextEditingController semesterController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    viewModel = context.read<AuthViewModel>();
+  }
 
   bool isPasswordVisible = false;
-  bool isConfirmPasswordVisible = false;
   bool showSpinner = false;
-
-  final formKey = GlobalKey<FormState>();
 
   void togglePasswordVisibility() {
     setState(() {
@@ -46,24 +37,42 @@ class _SignUpPageState extends State<SignUpPage> {
     });
   }
 
-  void toggleConfirmPasswordVisibility() {
-    setState(() {
-      isConfirmPasswordVisible = !isConfirmPasswordVisible;
-    });
+  Future<void> handleSignUp() async {
+    try {
+      await viewModel.saveDetailsToCache();
+
+      if (mounted) {
+        Navigation.navigateToScreenAndClearAllPrevious(
+          context: context,
+          screen: const FaceVerificationPage(
+            mode: FaceVerificationMode.signUp,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          showSpinner = false;
+        });
+        showAlert(
+          context: context,
+          title: AppStrings.signUpFailed,
+          desc: e.toString(),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        FocusManager.instance.primaryFocus
-            ?.unfocus(); //this hides the keyboard anytime the screen is tapped
+        FocusManager.instance.primaryFocus?.unfocus();
       },
       child: AbsorbPointer(
         absorbing: false,
         child: Scaffold(
-          resizeToAvoidBottomInset:
-              false, //this stops the background image from moving anytime the keyboard is initiated
+          resizeToAvoidBottomInset: false,
           body: ModalProgressHUD(
             inAsyncCall: showSpinner,
             child: DecoratedBox(
@@ -99,177 +108,95 @@ class _SignUpPageState extends State<SignUpPage> {
                         color: AppColors.white,
                         borderRadius: BorderRadius.circular(28),
                       ),
-                      child: Column(
-                        children: [
-                          // const Text(
-                          //   AppStrings.signUp,
-                          //   textAlign: TextAlign.center,
-                          //   style: TextStyle(
-                          //     color: AppColors.defaultColor,
-                          //     fontSize: 30,
-                          //     fontWeight: FontWeight.bold,
-                          //   ),
-                          // ),
-                          // const SizedBox(height: 20),
-                          Form(
-                            key: formKey,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                PrimaryTextFormField(
+                      child: Consumer<AuthViewModel>(builder: (context, vm, _) {
+                        return Column(
+                          children: [
+                            Form(
+                              key: formKey,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  PrimaryTextFormField(
                                     labelText: AppStrings.studentIdNumber,
-                                    controller: idNumberController,
                                     keyboardType: TextInputType.visiblePassword,
                                     hintText: AppStrings.idNumberHintText,
                                     textInputAction: TextInputAction.next,
                                     textCapitalization:
-                                        TextCapitalization.characters),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: PrimaryTextFormField(
+                                        TextCapitalization.characters,
+                                    onChanged: (value) {
+                                      vm.updateIDNumber(value);
+                                    },
+                                    errorText: vm.idNumber.isNotEmpty &&
+                                            !vm.isIdNumberValid
+                                        ? 'Invalid ID number format'
+                                        : null,
+                                  ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: PrimaryTextFormField(
                                           labelText: AppStrings.level,
-                                          controller: levelController,
                                           keyboardType: TextInputType.number,
                                           hintText: AppStrings.levelHintText,
-                                          textInputAction:
-                                              TextInputAction.next),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: PrimaryTextFormField(
+                                          textInputAction: TextInputAction.next,
+                                          onChanged: (value) {
+                                            viewModel.updateLevel(value);
+                                          },
+                                          errorText: vm.level.isNotEmpty &&
+                                                  !vm.isLevelValid
+                                              ? 'Between 100 - 400'
+                                              : null,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: PrimaryTextFormField(
                                           labelText: AppStrings.semester,
-                                          controller: semesterController,
                                           keyboardType: TextInputType.number,
                                           hintText: AppStrings.semesterHintText,
-                                          textInputAction:
-                                              TextInputAction.next),
-                                    ),
-                                  ],
-                                ),
-                                PrimaryTextFormField(
-                                  labelText: AppStrings.password,
-                                  hintText: AppStrings.enterAPassword,
-                                  obscureText: !isPasswordVisible,
-                                  controller: passwordController,
-                                  keyboardType: TextInputType.visiblePassword,
-                                  textInputAction: TextInputAction.next,
-                                  suffixWidget: IconButton(
-                                    icon: Icon(
-                                      isPasswordVisible
-                                          ? Icons.visibility
-                                          : Icons.visibility_off,
-                                      color: AppColors.defaultColor,
-                                    ),
-                                    onPressed: togglePasswordVisibility,
+                                          textInputAction: TextInputAction.next,
+                                          onChanged: (value) {
+                                            viewModel.updateSemester(value);
+                                          },
+                                          errorText: vm.semester.isNotEmpty &&
+                                                  !vm.isSemesterValid
+                                              ? 'Enter 1 or 2'
+                                              : null,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                                PrimaryTextFormField(
-                                  labelText: AppStrings.confirmPassword,
-                                  hintText: AppStrings.reenterYourPassword,
-                                  obscureText: !isConfirmPasswordVisible,
-                                  controller: confirmPasswordController,
-                                  keyboardType: TextInputType.visiblePassword,
-                                  textInputAction: TextInputAction.done,
-                                  suffixWidget: IconButton(
-                                    icon: Icon(
-                                      isConfirmPasswordVisible
-                                          ? Icons.visibility
-                                          : Icons.visibility_off,
-                                      color: AppColors.defaultColor,
+                                  PrimaryTextFormField(
+                                    labelText: AppStrings.password,
+                                    hintText: AppStrings.enterAPassword,
+                                    obscureText: !isPasswordVisible,
+                                    keyboardType: TextInputType.visiblePassword,
+                                    textInputAction: TextInputAction.done,
+                                    suffixWidget: IconButton(
+                                      icon: Icon(
+                                        isPasswordVisible
+                                            ? Icons.visibility
+                                            : Icons.visibility_off,
+                                        color: AppColors.defaultColor,
+                                      ),
+                                      onPressed: togglePasswordVisibility,
                                     ),
-                                    onPressed: toggleConfirmPasswordVisibility,
+                                    onChanged: (value) {
+                                      viewModel.updatePassword(value);
+                                    },
                                   ),
-                                ),
-                                const SizedBox(
-                                  height: 20,
-                                ),
-                                PrimaryButton(
-                                  // enabled: false,
-                                  onTap: () async {
-                                    //check if email entered is a school email
-                                    // if (isSchoolEmail(emailController.text) ==
-                                    //     false) {
-                                    //   setState(() {
-                                    //     showSpinner = false;
-                                    //   });
-                                    //   showAlert(
-                                    //       context: context,
-                                    //       title: AppStrings.invalidEmail,
-                                    //       desc: AppStrings
-                                    //           .pleaseEnterAValidAitEmailAdd);
-                                    //   return;
-                                    // }
-
-                                    // if (passwordController.text !=
-                                    //     confirmPasswordController.text) {
-                                    //   showAlert(
-                                    //     context: context,
-                                    //     title: AppStrings.signUpFailed,
-                                    //     desc: AppStrings.passwordsDoNotMatch,
-                                    //   );
-                                    //   return;
-                                    // }
-                                    // setState(() {
-                                    //   showSpinner = true;
-                                    // });
-                                    // try {
-                                    //   await _auth
-                                    //       .createUserWithEmailAndPassword(
-                                    //           email: emailController.text,
-                                    //           password:
-                                    //               passwordController.text);
-                                    //   FocusManager.instance.primaryFocus
-                                    //       ?.unfocus();
-                                    //   //saves data on device and making the sign up page not to show once
-                                    //   //a user has signed up already(keeping the user signed in)
-                                    //   SharedPreferences prefs =
-                                    //       await SharedPreferences.getInstance();
-                                    //   prefs.setString(
-                                    //       'email', emailController.text);
-                                    //   prefs.setBool('isLoggedIn', true);
-
-                                    final idNumber =
-                                        idNumberController.text.trim();
-                                    final level = levelController.text.trim();
-                                    final semester =
-                                        semesterController.text.trim();
-
-                                    context
-                                        .read<StudentInfoProvider>()
-                                        .setStudentInfo(
-                                            idNumber: idNumber,
-                                            level: level,
-                                            semester: semester);
-
-                                    Navigation
-                                        .navigateToScreenAndClearAllPrevious(
-                                            context: context,
-                                            screen: const FaceVerificationPage(
-                                              mode: FaceVerificationMode.signUp,
-                                            ));
-                                    //     setState(() {
-                                    //       showSpinner = false;
-                                    //     });
-                                    //   } catch (e) {
-                                    //     setState(() {
-                                    //       showSpinner = false;
-                                    //     });
-                                    //     showAlert(
-                                    //       context: context,
-                                    //       title: AppStrings.signUpFailed,
-                                    //       desc: e.toString(),
-                                    //     );
-                                    //     print(e);
-                                    //   }
-                                  },
-                                  child: const Text(AppStrings.signUp),
-                                ),
-                              ],
+                                  const SizedBox(height: 20),
+                                  PrimaryButton(
+                                    enabled: vm.enableButton,
+                                    onTap: handleSignUp,
+                                    child: const Text(AppStrings.signUp),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        );
+                      }),
                     ),
                   ],
                 ),

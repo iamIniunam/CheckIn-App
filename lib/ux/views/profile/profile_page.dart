@@ -1,9 +1,9 @@
-import 'package:attendance_app/platform/providers/student_info_provider.dart';
 import 'package:attendance_app/ux/shared/components/app_material.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_images.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
+import 'package:attendance_app/ux/shared/view_models.dart/user_view_model.dart';
 import 'package:attendance_app/ux/views/profile/components/profile_detail_item.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -18,11 +18,17 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   String? newPhoneNumber;
 
+  late UserViewModel viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    viewModel = context.read<UserViewModel>();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final idNumber = context.watch<StudentInfoProvider>().idNumber;
-    final level = context.watch<StudentInfoProvider>().level;
-    final semester = context.watch<StudentInfoProvider>().semester;
+    final semester = viewModel.semester;
 
     String semesterText;
     if (semester == '1') {
@@ -87,10 +93,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         children: [
                           ProfileDetailItem(
                               title: AppStrings.studentIdNumber,
-                              value: idNumber),
+                              value: viewModel.idNumber),
                           ProfileDetailItem(
                               title: AppStrings.studentLevel,
-                              value: 'Level $level'),
+                              value: 'Level ${viewModel.level}'),
                           ProfileDetailItem(
                               title: AppStrings.currentSemester,
                               value: '$semesterText Semester'),

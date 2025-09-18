@@ -1,5 +1,4 @@
 import 'package:attendance_app/platform/providers/course_provider.dart';
-import 'package:attendance_app/platform/providers/student_info_provider.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
 import 'package:attendance_app/ux/shared/components/app_material.dart';
@@ -8,6 +7,7 @@ import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
+import 'package:attendance_app/ux/shared/view_models.dart/user_view_model.dart';
 import 'package:attendance_app/ux/views/onboarding/add_course_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -21,6 +21,7 @@ class ConfirmCoursesPage extends StatefulWidget {
 
 class _ConfirmCoursesPageState extends State<ConfirmCoursesPage> {
   bool isConfirming = false;
+  late UserViewModel viewModel;
 
   List<Course> courses = [
     Course(
@@ -69,6 +70,7 @@ class _ConfirmCoursesPageState extends State<ConfirmCoursesPage> {
   void initState() {
     super.initState();
     selectedCourses = List.from(courses);
+    viewModel = context.read<UserViewModel>();
   }
 
   bool get allSelected => selectedCourses.length == courses.length;
@@ -99,14 +101,13 @@ class _ConfirmCoursesPageState extends State<ConfirmCoursesPage> {
     });
 
     context.read<CourseProvider>().setCourses(selectedCourses);
-    Navigation.navigateToScreen(
+    Navigation.navigateToScreenAndClearOnePrevious(
         context: context, screen: const NavigationHostPage());
   }
 
   @override
   Widget build(BuildContext context) {
-    final level = context.watch<StudentInfoProvider>().level;
-    final semester = context.watch<StudentInfoProvider>().semester;
+    final semester = viewModel.semester;
 
     String semesterText;
     if (semester == '1') {
@@ -130,7 +131,7 @@ class _ConfirmCoursesPageState extends State<ConfirmCoursesPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '$level Level, $semesterText Semester',
+                  '${viewModel.level} Level, $semesterText Semester',
                   style: const TextStyle(
                       color: AppColors.defaultColor,
                       fontSize: 16,

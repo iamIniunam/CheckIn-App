@@ -56,10 +56,9 @@ class SearchTextFormField extends StatelessWidget {
         autofocus: autofocus,
         cursorColor: AppColors.defaultColor,
         style: const TextStyle(
-          color: AppColors.defaultColor,
-          fontSize: 16,
-          fontWeight: FontWeight.w500
-        ),
+            color: AppColors.defaultColor,
+            fontSize: 16,
+            fontWeight: FontWeight.w500),
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.only(top: 4, left: 10, right: 10),
           hintText: hintText ?? AppStrings.search,
@@ -124,6 +123,7 @@ class PrimaryTextFormField extends StatelessWidget {
   final bool autofocus;
   final bool enabled;
   final void Function(String?)? onSaved;
+  final String? errorText;
 
   const PrimaryTextFormField(
       {super.key,
@@ -145,13 +145,15 @@ class PrimaryTextFormField extends StatelessWidget {
       this.onTap,
       this.enabled = true,
       this.required = false,
-      this.onSaved});
+      this.onSaved,
+      this.errorText});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Visibility(
@@ -181,51 +183,63 @@ class PrimaryTextFormField extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(
-            height: 48,
-            child: TextFormField(
-              autofocus: autofocus,
-              obscureText: obscureText,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
+          TextFormField(
+            autofocus: autofocus,
+            obscureText: obscureText,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+            ),
+            cursorColor: AppColors.defaultColor,
+            decoration: InputDecoration(
+              prefixIcon: prefixWidget,
+              filled: true,
+              fillColor: Colors.grey.shade200,
+              suffixIcon: suffixWidget,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              hintText: hintText ?? '',
+              hintStyle: const TextStyle(
+                color: Color.fromRGBO(166, 164, 164, 1),
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
               ),
-              cursorColor: AppColors.defaultColor,
-              decoration: InputDecoration(
-                prefixIcon: prefixWidget,
-                filled: true,
-                fillColor: Colors.grey.shade300,
-                suffixIcon: suffixWidget,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                hintText: hintText ?? '',
-                hintStyle: const TextStyle(
-                  color: Color.fromRGBO(166, 164, 164, 1),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Colors.transparent),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Colors.transparent),
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide:
-                      const BorderSide(color: Colors.transparent, width: 2.0),
-                ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                    color: errorText != null ? Colors.red : Colors.transparent),
               ),
-              inputFormatters: inputFormatters,
-              keyboardType: keyboardType,
-              validator: validator,
-              controller: controller,
-              onChanged: onChanged,
-              onSaved: onSaved,
-              textInputAction: textInputAction ?? TextInputAction.done,
-              textCapitalization: textCapitalization ?? TextCapitalization.none,
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                    color: errorText != null ? Colors.red : Colors.transparent),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide:
+                    const BorderSide(color: Colors.transparent, width: 2.0),
+              ),
+            ),
+            inputFormatters: inputFormatters,
+            keyboardType: keyboardType,
+            validator: validator,
+            controller: controller,
+            onChanged: onChanged,
+            onSaved: onSaved,
+            textInputAction: textInputAction ?? TextInputAction.done,
+            textCapitalization: textCapitalization ?? TextCapitalization.none,
+          ),
+          Visibility(
+            visible: labelText != null,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                errorText ?? '',
+                style: const TextStyle(
+                    color: Colors.red,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600),
+              ),
             ),
           ),
         ],
@@ -290,10 +304,10 @@ class CustomPrimaryTextFormField extends StatelessWidget {
                 children: [
                   Text(
                     labelText ?? '',
-          style: const TextStyle(
-              color: Colors.black,
-              fontSize: 14,
-              fontWeight: FontWeight.w400),
+                    style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400),
                   ),
                   Visibility(
                     visible: required,
