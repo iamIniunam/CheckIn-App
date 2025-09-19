@@ -64,4 +64,3 @@ Color statusColor(String status) {
   }
 }
 
-enum FaceVerificationMode { signUp, attendance }

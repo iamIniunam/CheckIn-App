@@ -5,12 +5,9 @@ import 'dart:io';
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/components/app_material.dart';
 import 'package:attendance_app/ux/shared/components/blurred_loading_overlay.dart';
-import 'package:attendance_app/ux/shared/components/global_functions.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
-import 'package:attendance_app/ux/views/attendance/face_verification_page.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-// import 'package:attendance_app/platform/extensions/date_time_extensions.dart';
 
 class ScanPage extends StatefulWidget {
   const ScanPage({super.key});
@@ -52,11 +49,7 @@ class _ScanPageState extends State<ScanPage> {
 
       await Future.delayed(const Duration(milliseconds: 500));
 
-      Navigation.navigateToScreenAndClearOnePrevious(
-          context: context,
-          screen: const FaceVerificationPage(
-            mode: FaceVerificationMode.attendance,
-          ));
+      Navigation.navigateToInPersonAttendance(context: context);
     } else {
       controller.stop();
       ScaffoldMessenger.of(context).showSnackBar(

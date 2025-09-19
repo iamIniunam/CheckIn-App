@@ -51,7 +51,10 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   bool isValidLevel(String level) {
-    if (level == '100' || level == '200' || level == '300' || level == '400') {
+    if (level == '100' ||
+        level == '200' ||
+        level == '300' ||
+        level == '400' && level.length == 3) {
       return true;
     } else {
       return false;
@@ -59,7 +62,8 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   bool isValidSemester(String semester) {
-    if (semester.contains('1') || semester.contains('2')) {
+    if (semester.contains('1') ||
+        semester.contains('2') && semester.length == 1) {
       return true;
     } else {
       return false;
