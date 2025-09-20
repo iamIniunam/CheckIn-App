@@ -37,11 +37,31 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Future<void> handleSignUp() async {
+    if (!formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      showSpinner = false;
+    });
+
     try {
-      await viewModel.saveDetailsToCache();
+      final success = await viewModel.saveDetailsToCache();
 
       if (mounted) {
-        Navigation.navigateToFaceVerification(context: context);
+        setState(() {
+          showSpinner = false;
+        });
+
+        if (success) {
+          Navigation.navigateToFaceVerification(context: context);
+        } else {
+          showAlert(
+            context: context,
+            title: AppStrings.signUpFailed,
+            desc: 'Failed to save user details. Please try again.',
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -177,6 +197,15 @@ class _SignUpPageState extends State<SignUpPage> {
                                     ),
                                     onChanged: (value) {
                                       viewModel.updatePassword(value);
+                                    },
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter a password';
+                                      }
+                                      if (value.length < 6) {
+                                        return 'Password must be at least 6 characters';
+                                      }
+                                      return null;
                                     },
                                   ),
                                   const SizedBox(height: 20),

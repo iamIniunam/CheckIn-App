@@ -12,6 +12,8 @@ class FaceVerificationViewModel extends ChangeNotifier {
   double? _distanceFromCampus;
   bool _faceVerificationPassed = false;
   AttendanceType? _attendanceType;
+  bool _isIndoorLocation = false;
+  bool _isNetworkBased = false;
 
   VerificationStep get currentStep => _currentStep;
   bool get isVerifying => _isVerifying;
@@ -20,6 +22,8 @@ class FaceVerificationViewModel extends ChangeNotifier {
   bool get faceVerificationPassed => _faceVerificationPassed;
   double? get distanceFromCampus => _distanceFromCampus;
   AttendanceType? get attendanceType => _attendanceType;
+  bool get isIndoorLocation => _isIndoorLocation;
+  bool get isNetworkBased => _isNetworkBased;
 
   bool get isFaceVerifying =>
       _currentStep == VerificationStep.faceVerification && _isVerifying;
@@ -77,6 +81,7 @@ class FaceVerificationViewModel extends ChangeNotifier {
     setLoading(true);
 
     try {
+      // Simulate face verification process
       await Future.delayed(const Duration(seconds: 2));
 
       _faceVerificationPassed = true;
@@ -93,23 +98,37 @@ class FaceVerificationViewModel extends ChangeNotifier {
     if (!requiresLocationCheck) return true;
 
     setError(null);
-    setLocationStatus('Checking your location...');
+    setLocationStatus('Checking your location in the building...');
     setLoading(true);
 
     try {
-      AttendanceLocationResult result = await LocationService.canMarkAttendance(
-        campusLat: AppConstants.campusLat,
-        campusLong: AppConstants.campusLong,
+      AttendanceLocationResult result =
+          await LocationService.canMarkAttendanceHybrid(
+        campusLat: AppConstants.chisomLat,
+        campusLong: AppConstants.chisomLong,
         maxDistanceMeters: AppConstants.maxDistanceMeters,
         showSettingsOption: true,
       );
 
       _currentPosition = result.currentPosition;
       _distanceFromCampus = result.distanceFromCampus;
+      _isIndoorLocation = result.isIndoorLocation;
+      _isNetworkBased = result.isNetworkBased;
 
       if (result.canMarkAttendance) {
-        setLocationStatus(
-            'Location verified - ${LocationService.formatDistance(result.distanceFromCampus ?? 0)} from campus');
+        // Enhanced status message based on location type
+        String statusMessage;
+        if (result.isNetworkBased) {
+          statusMessage = 'Location verified using network (GPS weak indoors)';
+        } else if (result.isIndoorLocation) {
+          statusMessage =
+              'Location verified - ${LocationService.formatDistance(result.distanceFromCampus ?? 0)} from campus (indoor GPS)';
+        } else {
+          statusMessage =
+              'Location verified - ${LocationService.formatDistance(result.distanceFromCampus ?? 0)} from campus';
+        }
+
+        setLocationStatus(statusMessage);
         return true;
       } else {
         setError(result.errorMessage ?? 'Location verification failed');
@@ -117,7 +136,21 @@ class FaceVerificationViewModel extends ChangeNotifier {
         return false;
       }
     } catch (e) {
-      setError('Location verification failed: ${e.toString()}');
+      String errorMsg = 'Location verification failed: ${e.toString()}';
+
+      // Provide helpful error messages for building-related issues
+      if (e.toString().toLowerCase().contains('timeout') ||
+          e.toString().toLowerCase().contains('accuracy')) {
+        errorMsg =
+            '''Location verification failed - GPS signal weak inside building.
+
+          Try:
+          • Moving closer to a window
+          • Ensuring WiFi is enabled
+          • Going outside briefly to get location''';
+      }
+
+      setError(errorMsg);
       setLocationStatus('Location check failed');
       return false;
     } finally {
@@ -150,9 +183,12 @@ class FaceVerificationViewModel extends ChangeNotifier {
           'longitude': _currentPosition?.longitude,
           'accuracy': _currentPosition?.accuracy,
           'distanceFromCampus': _distanceFromCampus,
+          'locationMethod': _getLocationMethod(),
+          'isIndoorLocation': _isIndoorLocation,
         });
       }
 
+      // Simulate API call
       await Future.delayed(const Duration(seconds: 2));
 
       debugPrint('Attendance submitted: $attendanceData');
@@ -163,6 +199,12 @@ class FaceVerificationViewModel extends ChangeNotifier {
     } finally {
       setLoading(false);
     }
+  }
+
+  String _getLocationMethod() {
+    if (_isNetworkBased) return 'network';
+    if (_isIndoorLocation) return 'indoor_gps';
+    return 'gps';
   }
 
   Future<bool> startVerificationFlow({AttendanceType? attendanceType}) async {
@@ -199,6 +241,54 @@ class FaceVerificationViewModel extends ChangeNotifier {
     return true;
   }
 
+  // Method to retry location check with different settings
+  Future<bool> retryLocationCheck({bool useNetworkOnly = false}) async {
+    if (!requiresLocationCheck) return true;
+
+    setError(null);
+    setLocationStatus(useNetworkOnly
+        ? 'Trying network-based location...'
+        : 'Retrying location check...');
+    setLoading(true);
+
+    try {
+      AttendanceLocationResult result;
+
+      if (useNetworkOnly) {
+        result = await LocationService.canMarkAttendanceNetworkBased(
+          campusLat: AppConstants.chisomLat,
+          campusLong: AppConstants.chisomLong,
+          maxDistanceMeters: AppConstants.maxDistanceMeters,
+        );
+      } else {
+        result = await LocationService.canMarkAttendanceHybrid(
+          campusLat: AppConstants.chisomLat,
+          campusLong: AppConstants.chisomLong,
+          maxDistanceMeters: AppConstants.maxDistanceMeters,
+          showSettingsOption: false, // Don't show settings dialog on retry
+        );
+      }
+
+      _currentPosition = result.currentPosition;
+      _distanceFromCampus = result.distanceFromCampus;
+      _isIndoorLocation = result.isIndoorLocation;
+      _isNetworkBased = result.isNetworkBased;
+
+      if (result.canMarkAttendance) {
+        setLocationStatus('Location verified on retry!');
+        return true;
+      } else {
+        setError('Location retry failed: ${result.errorMessage}');
+        return false;
+      }
+    } catch (e) {
+      setError('Location retry failed: ${e.toString()}');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }
+
   void resetVerification() {
     _currentStep = VerificationStep.faceVerification;
     _isVerifying = false;
@@ -208,6 +298,8 @@ class FaceVerificationViewModel extends ChangeNotifier {
     _distanceFromCampus = null;
     _faceVerificationPassed = false;
     _attendanceType = null;
+    _isIndoorLocation = false;
+    _isNetworkBased = false;
     notifyListeners();
   }
 
@@ -216,15 +308,25 @@ class FaceVerificationViewModel extends ChangeNotifier {
       case VerificationStep.faceVerification:
         return 'Position your face in the circle and tap verify';
       case VerificationStep.locationCheck:
-        return requiresLocationCheck
-            ? 'Verifying your location...'
-            : 'Location check skipped for online attendance';
+        if (requiresLocationCheck) {
+          if (_isVerifying) {
+            return 'Checking location inside building...';
+          }
+          return 'Verifying your location...';
+        }
+        return 'Location check skipped for online attendance';
       case VerificationStep.attendanceSubmission:
         return requiresLocationCheck
             ? 'Submitting in-person attendance...'
             : 'Submitting online attendance...';
       case VerificationStep.completed:
-        return 'Verification completed successfully!';
+        String completionMessage = 'Verification completed successfully!';
+        if (_isNetworkBased) {
+          completionMessage += '\n(Network location used)';
+        } else if (_isIndoorLocation) {
+          completionMessage += '\n(Indoor GPS used)';
+        }
+        return completionMessage;
     }
   }
 
@@ -248,6 +350,14 @@ class FaceVerificationViewModel extends ChangeNotifier {
   bool shouldShowButton(FaceVerificationMode mode) {
     if (mode == FaceVerificationMode.signUp) return true;
     return _currentStep == VerificationStep.faceVerification;
+  }
+
+  // Show retry button for location failures
+  bool shouldShowRetryButton() {
+    return _currentStep == VerificationStep.locationCheck &&
+        !_isVerifying &&
+        _errorMessage != null &&
+        requiresLocationCheck;
   }
 
   List<VerificationStep> getRequiredSteps() {
@@ -282,6 +392,34 @@ class FaceVerificationViewModel extends ChangeNotifier {
       case null:
         return 'Not Set';
     }
+  }
+
+  // Get location info for display
+  String getLocationInfo() {
+    if (_currentPosition == null) return 'No location data';
+
+    String info =
+        'Distance: ${LocationService.formatDistance(_distanceFromCampus ?? 0)}';
+
+    if (_isNetworkBased) {
+      info += '\nMethod: Network location';
+    } else if (_isIndoorLocation) {
+      info +=
+          '\nMethod: Indoor GPS (±${LocationService.formatDistance(_currentPosition!.accuracy)})';
+    } else {
+      info +=
+          '\nMethod: GPS (±${LocationService.formatDistance(_currentPosition!.accuracy)})';
+    }
+
+    return info;
+  }
+
+  // Check if current error suggests user should try moving to a window
+  bool shouldSuggestMovingToWindow() {
+    return _errorMessage != null &&
+        (_errorMessage!.toLowerCase().contains('accuracy') ||
+            _errorMessage!.toLowerCase().contains('timeout') ||
+            _errorMessage!.toLowerCase().contains('weak'));
   }
 }
 

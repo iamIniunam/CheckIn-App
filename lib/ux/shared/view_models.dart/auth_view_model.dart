@@ -8,6 +8,9 @@ class AuthViewModel extends ChangeNotifier {
   String semester = '';
   String password = '';
 
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+
   void updateIDNumber(String value) {
     idNumber = value;
     notifyListeners();
@@ -28,12 +31,81 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> saveDetailsToCache() async {
-    final pref = await SharedPreferences.getInstance();
-    await pref.setString(AppConstants.idNumberKey, idNumber);
-    await pref.setString(AppConstants.levelKey, level);
-    await pref.setString(AppConstants.semesterKey, semester);
-    await pref.setString(AppConstants.passwordKey, password);
+  void setLoadingState(bool loading) {
+    _isLoading = loading;
+    notifyListeners();
+  }
+
+  Future<bool> saveDetailsToCache() async {
+    try {
+      setLoadingState(true);
+
+      final pref = await SharedPreferences.getInstance();
+
+      await Future.wait([
+        pref.setString(AppConstants.idNumberKey, idNumber),
+        pref.setString(AppConstants.levelKey, level),
+        pref.setString(AppConstants.semesterKey, semester),
+        pref.setString(AppConstants.passwordKey, password),
+      ]);
+
+      setLoadingState(false);
+      return true;
+    } catch (e) {
+      setLoadingState(false);
+      return false;
+    }
+  }
+
+  Future<bool> signUp() async {
+    if (!enableButton) return false;
+
+    return await saveDetailsToCache();
+  }
+
+  static Future<bool> isUserSignedUp() async {
+    try {
+      final pref = await SharedPreferences.getInstance();
+
+      final idNumber = pref.getString(AppConstants.idNumberKey);
+      final level = pref.getString(AppConstants.levelKey);
+      final semester = pref.getString(AppConstants.semesterKey);
+      final password = pref.getString(AppConstants.passwordKey);
+
+      return idNumber != null &&
+          level != null &&
+          semester != null &&
+          password != null &&
+          idNumber.isNotEmpty &&
+          level.isNotEmpty &&
+          semester.isNotEmpty &&
+          password.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> clearUserData() async {
+    try {
+      final pref = await SharedPreferences.getInstance();
+
+      await Future.wait([
+        pref.remove(AppConstants.idNumberKey),
+        pref.remove(AppConstants.levelKey),
+        pref.remove(AppConstants.semesterKey),
+        pref.remove(AppConstants.passwordKey),
+      ]);
+
+      idNumber = '';
+      level = '';
+      semester = '';
+      password = '';
+
+      notifyListeners();
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   bool isValidIdNumber(String idNumber) {
