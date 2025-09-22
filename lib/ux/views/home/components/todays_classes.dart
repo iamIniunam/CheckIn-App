@@ -18,7 +18,7 @@ class TodaysClasses extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SectionHeader(period: AppStrings.todaysClasses, hasAction: false),
+        const SectionHeader(period: AppStrings.todaysClasses, hasAction: false,),
         ...courses
             .map(
               (todaysCourses) => CourseCard(course: todaysCourses),

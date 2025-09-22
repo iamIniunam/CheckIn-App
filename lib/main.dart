@@ -1,6 +1,6 @@
-import 'package:attendance_app/platform/providers/course_provider.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/view_models.dart/auth_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models.dart/course_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models.dart/user_view_model.dart';
 import 'package:attendance_app/ux/views/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -28,9 +28,9 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => CourseProvider()),
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
         ChangeNotifierProvider(create: (_) => UserViewModel(pref: prefs)),
+        ChangeNotifierProvider(create: (_) => CourseViewModel()),
       ],
       child: const MyApp(),
     ),

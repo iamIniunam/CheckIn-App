@@ -1,4 +1,4 @@
-import 'package:attendance_app/platform/utils/location_service.dart';
+import 'package:attendance_app/platform/services/location_service.dart';
 import 'package:flutter/material.dart';
 
 class LocationVerifiedBadge extends StatelessWidget {

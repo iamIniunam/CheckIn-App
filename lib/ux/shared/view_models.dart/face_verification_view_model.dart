@@ -1,4 +1,4 @@
-import 'package:attendance_app/platform/utils/location_service.dart';
+import 'package:attendance_app/platform/services/location_service.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';

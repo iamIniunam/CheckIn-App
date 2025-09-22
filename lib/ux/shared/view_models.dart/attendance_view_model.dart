@@ -1,4 +1,4 @@
-import 'package:attendance_app/platform/utils/location_service.dart';
+import 'package:attendance_app/platform/services/location_service.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:attendance_app/ux/shared/view_models.dart/user_view_model.dart';
 import 'package:flutter/material.dart';

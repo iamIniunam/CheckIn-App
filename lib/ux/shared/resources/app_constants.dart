@@ -21,6 +21,18 @@ class AppConstants {
   static const double kccLong = -0.3258892; // replace with actual values
   static const double maxDistanceMeters = 200;
 
-   static const double buildingGpsAccuracyThreshold = 50.0; // meters
-   static const double networkLocationBuffer = 200.0; // extra meters for network location
+  static const double buildingGpsAccuracyThreshold = 50.0; // meters
+  static const double networkLocationBuffer =
+      200.0; // extra meters for network location
+
+  static const int requiredCreditHours = 18;
+  static const List<String> streams = [
+    'Seaview (Day)',
+    'KCC (Evening)',
+    'Seaview (Weekend)',
+    'KCC (Weekend)',
+  ];
+
+  static const String selectedCoursesKey = 'selected_courses';
+  static const String selectedStreamsKey = 'selected.streams';
 }

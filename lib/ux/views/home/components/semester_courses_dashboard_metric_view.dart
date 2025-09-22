@@ -1,4 +1,4 @@
-import 'package:attendance_app/platform/providers/course_provider.dart';
+import 'package:attendance_app/platform/services/selected_courses_service.dart';
 import 'package:attendance_app/ux/shared/components/app_material.dart';
 import 'package:attendance_app/ux/shared/components/dashboard_metric_grid_view.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
@@ -8,60 +8,74 @@ import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/views/course/course_details_page.dart';
 import 'package:attendance_app/ux/views/home/components/section_header.dart';
 import 'package:attendance_app/ux/views/home/full_course_list_page.dart';
+import 'package:attendance_app/ux/views/onboarding/confirm_courses_page.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class SemesterCoursesDashboardMetricView extends StatelessWidget {
   const SemesterCoursesDashboardMetricView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final selectedSemesterCourses =
-        context.watch<CourseProvider>().selectedCourses;
+    return ListenableBuilder(
+        listenable: SelectedCoursesService(),
+        builder: (context, child) {
+          final selectedSemesterCourses =
+              SelectedCoursesService().selectedCourses;
+          final selectedStreams = SelectedCoursesService().selectedStreams;
 
-    final courseInfo = selectedSemesterCourses
-        .asMap()
-        .entries
-        .map((entry) => Course(
-              courseCode: entry.value.courseCode,
-              courseTitle: entry.value.courseTitle,
-              creditHours: entry.value.creditHours,
-              status: entry.value.status,
-              showStatus: entry.value.showStatus,
-              index: entry.key,
-            ))
-        .toList();
+          if (selectedSemesterCourses.isEmpty) {
+            return const SelectedCoursesEmptyState();
+          }
 
-    return Column(
-      children: [
-        SectionHeader(
-          period: AppStrings.semesterCourses,
-          hasAction: courseInfo.length > 9,
-          onTap: () {
-            if (courseInfo.length > 9) {
-              Navigation.navigateToScreen(
-                context: context,
-                screen: FullCourseListPage(
-                  courses: courseInfo,
-                ),
-              );
-            }
-          },
-        ),
-        Padding(
-          padding:
-              const EdgeInsets.only(left: 16, top: 10, right: 16, bottom: 16),
-          child: DashboardMetricGridView(
+          final courseInfo = selectedSemesterCourses
+              .asMap()
+              .entries
+              .map((entry) => Course(
+                    courseCode: entry.value.courseCode,
+                    courseTitle: entry.value.courseTitle,
+                    creditHours: entry.value.creditHours,
+                    status: entry.value.status,
+                    showStatus: entry.value.showStatus,
+                    index: entry.key,
+                  ))
+              .toList();
+
+          return Column(
             children: [
-              ...courseInfo
-                  .map((course) =>
-                      singleCourse(context: context, course: course))
-                  .toList(),
+              SectionHeader(
+                period: AppStrings.semesterCourses,
+                hasAction: courseInfo.length > 9,
+                onTap: () {
+                  if (courseInfo.length > 9) {
+                    Navigation.navigateToScreen(
+                      context: context,
+                      screen: FullCourseListPage(
+                        courses: courseInfo,
+                        courseStreams: selectedStreams,
+                      ),
+                    );
+                  }
+                },
+              ),
+              Padding(
+                padding: const EdgeInsets.only(
+                    left: 16, top: 10, right: 16, bottom: 16),
+                child: DashboardMetricGridView(
+                  children: [
+                    ...courseInfo
+                        .map(
+                          (course) => singleCourse(
+                            context: context,
+                            course: course,
+                          ),
+                        )
+                        .toList(),
+                  ],
+                ),
+              ),
             ],
-          ),
-        ),
-      ],
-    );
+          );
+        });
   }
 
   Widget singleCourse({required BuildContext context, required Course course}) {
@@ -102,6 +116,67 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class SelectedCoursesEmptyState extends StatelessWidget {
+  const SelectedCoursesEmptyState({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const SectionHeader(
+          period: AppStrings.semesterCourses,
+          hasAction: false,
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: AppMaterial(
+            onTap: () {
+              Navigation.navigateToScreen(
+                  context: context, screen: const ConfirmCoursesPage());
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppColors.grey.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(color: AppColors.grey.withOpacity(0.3)),
+              ),
+              child: const Column(
+                children: [
+                  Icon(
+                    Icons.school_outlined,
+                    size: 48,
+                    color: AppColors.grey,
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'No courses selected',
+                    style: TextStyle(
+                      color: AppColors.grey,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Complete your course selection to see your courses here',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.grey,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

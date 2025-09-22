@@ -1,4 +1,5 @@
 import 'package:attendance_app/platform/extensions/date_time_extensions.dart';
+import 'package:attendance_app/platform/services/selected_courses_service.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
@@ -50,6 +51,9 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
         status: AppStrings.present),
   ];
 
+  String? get courseStream =>
+      SelectedCoursesService().getStreamForCourse(widget.courseCode);
+
   @override
   Widget build(BuildContext context) {
     return AppPageScaffold(
@@ -67,19 +71,48 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        widget.courseCode,
-                        style: const TextStyle(
-                            color: AppColors.defaultColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        widget.courseTitle,
-                        style: const TextStyle(
-                            color: Colors.grey,
-                            // fontSize: 16,
-                            fontWeight: FontWeight.bold),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.courseCode,
+                                style: const TextStyle(
+                                    color: AppColors.defaultColor,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                widget.courseTitle,
+                                style: const TextStyle(
+                                    color: Colors.grey,
+                                    // fontSize: 16,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryTeal.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: AppColors.primaryTeal.withOpacity(0.5),
+                              ),
+                            ),
+                            child: Text(
+                              courseStream ?? '',
+                              style: const TextStyle(
+                                color: AppColors.defaultColor,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 10),
                       Container(
