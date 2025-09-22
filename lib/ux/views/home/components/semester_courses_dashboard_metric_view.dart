@@ -57,21 +57,20 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
                   }
                 },
               ),
-              Padding(
+              DashboardMetricGridView(
                 padding: const EdgeInsets.only(
                     left: 16, top: 10, right: 16, bottom: 16),
-                child: DashboardMetricGridView(
-                  children: [
-                    ...courseInfo
-                        .map(
-                          (course) => singleCourse(
-                            context: context,
-                            course: course,
-                          ),
-                        )
-                        .toList(),
-                  ],
-                ),
+                crossAxisCount: 3,
+                children: [
+                  ...courseInfo
+                      .map(
+                        (course) => singleCourse(
+                          context: context,
+                          course: course,
+                        ),
+                      )
+                      .toList(),
+                ],
               ),
             ],
           );
@@ -93,9 +92,9 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
             ));
       },
       child: Padding(
-        padding:
-            const EdgeInsets.only(left: 12, top: 10, right: 12, bottom: 12),
+        padding: const EdgeInsets.all(12),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               course.creditHours.toString(),
