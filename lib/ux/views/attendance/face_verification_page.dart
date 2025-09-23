@@ -1,7 +1,7 @@
 import 'package:attendance_app/platform/utils/permission_utils.dart';
 import 'package:attendance_app/ux/shared/components/blurred_loading_overlay.dart';
 import 'package:attendance_app/ux/shared/components/global_functions.dart';
-import 'package:attendance_app/ux/shared/view_models.dart/face_verification_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/face_verification_view_model.dart';
 import 'package:attendance_app/ux/views/attendance/alert_dialogs/cancel_dialog.dart';
 import 'package:attendance_app/ux/views/attendance/components/attendance_type_indicator.dart';
 import 'package:attendance_app/ux/views/attendance/components/face_verification_buttons.dart';

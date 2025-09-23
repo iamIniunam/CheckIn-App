@@ -1,5 +1,5 @@
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
-import 'package:attendance_app/ux/shared/view_models.dart/face_verification_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/face_verification_view_model.dart';
 import 'package:attendance_app/ux/views/attendance/components/error_message.dart';
 import 'package:flutter/material.dart';
 

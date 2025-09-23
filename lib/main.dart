@@ -1,7 +1,7 @@
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
-import 'package:attendance_app/ux/shared/view_models.dart/auth_view_model.dart';
-import 'package:attendance_app/ux/shared/view_models.dart/course_view_model.dart';
-import 'package:attendance_app/ux/shared/view_models.dart/user_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/user_view_model.dart';
 import 'package:attendance_app/ux/views/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';

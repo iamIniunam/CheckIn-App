@@ -1,4 +1,4 @@
-import 'package:attendance_app/ux/shared/view_models.dart/face_verification_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/face_verification_view_model.dart';
 import 'package:attendance_app/ux/views/attendance/components/completion_content.dart';
 import 'package:attendance_app/ux/views/attendance/components/face_verification_content.dart';
 import 'package:attendance_app/ux/views/attendance/components/location_content.dart';

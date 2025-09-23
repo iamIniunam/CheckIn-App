@@ -3,7 +3,7 @@ import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_images.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
-import 'package:attendance_app/ux/shared/view_models.dart/user_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/user_view_model.dart';
 import 'package:attendance_app/ux/views/profile/components/profile_detail_item.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
