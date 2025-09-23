@@ -17,64 +17,65 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-        listenable: SelectedCoursesService(),
-        builder: (context, child) {
-          final selectedSemesterCourses =
-              SelectedCoursesService().selectedCourses;
-          final selectedStreams = SelectedCoursesService().selectedStreams;
+      listenable: SelectedCoursesService(),
+      builder: (context, child) {
+        final selectedSemesterCourses =
+            SelectedCoursesService().selectedCourses;
+        final selectedStreams = SelectedCoursesService().selectedStreams;
 
-          if (selectedSemesterCourses.isEmpty) {
-            return const SelectedCoursesEmptyState();
-          }
+        if (selectedSemesterCourses.isEmpty) {
+          return const SelectedCoursesEmptyState();
+        }
 
-          final courseInfo = selectedSemesterCourses
-              .asMap()
-              .entries
-              .map((entry) => Course(
-                    courseCode: entry.value.courseCode,
-                    courseTitle: entry.value.courseTitle,
-                    creditHours: entry.value.creditHours,
-                    status: entry.value.status,
-                    showStatus: entry.value.showStatus,
-                    index: entry.key,
-                  ))
-              .toList();
+        final courseInfo = selectedSemesterCourses
+            .asMap()
+            .entries
+            .map((entry) => Course(
+                  courseCode: entry.value.courseCode,
+                  courseTitle: entry.value.courseTitle,
+                  creditHours: entry.value.creditHours,
+                  status: entry.value.status,
+                  showStatus: entry.value.showStatus,
+                  index: entry.key,
+                ))
+            .toList();
 
-          return Column(
-            children: [
-              SectionHeader(
-                period: AppStrings.semesterCourses,
-                hasAction: courseInfo.length > 9,
-                onTap: () {
-                  if (courseInfo.length > 9) {
-                    Navigation.navigateToScreen(
-                      context: context,
-                      screen: FullCourseListPage(
-                        courses: courseInfo,
-                        courseStreams: selectedStreams,
+        return Column(
+          children: [
+            SectionHeader(
+              period: AppStrings.semesterCourses,
+              hasAction: courseInfo.length > 9,
+              onTap: () {
+                if (courseInfo.length > 9) {
+                  Navigation.navigateToScreen(
+                    context: context,
+                    screen: FullCourseListPage(
+                      courses: courseInfo,
+                      courseStreams: selectedStreams,
+                    ),
+                  );
+                }
+              },
+            ),
+            DashboardMetricGridView(
+              padding: const EdgeInsets.only(
+                  left: 16, top: 10, right: 16, bottom: 16),
+              crossAxisCount: 3,
+              children: [
+                ...courseInfo
+                    .map(
+                      (course) => singleCourse(
+                        context: context,
+                        course: course,
                       ),
-                    );
-                  }
-                },
-              ),
-              DashboardMetricGridView(
-                padding: const EdgeInsets.only(
-                    left: 16, top: 10, right: 16, bottom: 16),
-                crossAxisCount: 3,
-                children: [
-                  ...courseInfo
-                      .map(
-                        (course) => singleCourse(
-                          context: context,
-                          course: course,
-                        ),
-                      )
-                      .toList(),
-                ],
-              ),
-            ],
-          );
-        });
+                    )
+                    .toList(),
+              ],
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget singleCourse({required BuildContext context, required Course course}) {

@@ -31,10 +31,7 @@ class SingleNotification extends StatelessWidget {
               decoration: BoxDecoration(
                   color: AppColors.primaryTeal,
                   borderRadius: BorderRadius.circular(8)),
-              child: Icon(
-                icon,
-                color: AppColors.defaultColor,
-              ),
+              child: Icon(icon, color: AppColors.defaultColor),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -50,9 +47,7 @@ class SingleNotification extends StatelessWidget {
                   ),
                   Text(
                     body,
-                    style: const TextStyle(
-                      color: AppColors.defaultColor,
-                    ),
+                    style: const TextStyle(color: AppColors.defaultColor),
                   ),
                   const SizedBox(height: 2),
                   Text(
