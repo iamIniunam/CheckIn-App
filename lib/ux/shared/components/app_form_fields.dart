@@ -124,6 +124,7 @@ class PrimaryTextFormField extends StatelessWidget {
   final bool enabled;
   final void Function(String?)? onSaved;
   final String? errorText;
+  final double? bottomPadding;
 
   const PrimaryTextFormField(
       {super.key,
@@ -146,12 +147,13 @@ class PrimaryTextFormField extends StatelessWidget {
       this.enabled = true,
       this.required = false,
       this.onSaved,
-      this.errorText});
+      this.errorText,
+      this.bottomPadding});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 15),
+      padding: EdgeInsets.only(bottom: bottomPadding ?? 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -187,6 +189,7 @@ class PrimaryTextFormField extends StatelessWidget {
             autofocus: autofocus,
             obscureText: obscureText,
             style: const TextStyle(
+              color: AppColors.defaultColor,
               fontSize: 15,
               fontWeight: FontWeight.w500,
             ),

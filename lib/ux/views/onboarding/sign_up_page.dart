@@ -1,3 +1,4 @@
+import 'package:attendance_app/ux/shared/components/app_dropdown_field.dart';
 import 'package:attendance_app/ux/shared/components/global_functions.dart';
 import 'package:attendance_app/ux/shared/components/app_buttons.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
@@ -98,23 +99,22 @@ class _SignUpPageState extends State<SignUpPage> {
                       AppColors.black.withOpacity(0.7), BlendMode.darken),
                 ),
               ),
+              //TODO: try using listview and centering it vertically
               child: Padding(
                 padding: const EdgeInsets.only(left: 24, right: 24),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 18),
-                      child: Text(
-                        AppStrings.signUp,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: AppColors.white,
-                          fontSize: 45,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    const Text(
+                      AppStrings.signUp,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: AppColors.white,
+                        fontSize: 45,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
+                    const SizedBox(height: 18),
                     Container(
                       padding: const EdgeInsets.only(
                           left: 24, top: 30, right: 24, bottom: 40),
@@ -122,104 +122,118 @@ class _SignUpPageState extends State<SignUpPage> {
                         color: AppColors.white,
                         borderRadius: BorderRadius.circular(28),
                       ),
-                      child: Consumer<AuthViewModel>(builder: (context, vm, _) {
-                        return Column(
-                          children: [
-                            Form(
-                              key: formKey,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  PrimaryTextFormField(
-                                    labelText: AppStrings.studentIdNumber,
-                                    keyboardType: TextInputType.visiblePassword,
-                                    hintText: AppStrings.idNumberHintText,
-                                    textInputAction: TextInputAction.next,
-                                    textCapitalization:
-                                        TextCapitalization.characters,
-                                    onChanged: (value) {
-                                      vm.updateIDNumber(value);
-                                    },
-                                    errorText: vm.idNumber.isNotEmpty &&
-                                            !vm.isIdNumberValid
-                                        ? 'Invalid ID number format'
-                                        : null,
-                                  ),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: PrimaryTextFormField(
-                                          labelText: AppStrings.level,
-                                          keyboardType: TextInputType.number,
-                                          hintText: AppStrings.levelHintText,
-                                          textInputAction: TextInputAction.next,
-                                          onChanged: (value) {
-                                            viewModel.updateLevel(value);
-                                          },
-                                          errorText: vm.level.isNotEmpty &&
-                                                  !vm.isLevelValid
-                                              ? 'Between 100 - 400'
-                                              : null,
-                                        ),
+                      child: Consumer<AuthViewModel>(
+                        builder: (context, vm, _) {
+                          return Form(
+                            key: formKey,
+                            child: Column(
+                              children: [
+                                PrimaryTextFormField(
+                                  labelText: AppStrings.studentIdNumber,
+                                  keyboardType: TextInputType.visiblePassword,
+                                  hintText: AppStrings.idNumberHintText,
+                                  textInputAction: TextInputAction.next,
+                                  textCapitalization:
+                                      TextCapitalization.characters,
+                                  bottomPadding: 2,
+                                  onChanged: (value) {
+                                    vm.updateIDNumber(value);
+                                  },
+                                  errorText: vm.idNumber.isNotEmpty &&
+                                          !vm.isIdNumberValid
+                                      ? 'Invalid ID number format'
+                                      : null,
+                                ),
+                                AppDropdownField(
+                                  labelText: 'Program',
+                                  stringItems: true,
+                                  items: const [
+                                    'Bsc. Information Technology',
+                                    'Bsc. Computer Science',
+                                    'Bsc. Business & Marketing',
+                                    'BEng. Computer Engineering',
+                                    'BEng. Civil Engineering',
+                                    'BEng. Electrical Electronics Engineering'
+                                  ],
+                                  onChanged: (c) {},
+                                ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: PrimaryTextFormField(
+                                        labelText: AppStrings.level,
+                                        keyboardType: TextInputType.number,
+                                        hintText: AppStrings.levelHintText,
+                                        bottomPadding: 2,
+                                        textInputAction: TextInputAction.next,
+                                        onChanged: (value) {
+                                          viewModel.updateLevel(value);
+                                        },
+                                        errorText: vm.level.isNotEmpty &&
+                                                !vm.isLevelValid
+                                            ? 'Between 100 - 400'
+                                            : null,
                                       ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: PrimaryTextFormField(
-                                          labelText: AppStrings.semester,
-                                          keyboardType: TextInputType.number,
-                                          hintText: AppStrings.semesterHintText,
-                                          textInputAction: TextInputAction.next,
-                                          onChanged: (value) {
-                                            viewModel.updateSemester(value);
-                                          },
-                                          errorText: vm.semester.isNotEmpty &&
-                                                  !vm.isSemesterValid
-                                              ? 'Enter 1 or 2'
-                                              : null,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  PrimaryTextFormField(
-                                    labelText: AppStrings.password,
-                                    hintText: AppStrings.enterAPassword,
-                                    obscureText: !isPasswordVisible,
-                                    keyboardType: TextInputType.visiblePassword,
-                                    textInputAction: TextInputAction.done,
-                                    suffixWidget: IconButton(
-                                      icon: Icon(
-                                        isPasswordVisible
-                                            ? Icons.visibility
-                                            : Icons.visibility_off,
-                                        color: AppColors.defaultColor,
-                                      ),
-                                      onPressed: togglePasswordVisibility,
                                     ),
-                                    onChanged: (value) {
-                                      viewModel.updatePassword(value);
-                                    },
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please enter a password';
-                                      }
-                                      if (value.length < 6) {
-                                        return 'Password must be at least 6 characters';
-                                      }
-                                      return null;
-                                    },
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: PrimaryTextFormField(
+                                        labelText: AppStrings.semester,
+                                        keyboardType: TextInputType.number,
+                                        bottomPadding: 2,
+                                        hintText: AppStrings.semesterHintText,
+                                        textInputAction: TextInputAction.next,
+                                        onChanged: (value) {
+                                          viewModel.updateSemester(value);
+                                        },
+                                        errorText: vm.semester.isNotEmpty &&
+                                                !vm.isSemesterValid
+                                            ? 'Enter 1 or 2'
+                                            : null,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                PrimaryTextFormField(
+                                  labelText: AppStrings.password,
+                                  hintText: AppStrings.enterAPassword,
+                                  obscureText: !isPasswordVisible,
+                                  keyboardType: TextInputType.visiblePassword,
+                                  textInputAction: TextInputAction.done,
+                                  suffixWidget: IconButton(
+                                    icon: Icon(
+                                      isPasswordVisible
+                                          ? Icons.visibility
+                                          : Icons.visibility_off,
+                                      color: AppColors.defaultColor,
+                                    ),
+                                    onPressed: togglePasswordVisibility,
                                   ),
-                                  const SizedBox(height: 20),
-                                  PrimaryButton(
-                                    enabled: vm.enableButton,
-                                    onTap: handleSignUp,
-                                    child: const Text(AppStrings.signUp),
-                                  ),
-                                ],
-                              ),
+                                  onChanged: (value) {
+                                    viewModel.updatePassword(value);
+                                  },
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter a password';
+                                    }
+                                    if (value.length < 6) {
+                                      return 'Password must be at least 6 characters';
+                                    }
+                                    return null;
+                                  },
+                                  bottomPadding: 0,
+                                ),
+                                const SizedBox(height: 20),
+                                PrimaryButton(
+                                  enabled: vm.enableButton,
+                                  onTap: handleSignUp,
+                                  child: const Text(AppStrings.signUp),
+                                ),
+                              ],
                             ),
-                          ],
-                        );
-                      }),
+                          );
+                        },
+                      ),
                     ),
                   ],
                 ),
