@@ -4,12 +4,14 @@ import 'package:attendance_app/ux/shared/components/app_buttons.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/components/app_form_fields.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
+import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:attendance_app/ux/shared/resources/app_images.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:provider/provider.dart';
+import 'package:searchfield/searchfield.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -99,11 +101,10 @@ class _SignUpPageState extends State<SignUpPage> {
                       AppColors.black.withOpacity(0.7), BlendMode.darken),
                 ),
               ),
-              //TODO: try using listview and centering it vertically
-              child: Padding(
-                padding: const EdgeInsets.only(left: 24, right: 24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              child: Center(
+                child: ListView(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.only(left: 24, right: 24),
                   children: [
                     const Text(
                       AppStrings.signUp,
@@ -135,7 +136,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                   textInputAction: TextInputAction.next,
                                   textCapitalization:
                                       TextCapitalization.characters,
-                                  bottomPadding: 2,
+                                  bottomPadding: 0,
                                   onChanged: (value) {
                                     vm.updateIDNumber(value);
                                   },
@@ -144,18 +145,19 @@ class _SignUpPageState extends State<SignUpPage> {
                                       ? 'Invalid ID number format'
                                       : null,
                                 ),
-                                AppDropdownField(
-                                  labelText: 'Program',
-                                  stringItems: true,
-                                  items: const [
-                                    'Bsc. Information Technology',
-                                    'Bsc. Computer Science',
-                                    'Bsc. Business & Marketing',
-                                    'BEng. Computer Engineering',
-                                    'BEng. Civil Engineering',
-                                    'BEng. Electrical Electronics Engineering'
-                                  ],
-                                  onChanged: (c) {},
+                                CustomSearchTextFormField(
+                                  labelText: 'Programs',
+                                  hintText: 'e.g BEng. Computer Engineering',
+                                  suggestions: AppConstants.programs
+                                      .map((e) => SearchFieldListItem<dynamic>(
+                                          e,
+                                          child: Text(e)))
+                                      .toList(),
+                                  onSuggestionTap: (suggestion) {
+                                    final selectedProgram =
+                                        suggestion.searchKey;
+                                    vm.updateProgram(selectedProgram);
+                                  },
                                 ),
                                 Row(
                                   children: [
@@ -164,7 +166,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                         labelText: AppStrings.level,
                                         keyboardType: TextInputType.number,
                                         hintText: AppStrings.levelHintText,
-                                        bottomPadding: 2,
+                                        bottomPadding: 0,
                                         textInputAction: TextInputAction.next,
                                         onChanged: (value) {
                                           viewModel.updateLevel(value);
@@ -180,7 +182,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                       child: PrimaryTextFormField(
                                         labelText: AppStrings.semester,
                                         keyboardType: TextInputType.number,
-                                        bottomPadding: 2,
+                                        bottomPadding: 0,
                                         hintText: AppStrings.semesterHintText,
                                         textInputAction: TextInputAction.next,
                                         onChanged: (value) {

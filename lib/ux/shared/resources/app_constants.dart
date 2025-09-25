@@ -5,6 +5,7 @@ class AppConstants {
   static const levelKey = 'level';
   static const semesterKey = 'semester';
   static const passwordKey = 'password';
+  static const userStreamKey = 'user.stream';
 
   static const double houseLat = 5.5334916;
   static const double houseLong = -0.3258892;
@@ -33,6 +34,31 @@ class AppConstants {
     'KCC (Weekend)',
   ];
 
-  static const String selectedCoursesKey = 'selected_courses';
+  static const String selectedCoursesKey = 'selected.courses';
   static const String selectedStreamsKey = 'selected.streams';
+
+  static const List<String> programs = [
+    'BSc. Information Technology', //id 1
+    'BSc. Computer Science', //id 2
+    'BSc. Business Administration (Accounting & Finance)', //id 3
+    'BSc. Business Administration (E-Commerce)', //id 4
+    'BSc. Business Administration (HRM & IT)', //id 5
+    'BSc. Business Administration (Marketing & IT)', //id 6
+    'BEng. Computer Engineering', //id 7
+    'BEng. Electrical Electronics Engineering', //id 8
+    'BEng. Civil Engineering', //id 9
+  ];
+
+  static const String programKey = 'selected.program';
+  static const String programIdKey = 'selected.program.id';
+
+  static int getProgramId(String program) {
+    final index = programs.indexOf(program);
+    return index != -1 ? index + 1 : 0;
+  }
+
+  static String getProgramName(int id) {
+    final index = id - 1;
+    return (index >= 0 && index < programs.length) ? programs[index] : '';
+  }
 }

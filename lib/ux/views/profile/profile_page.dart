@@ -3,6 +3,7 @@ import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_images.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
+import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/user_view_model.dart';
 import 'package:attendance_app/ux/views/profile/components/profile_detail_item.dart';
 import 'package:flutter/material.dart';
@@ -18,17 +19,30 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   String? newPhoneNumber;
 
-  late UserViewModel viewModel;
+  late UserViewModel userViewModel;
+  late CourseViewModel courseViewModel;
 
   @override
   void initState() {
     super.initState();
-    viewModel = context.read<UserViewModel>();
+    userViewModel = context.read<UserViewModel>();
+    courseViewModel = context.read<CourseViewModel>();
+  }
+
+  String getUserStream() {
+    String savedStream = userViewModel.savedPrimaryStream;
+    if (savedStream.isNotEmpty) {
+      return savedStream;
+    }
+
+    String calculatedStream =
+        userViewModel.getUserPrimaryStream(courseViewModel.chosenStreams);
+    return calculatedStream;
   }
 
   @override
   Widget build(BuildContext context) {
-    final semester = viewModel.semester;
+    final semester = userViewModel.semester;
 
     String semesterText;
     if (semester == '1') {
@@ -73,9 +87,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           fontSize: 24,
                           fontWeight: FontWeight.bold),
                     ),
-                    const Text(
-                      AppStrings.sampleCourse,
-                      style: TextStyle(
+                    Text(
+                      userViewModel.program,
+                      style: const TextStyle(
                           color: Colors.grey,
                           fontSize: 18,
                           fontWeight: FontWeight.w500),
@@ -93,16 +107,15 @@ class _ProfilePageState extends State<ProfilePage> {
                         children: [
                           ProfileDetailItem(
                               title: AppStrings.studentIdNumber,
-                              value: viewModel.idNumber),
+                              value: userViewModel.idNumber),
                           ProfileDetailItem(
                               title: AppStrings.studentLevel,
-                              value: 'Level ${viewModel.level}'),
+                              value: 'Level ${userViewModel.level}'),
                           ProfileDetailItem(
                               title: AppStrings.currentSemester,
                               value: '$semesterText Semester'),
-                          const ProfileDetailItem(
-                              title: AppStrings.stream,
-                              value: AppStrings.sampleStream),
+                          ProfileDetailItem(
+                              title: AppStrings.stream, value: getUserStream()),
                           const ProfileDetailItem(
                               title: AppStrings.schoolEmail,
                               value: AppStrings.sampleSchoolEmail),
@@ -110,9 +123,10 @@ class _ProfilePageState extends State<ProfilePage> {
                               title: AppStrings.nationality,
                               value: AppStrings.sampleNationality),
                           ProfileDetailItem(
-                              title: AppStrings.studentPhoneNumber,
-                              value: newPhoneNumber ??
-                                  AppStrings.samplePhoneNumber),
+                            title: AppStrings.studentPhoneNumber,
+                            value:
+                                newPhoneNumber ?? AppStrings.samplePhoneNumber,
+                          ),
                         ],
                       ),
                     ),

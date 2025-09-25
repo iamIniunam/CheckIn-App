@@ -7,6 +7,8 @@ class AuthViewModel extends ChangeNotifier {
   String level = '';
   String semester = '';
   String password = '';
+  String selectedProgram = '';
+  int selectedProgramId = 0;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -31,6 +33,12 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateProgram(String program) {
+    selectedProgram = program;
+    selectedProgramId = AppConstants.getProgramId(program);
+    notifyListeners();
+  }
+
   void setLoadingState(bool loading) {
     _isLoading = loading;
     notifyListeners();
@@ -47,6 +55,8 @@ class AuthViewModel extends ChangeNotifier {
         pref.setString(AppConstants.levelKey, level),
         pref.setString(AppConstants.semesterKey, semester),
         pref.setString(AppConstants.passwordKey, password),
+        pref.setString(AppConstants.programKey, selectedProgram),
+        pref.setInt(AppConstants.programIdKey, selectedProgramId),
       ]);
 
       setLoadingState(false);
@@ -71,15 +81,18 @@ class AuthViewModel extends ChangeNotifier {
       final level = pref.getString(AppConstants.levelKey);
       final semester = pref.getString(AppConstants.semesterKey);
       final password = pref.getString(AppConstants.passwordKey);
+      final program = pref.getString(AppConstants.programKey);
 
       return idNumber != null &&
           level != null &&
           semester != null &&
           password != null &&
+          program != null &&
           idNumber.isNotEmpty &&
           level.isNotEmpty &&
           semester.isNotEmpty &&
-          password.isNotEmpty;
+          password.isNotEmpty &&
+          program.isNotEmpty;
     } catch (e) {
       return false;
     }
@@ -94,12 +107,16 @@ class AuthViewModel extends ChangeNotifier {
         pref.remove(AppConstants.levelKey),
         pref.remove(AppConstants.semesterKey),
         pref.remove(AppConstants.passwordKey),
+        pref.remove(AppConstants.programKey),
+        pref.remove(AppConstants.programIdKey),
       ]);
 
       idNumber = '';
       level = '';
       semester = '';
       password = '';
+      selectedProgram = '';
+      selectedProgramId = 0;
 
       notifyListeners();
       return true;
@@ -123,23 +140,15 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   bool isValidLevel(String level) {
-    if (level == '100' ||
-        level == '200' ||
-        level == '300' ||
-        level == '400' && level.length == 3) {
-      return true;
-    } else {
-      return false;
-    }
+    return (level == '100' ||
+            level == '200' ||
+            level == '300' ||
+            level == '400') &&
+        level.length == 3;
   }
 
   bool isValidSemester(String semester) {
-    if (semester.contains('1') ||
-        semester.contains('2') && semester.length == 1) {
-      return true;
-    } else {
-      return false;
-    }
+    return (semester == '1' || semester == '2') && semester.length == 1;
   }
 
   bool get isIdNumberValid => idNumber.isEmpty || isValidIdNumber(idNumber);
@@ -151,8 +160,11 @@ class AuthViewModel extends ChangeNotifier {
         level.isNotEmpty &&
         semester.isNotEmpty &&
         password.isNotEmpty &&
+        selectedProgram.isNotEmpty &&
         isValidIdNumber(idNumber) &&
         isValidLevel(level) &&
         isValidSemester(semester);
   }
+
+  int get programIdForApi => selectedProgramId;
 }
