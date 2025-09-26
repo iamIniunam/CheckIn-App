@@ -1,3 +1,4 @@
+import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/shared/view_models/face_verification_view_model.dart';
 import 'package:attendance_app/ux/views/attendance/components/completion_content.dart';
 import 'package:attendance_app/ux/views/attendance/components/face_verification_content.dart';
@@ -23,7 +24,7 @@ class StepContent extends StatelessWidget {
     final size = MediaQuery.of(context).size.width * 0.93;
     final previewSize = cameraController?.value.previewSize;
 
-    switch (viewModel.currentStep) {
+    switch (viewModel.state.currentStep) {
       case VerificationStep.faceVerification:
         return FaceVerificationContent(
           size: size,

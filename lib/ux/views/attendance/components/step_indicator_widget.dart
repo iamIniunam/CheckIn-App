@@ -1,3 +1,4 @@
+import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/view_models/face_verification_view_model.dart';
 import 'package:flutter/material.dart';
@@ -32,39 +33,39 @@ class StepIndicatorWidget extends StatelessWidget {
             StepIndicatorItem(
               label: 'Face',
               icon: Icons.face,
-              isActive: viewModel.currentStep.index >=
+              isActive: viewModel.state.currentStep.index >=
                   VerificationStep.faceVerification.index,
               isLoading:
-                  viewModel.currentStep == VerificationStep.faceVerification &&
-                      viewModel.isVerifying,
+                  viewModel.state.currentStep == VerificationStep.faceVerification &&
+                      viewModel.state.isLoading,
             ),
             StepConnector(
-              isActive: viewModel.currentStep.index >
+              isActive: viewModel.state.currentStep.index >
                   VerificationStep.faceVerification.index,
             ),
             if (viewModel.requiresLocationCheck) ...[
               StepIndicatorItem(
                 label: 'Location',
                 icon: Icons.location_on,
-                isActive: viewModel.currentStep.index >=
+                isActive: viewModel.state.currentStep.index >=
                     VerificationStep.locationCheck.index,
                 isLoading:
-                    viewModel.currentStep == VerificationStep.locationCheck &&
-                        viewModel.isVerifying,
+                    viewModel.state.currentStep == VerificationStep.locationCheck &&
+                        viewModel.state.isLoading,
               ),
               StepConnector(
-                isActive: viewModel.currentStep.index >
+                isActive: viewModel.state.currentStep.index >
                     VerificationStep.locationCheck.index,
               ),
             ],
             StepIndicatorItem(
               label: 'Submit',
               icon: Icons.check_circle,
-              isActive: viewModel.currentStep.index >=
+              isActive: viewModel.state.currentStep.index >=
                   VerificationStep.attendanceSubmission.index,
-              isLoading: viewModel.currentStep ==
+              isLoading: viewModel.state.currentStep ==
                       VerificationStep.attendanceSubmission &&
-                  viewModel.isVerifying,
+                  viewModel.state.isLoading,
             ),
           ],
         ),

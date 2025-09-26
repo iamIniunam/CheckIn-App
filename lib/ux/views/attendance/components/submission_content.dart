@@ -56,11 +56,11 @@ class SubmissionContent extends StatelessWidget {
             const CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(AppColors.defaultColor),
             ),
-            if (viewModel.distanceFromCampus != null)
+            if (viewModel.locationState.distanceFromCampus != null)
               LocationVerifiedBadge(
-                  distance: viewModel.distanceFromCampus ?? 0),
-            if (viewModel.errorMessage != null)
-              ErrorMessage(message: viewModel.errorMessage ?? ''),
+                  distance: viewModel.locationState.distanceFromCampus ?? 0),
+            if (viewModel.state.errorMessage != null)
+              ErrorMessage(message: viewModel.state.errorMessage ?? ''),
           ],
         ),
       ),

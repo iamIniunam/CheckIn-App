@@ -1,6 +1,6 @@
 import 'package:attendance_app/platform/utils/permission_utils.dart';
 import 'package:attendance_app/ux/shared/components/blurred_loading_overlay.dart';
-import 'package:attendance_app/ux/shared/components/global_functions.dart';
+import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/shared/view_models/face_verification_view_model.dart';
 import 'package:attendance_app/ux/views/attendance/alert_dialogs/cancel_dialog.dart';
 import 'package:attendance_app/ux/views/attendance/components/attendance_type_indicator.dart';
@@ -103,7 +103,7 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
 
   Future<void> handleAttendanceVerification(
       AttendanceType attendanceType) async {
-    if (viewModel.attendanceType == null) {
+    if (viewModel.state.attendanceType == null) {
       viewModel.setAttendanceType(attendanceType);
     }
 
@@ -111,17 +111,10 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
         await viewModel.startVerificationFlow(attendanceType: attendanceType);
 
     if (!success && mounted) {
-      if (viewModel.errorMessage != null) {
-        showAlert(
-          context: context,
-          title: 'Verification Failed',
-          desc: viewModel.errorMessage ?? '',
-        );
-      }
       return;
     }
 
-    if (viewModel.currentStep == VerificationStep.completed && mounted) {
+    if (viewModel.state.currentStep == VerificationStep.completed && mounted) {
       Navigation.navigateToScreenAndClearOnePrevious(
         context: context,
         screen: const VerificationSuccessPage(),
@@ -184,10 +177,10 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
                     StepIndicatorWidget(viewModel: vm),
 
                   // Attendance type indicator
-                  if (isAttendanceMode() && vm.attendanceType != null)
+                  if (isAttendanceMode() && vm.state.attendanceType != null)
                     AttendanceTypeIndicator(
                       attendanceType:
-                          vm.attendanceType ?? AttendanceType.inPerson,
+                          vm.state.attendanceType ?? AttendanceType.inPerson,
                       viewModel: vm,
                     ),
 
@@ -208,7 +201,9 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
                   // Loading overlay
                   Visibility(
                     visible: vm.isFaceVerifying,
-                    child: BlurredLoadingOverlay(showLoader: vm.isVerifying),
+                    child:
+                        BlurredLoadingOverlay(showLoader: vm.state.isLoading),
+                    // child: AppDialogs.showLoadingDialog(context),
                   ),
                 ],
               );

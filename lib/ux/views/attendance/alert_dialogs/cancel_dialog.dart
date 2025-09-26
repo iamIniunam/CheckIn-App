@@ -1,6 +1,6 @@
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
-import 'package:attendance_app/ux/shared/components/app_dialogs.dart';
+import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/views/onboarding/sign_up_page.dart';
 import 'package:camera/camera.dart';
@@ -11,21 +11,14 @@ class SignUpCancelDialog {
     required BuildContext context,
     CameraController? cameraController,
   }) async {
-    final result = await showAdaptiveDialog(
-      context: context,
-      builder: (context) {
-        return AppAlertDialog(
-          title: AppStrings.cancelFaceRegistration,
-          desc: AppStrings.youreInTheMiddleOfRegistering,
-          firstOption: AppStrings.stay,
-          secondOption: AppStrings.yesCancel,
-          onFirstOptionTap: () {
-            Navigation.back(context: context, result: false);
-          },
-          onSecondOptionTap: () {
-            Navigation.back(context: context, result: true);
-          },
-        );
+    final result = await AppDialogs.showWarningDialog(
+      context,
+      title: AppStrings.cancelFaceRegistration,
+      message: AppStrings.youreInTheMiddleOfRegistering,
+      firstOption: AppStrings.stay,
+      secondOption: AppStrings.yesCancel,
+      action: () {
+        Navigation.back(context: context, result: true);
       },
     );
     if (result == true) {
@@ -45,22 +38,16 @@ class AttendanceCancelDialog {
     required BuildContext context,
     CameraController? cameraController,
   }) async {
-    final result = await showAdaptiveDialog(
-        context: context,
-        builder: (context) {
-          return AppAlertDialog(
-            title: AppStrings.cancelFaceVerification,
-            desc: AppStrings.ifYouExitNowYourAttendanceWont,
-            secondOption: AppStrings.yesCancel,
-            firstOption: 'No',
-            onFirstOptionTap: () {
-              Navigation.back(context: context, result: false);
-            },
-            onSecondOptionTap: () {
-              Navigation.back(context: context, result: true);
-            },
-          );
-        });
+    final result = await AppDialogs.showWarningDialog(
+      context,
+      title: AppStrings.cancelFaceVerification,
+      message: AppStrings.ifYouExitNowYourAttendanceWont,
+      secondOption: AppStrings.yesCancel,
+      firstOption: 'No',
+      action: () {
+        Navigation.back(context: context, result: true);
+      },
+    );
     if (result == true) {
       await cameraController?.dispose();
       cameraController = null;

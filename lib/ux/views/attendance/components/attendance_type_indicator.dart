@@ -1,3 +1,5 @@
+import 'package:attendance_app/ux/shared/enums.dart';
+import 'package:attendance_app/ux/shared/message_providers.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/view_models/face_verification_view_model.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +10,9 @@ class AttendanceTypeIndicator extends StatelessWidget {
 
   final AttendanceType attendanceType;
   final FaceVerificationViewModel viewModel;
+
+  static final VerificationMessageProvider messageProvider =
+      DefaultVerificationMessageProvider();
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +38,7 @@ class AttendanceTypeIndicator extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             Text(
-              viewModel.getAttendanceTypeDisplayName(),
+              messageProvider.getAttendanceTypeDisplayName(attendanceType),
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,

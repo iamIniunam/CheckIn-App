@@ -288,15 +288,10 @@ class LocationService {
         distanceFromCampus: gpsResult.distanceFromCampus,
         formattedDistance: gpsResult.formattedDistance,
         accuracy: gpsResult.accuracy,
-        errorMessage: '''Location check failed.
+        errorMessage: '''You are not on campus.
         
         Distance from campus: ${gpsResult.formattedDistance ?? 'Unknown'}
-        GPS accuracy: ±${formatDistance(gpsResult.accuracy ?? 0)}
-
-        If you're inside the building:
-        • Try moving to a window
-        • Ensure WiFi is enabled
-        • Contact support if problem persists''',
+        GPS accuracy: ±${formatDistance(gpsResult.accuracy ?? 0)}''',
       );
     } catch (e) {
       return AttendanceLocationResult(

@@ -44,19 +44,23 @@ class LocationCheckContent extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              viewModel.locationStatus ?? 'Checking if you\'re on campus...',
+              viewModel.locationState.statusMessage ??
+                  'Checking if you\'re on campus...',
+              textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 16,
                 color: Colors.grey,
               ),
-              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.defaultColor),
-            ),
-            if (viewModel.errorMessage != null)
-              ErrorMessage(message: viewModel.errorMessage ?? ''),
+            if (viewModel.isLocationChecking) ...[
+              const SizedBox(height: 24),
+              const CircularProgressIndicator(
+                valueColor:
+                    AlwaysStoppedAnimation<Color>(AppColors.defaultColor),
+              ),
+            ],
+            if (viewModel.state.errorMessage != null)
+              ErrorMessage(message: viewModel.state.errorMessage ?? ''),
           ],
         ),
       ),

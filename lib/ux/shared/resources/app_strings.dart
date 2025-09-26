@@ -153,4 +153,8 @@ class AppStrings {
       'Input the attendance code provided by your lecturer';
   static const classCodeHint = 'e.g. AIT-CS103-7XKP';
   static const submit = 'Submit';
+
+
+  static const cancel = 'Cancel';
+  static const alert = 'Alert';
 }

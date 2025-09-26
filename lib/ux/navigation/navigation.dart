@@ -1,4 +1,4 @@
-import 'package:attendance_app/ux/shared/view_models/face_verification_view_model.dart';
+import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/views/attendance/face_verification_page.dart';
 import 'package:attendance_app/ux/views/home/home_page.dart';
 import 'package:flutter/material.dart';
