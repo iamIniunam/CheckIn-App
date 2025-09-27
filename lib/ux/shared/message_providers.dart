@@ -127,7 +127,7 @@ Try:
 
     if (locationState.verificationStatus != null) {
       info +=
-          '\nStatus: ${getLocationStatusMessage(locationState.verificationStatus!)}';
+          '\nStatus: ${getLocationStatusMessage(locationState.verificationStatus!)}'; //TODO: check the null checl
     }
 
     return info;

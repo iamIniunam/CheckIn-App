@@ -19,10 +19,7 @@ class CourseCard extends StatelessWidget {
         onTap: () {
           Navigation.navigateToScreen(
             context: context,
-            screen: CourseDetailsPage(
-              courseCode: course.courseCode,
-              courseTitle: course.courseTitle ?? '',
-            ),
+            screen: CourseDetailsPage(course: course),
           );
         },
         child: Padding(
@@ -48,9 +45,10 @@ class CourseCard extends StatelessWidget {
                     Text(
                       DateTime.now().day.toString(),
                       style: const TextStyle(
-                          color: AppColors.defaultColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold),
+                        color: AppColors.defaultColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -107,9 +105,10 @@ class CourseCard extends StatelessWidget {
                           child: Text(
                             course.status ?? '',
                             style: TextStyle(
-                                color: course.getStatusColor,
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold),
+                              color: course.getStatusColor,
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],

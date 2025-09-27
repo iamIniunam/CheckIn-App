@@ -39,11 +39,8 @@ class LocationVerificationViewModel extends ChangeNotifier {
           isNetworkBased: result.isNetworkBased));
 
       if (result.canMarkAttendance) {
-        String statusMessage = buildSuccessMessage(result);
         updateState(_state.copyWith(
-          verificationStatus: LocationVerificationStatus.successInRange,
-          statusMessage: statusMessage,
-        ));
+            verificationStatus: LocationVerificationStatus.successInRange));
         return true;
       } else {
         return handleVerificationFailure(result, maxDistanceMeters);
@@ -76,8 +73,7 @@ class LocationVerificationViewModel extends ChangeNotifier {
 
       if (result.canMarkAttendance) {
         updateState(_state.copyWith(
-            verificationStatus: LocationVerificationStatus.successInRange,
-            statusMessage: 'Location verified on retry!'));
+            verificationStatus: LocationVerificationStatus.successInRange));
         return true;
       } else {
         return handleVerificationFailure(result, maxDistanceMeters);
@@ -88,22 +84,12 @@ class LocationVerificationViewModel extends ChangeNotifier {
     }
   }
 
-  String buildSuccessMessage(AttendanceLocationResult result) {
-    if (result.isNetworkBased) {
-      return 'Location verified using network (GPS weak indoors)';
-    } else if (result.isIndoorLocation) {
-      return 'Location verified - ${LocationService.formatDistance(result.distanceFromCampus ?? 0)} from campus (indoor GPS)';
-    } else {
-      return 'Location verified - ${LocationService.formatDistance(result.distanceFromCampus ?? 0)} from campus';
-    }
-  }
-
   bool handleVerificationFailure(
       AttendanceLocationResult result, double maxDistanceMeters) {
     if (result.currentPosition != null && result.distanceFromCampus != null) {
       updateState(_state.copyWith(
         verificationStatus: LocationVerificationStatus.outOfRange,
-        statusMessage: _messageProvider
+        errorMessage: _messageProvider
             .getErrorMessage(VerificationError.locationOutOfRange, context: {
           'distance': result.distanceFromCampus,
           'maxDistance': maxDistanceMeters
@@ -113,7 +99,7 @@ class LocationVerificationViewModel extends ChangeNotifier {
       updateState(
         _state.copyWith(
           verificationStatus: LocationVerificationStatus.failed,
-          statusMessage:
+          errorMessage:
               result.errorMessage ?? 'Unable to determine your location',
         ),
       );
@@ -132,7 +118,7 @@ class LocationVerificationViewModel extends ChangeNotifier {
 
     updateState(_state.copyWith(
       verificationStatus: LocationVerificationStatus.failed,
-      statusMessage: _messageProvider.getErrorMessage(errorType),
+      errorMessage: _messageProvider.getErrorMessage(errorType),
     ));
   }
 

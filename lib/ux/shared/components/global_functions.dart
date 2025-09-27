@@ -63,4 +63,3 @@ Color statusColor(String status) {
       return Colors.grey.shade500;
   }
 }
-

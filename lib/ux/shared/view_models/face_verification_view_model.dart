@@ -61,6 +61,15 @@ class FaceVerificationViewModel extends ChangeNotifier {
   String getButtonText(FaceVerificationMode mode) =>
       _messageProvider.getButtonText(mode, _verificationState.currentStep);
 
+  String locationStatus() {
+    if (_locationViewModel.state.verificationStatus == null) {
+      return 'Verifying Location';
+    }
+    return _messageProvider.getLocationStatusMessage(
+        _locationViewModel.state.verificationStatus ??
+            LocationVerificationStatus.successInRange); //TODO: check this again
+  }
+
   double getProgressPercentage() {
     final requiredSteps = getRequiredSteps();
     final currentIndex = requiredSteps.indexOf(_verificationState.currentStep);
@@ -113,7 +122,7 @@ class FaceVerificationViewModel extends ChangeNotifier {
 
       if (!success) {
         updateState(_verificationState.copyWith(
-          errorMessage: _locationViewModel.state.statusMessage,
+          errorMessage: _locationViewModel.state.errorMessage,
         ));
       }
       return success;
@@ -162,7 +171,7 @@ class FaceVerificationViewModel extends ChangeNotifier {
 
       if (!success) {
         updateState(_verificationState.copyWith(
-            errorMessage: _locationViewModel.state.statusMessage));
+            errorMessage: _locationViewModel.state.errorMessage));
       }
       return success;
     } finally {

@@ -61,16 +61,14 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
               padding: const EdgeInsets.only(
                   left: 16, top: 10, right: 16, bottom: 16),
               crossAxisCount: 3,
-              children: [
-                ...courseInfo
-                    .map(
-                      (course) => singleCourse(
-                        context: context,
-                        course: course,
-                      ),
-                    )
-                    .toList(),
-              ],
+              children: courseInfo
+                  .map(
+                    (course) => singleCourse(
+                      context: context,
+                      course: course,
+                    ),
+                  )
+                  .toList(),
             ),
           ],
         );
@@ -86,11 +84,9 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
       elevation: 1,
       onTap: () {
         Navigation.navigateToScreen(
-            context: context,
-            screen: CourseDetailsPage(
-              courseCode: course.courseCode,
-              courseTitle: course.courseTitle ?? '',
-            ));
+          context: context,
+          screen: CourseDetailsPage(course: course),
+        );
       },
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -101,17 +97,19 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
               course.creditHours.toString(),
               textAlign: TextAlign.center,
               style: const TextStyle(
-                  color: AppColors.defaultColor,
-                  fontSize: 32,
-                  fontWeight: FontWeight.w600),
+                color: AppColors.defaultColor,
+                fontSize: 32,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             Text(
               course.courseCode,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                  color: AppColors.defaultColor,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500),
+                color: AppColors.defaultColor,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),

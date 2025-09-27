@@ -60,7 +60,8 @@ class SubmissionContent extends StatelessWidget {
               LocationVerifiedBadge(
                   distance: viewModel.locationState.distanceFromCampus ?? 0),
             if (viewModel.verificationState.errorMessage != null)
-              ErrorMessage(message: viewModel.verificationState.errorMessage ?? ''),
+              ErrorMessage(
+                  message: viewModel.verificationState.errorMessage ?? ''),
           ],
         ),
       ),

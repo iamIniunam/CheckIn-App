@@ -9,11 +9,9 @@ import 'package:attendance_app/ux/views/course/components/session_history.dart';
 import 'package:flutter/material.dart';
 
 class CourseDetailsPage extends StatefulWidget {
-  const CourseDetailsPage(
-      {super.key, required this.courseCode, required this.courseTitle});
+  const CourseDetailsPage({super.key, required this.course});
 
-  final String courseCode;
-  final String courseTitle;
+  final Course course;
 
   @override
   State<CourseDetailsPage> createState() => _CourseDetailsPageState();
@@ -52,7 +50,7 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
   ];
 
   String? get courseStream =>
-      SelectedCoursesService().getStreamForCourse(widget.courseCode);
+      SelectedCoursesService().getStreamForCourse(widget.course.courseCode);
 
   @override
   Widget build(BuildContext context) {
@@ -78,14 +76,14 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                widget.courseCode,
+                                widget.course.courseCode,
                                 style: const TextStyle(
                                     color: AppColors.defaultColor,
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold),
                               ),
                               Text(
-                                widget.courseTitle,
+                                widget.course.courseTitle ?? '',
                                 style: const TextStyle(
                                     color: Colors.grey,
                                     // fontSize: 16,

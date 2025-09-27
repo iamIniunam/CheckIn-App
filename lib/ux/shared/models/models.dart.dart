@@ -41,7 +41,7 @@ class LocationState {
   final bool isIndoorLocation;
   final bool isNetworkBased;
   final LocationVerificationStatus? verificationStatus;
-  final String? statusMessage;
+  final String? errorMessage;
 
   const LocationState({
     this.currentPosition,
@@ -49,7 +49,7 @@ class LocationState {
     this.isIndoorLocation = false,
     this.isNetworkBased = false,
     this.verificationStatus,
-    this.statusMessage,
+    this.errorMessage,
   });
 
   LocationState copyWith({
@@ -58,7 +58,7 @@ class LocationState {
     bool? isIndoorLocation,
     bool? isNetworkBased,
     LocationVerificationStatus? verificationStatus,
-    String? statusMessage,
+    String? errorMessage,
     bool clearStatus = false,
   }) {
     return LocationState(
@@ -67,7 +67,7 @@ class LocationState {
       isIndoorLocation: isIndoorLocation ?? this.isIndoorLocation,
       isNetworkBased: isNetworkBased ?? this.isNetworkBased,
       verificationStatus: verificationStatus ?? this.verificationStatus,
-      statusMessage: clearStatus ? null : (statusMessage ?? this.statusMessage),
+      errorMessage: clearStatus ? null : (errorMessage ?? this.errorMessage),
     );
   }
 }

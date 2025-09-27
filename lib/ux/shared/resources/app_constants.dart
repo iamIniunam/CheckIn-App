@@ -13,6 +13,9 @@ class AppConstants {
   static const double chisomLat = 5.5321914;
   static const double chisomLong = -0.3315539;
 
+  static const double bmfLat = 5.5340481;
+  static const double bmfLong = -0.3311139;
+
   static const double seaviewLat = 5.5374258;
   static const double seaviewLong = -0.3328109;
   // static const double seaviewLat = 5.5374063;

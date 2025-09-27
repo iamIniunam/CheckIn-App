@@ -44,8 +44,7 @@ class LocationCheckContent extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              viewModel.locationState.statusMessage ??
-                  'Checking if you\'re on campus...',
+              viewModel.locationStatus(),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 16,

@@ -25,7 +25,7 @@ class MockAttendanceService implements AttendanceService {
     bool? isIndoorLocation,
     LocationVerificationStatus? locationStatus,
   }) async {
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 5));
 
     Map<String, dynamic> attendanceData = {
       'timestamp': DateTime.now().toIso8601String(),
