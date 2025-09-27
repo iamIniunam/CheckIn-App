@@ -24,7 +24,7 @@ class StepContent extends StatelessWidget {
     final size = MediaQuery.of(context).size.width * 0.93;
     final previewSize = cameraController?.value.previewSize;
 
-    switch (viewModel.state.currentStep) {
+    switch (viewModel.verificationState.currentStep) {
       case VerificationStep.faceVerification:
         return FaceVerificationContent(
           size: size,

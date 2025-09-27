@@ -59,8 +59,9 @@ class LocationCheckContent extends StatelessWidget {
                     AlwaysStoppedAnimation<Color>(AppColors.defaultColor),
               ),
             ],
-            if (viewModel.state.errorMessage != null)
-              ErrorMessage(message: viewModel.state.errorMessage ?? ''),
+            if (viewModel.verificationState.errorMessage != null)
+              ErrorMessage(
+                  message: viewModel.verificationState.errorMessage ?? ''),
           ],
         ),
       ),

@@ -8,7 +8,7 @@ import 'package:attendance_app/ux/shared/view_models/location_verification_view_
 import 'package:flutter/material.dart';
 
 class FaceVerificationViewModel extends ChangeNotifier {
-  VerificationState _state = const VerificationState();
+  VerificationState _verificationState = const VerificationState();
   final LocationVerificationViewModel _locationViewModel;
   final FaceVerificationService _faceService;
   final AttendanceService _attendanceService;
@@ -26,43 +26,44 @@ class FaceVerificationViewModel extends ChangeNotifier {
         _locationViewModel =
             locationViewModel ?? LocationVerificationViewModel();
 
-  VerificationState get state => _state;
+  VerificationState get verificationState => _verificationState;
   LocationState get locationState => _locationViewModel.state;
 
   bool get requiresLocationCheck =>
-      _state.attendanceType == AttendanceType.inPerson;
+      _verificationState.attendanceType == AttendanceType.inPerson;
   bool get isFaceVerifying =>
-      _state.currentStep == VerificationStep.faceVerification &&
-      _state.isLoading;
+      _verificationState.currentStep == VerificationStep.faceVerification &&
+      _verificationState.isLoading;
   bool get isLocationChecking =>
-      _state.currentStep == VerificationStep.locationCheck && _state.isLoading;
+      _verificationState.currentStep == VerificationStep.locationCheck &&
+      _verificationState.isLoading;
   bool get isSubmittingAttendance =>
-      _state.currentStep == VerificationStep.attendanceSubmission &&
-      _state.isLoading;
+      _verificationState.currentStep == VerificationStep.attendanceSubmission &&
+      _verificationState.isLoading;
 
   bool shouldEnableButton() {
-    return !_state.isLoading &&
-        _state.currentStep == VerificationStep.faceVerification;
+    return !_verificationState.isLoading &&
+        _verificationState.currentStep == VerificationStep.faceVerification;
   }
 
   bool shouldShowButton(FaceVerificationMode mode) {
     if (mode == FaceVerificationMode.signUp) return true;
-    return _state.currentStep == VerificationStep.faceVerification;
+    return _verificationState.currentStep == VerificationStep.faceVerification;
   }
 
   bool shouldShowRetryButton() {
-    return _state.currentStep == VerificationStep.locationCheck &&
-        !_state.isLoading &&
-        _state.errorMessage != null &&
+    return _verificationState.currentStep == VerificationStep.locationCheck &&
+        !_verificationState.isLoading &&
+        _verificationState.errorMessage != null &&
         requiresLocationCheck;
   }
 
   String getButtonText(FaceVerificationMode mode) =>
-      _messageProvider.getButtonText(mode, _state.currentStep);
+      _messageProvider.getButtonText(mode, _verificationState.currentStep);
 
   double getProgressPercentage() {
     final requiredSteps = getRequiredSteps();
-    final currentIndex = requiredSteps.indexOf(_state.currentStep);
+    final currentIndex = requiredSteps.indexOf(_verificationState.currentStep);
 
     if (currentIndex == -1) return 0.0;
 
@@ -70,7 +71,7 @@ class FaceVerificationViewModel extends ChangeNotifier {
   }
 
   void setAttendanceType(AttendanceType type) {
-    updateState(_state.copyWith(attendanceType: type));
+    updateState(_verificationState.copyWith(attendanceType: type));
   }
 
   Future<bool> startVerificationFlow({AttendanceType? attendanceType}) async {
@@ -78,7 +79,7 @@ class FaceVerificationViewModel extends ChangeNotifier {
       setAttendanceType(attendanceType);
     }
 
-    if (_state.currentStep == VerificationStep.faceVerification) {
+    if (_verificationState.currentStep == VerificationStep.faceVerification) {
       bool faceSuccess = await verifyFace();
       if (!faceSuccess) return false;
 
@@ -91,86 +92,86 @@ class FaceVerificationViewModel extends ChangeNotifier {
   Future<bool> retryLocationCheck({bool useNetworkOnly = false}) async {
     if (!requiresLocationCheck) return true;
 
-    updateState(_state.copyWith(isLoading: true, clearError: true));
+    updateState(_verificationState.copyWith(isLoading: true, clearError: true));
 
     try {
       bool success;
       if (useNetworkOnly) {
         success = await _locationViewModel.retyrWithNetworkOnly(
-          campusLat: AppConstants.chisomLat,
-          campusLong: AppConstants.chisomLong,
+          campusLat: AppConstants.seaviewLat,
+          campusLong: AppConstants.seaviewLong,
           maxDistanceMeters: AppConstants.maxDistanceMeters,
         );
       } else {
         success = await _locationViewModel.verifyLocation(
-          campusLat: AppConstants.chisomLat,
-          campusLong: AppConstants.chisomLong,
+          campusLat: AppConstants.seaviewLat,
+          campusLong: AppConstants.seaviewLong,
           maxDistanceMeters: AppConstants.maxDistanceMeters,
           showSettingsOption: false,
         );
       }
 
       if (!success) {
-        updateState(_state.copyWith(
+        updateState(_verificationState.copyWith(
           errorMessage: _locationViewModel.state.statusMessage,
         ));
       }
       return success;
     } finally {
-      updateState(_state.copyWith(isLoading: false));
+      updateState(_verificationState.copyWith(isLoading: false));
     }
   }
 
   void resetVerification() {
-    _state = const VerificationState();
+    _verificationState = const VerificationState();
     _locationViewModel.reset();
     notifyListeners();
   }
 
   Future<bool> verifyFace() async {
-    updateState(_state.copyWith(isLoading: true, clearError: true));
+    updateState(_verificationState.copyWith(isLoading: true, clearError: true));
 
     try {
       bool success = await _faceService.verifyFace();
       if (success) {
-        updateState(_state.copyWith(faceVerificationPassed: true));
+        updateState(_verificationState.copyWith(faceVerificationPassed: true));
       } else {
-        updateState(_state.copyWith(
+        updateState(_verificationState.copyWith(
           errorMessage: _messageProvider
               .getErrorMessage(VerificationError.faceVerificationFailed),
         ));
       }
       return success;
     } finally {
-      updateState(_state.copyWith(isLoading: false));
+      updateState(_verificationState.copyWith(isLoading: false));
     }
   }
 
   Future<bool> checkLocation() async {
     if (!requiresLocationCheck) return true;
 
-    updateState(_state.copyWith(isLoading: true, clearError: true));
+    updateState(_verificationState.copyWith(isLoading: true, clearError: true));
 
     try {
       bool success = await _locationViewModel.verifyLocation(
-        campusLat: AppConstants.chisomLat,
-        campusLong: AppConstants.chisomLong,
+        campusLat: AppConstants.seaviewLat,
+        campusLong: AppConstants.seaviewLong,
         maxDistanceMeters: AppConstants.maxDistanceMeters,
         showSettingsOption: true,
       );
 
       if (!success) {
-        updateState(_state.copyWith(
+        updateState(_verificationState.copyWith(
             errorMessage: _locationViewModel.state.statusMessage));
       }
       return success;
     } finally {
-      updateState(_state.copyWith(isLoading: false));
+      updateState(_verificationState.copyWith(isLoading: false));
     }
   }
 
   Future<bool> submitAttendance() async {
-    updateState(_state.copyWith(isLoading: true, clearError: true));
+    updateState(_verificationState.copyWith(isLoading: true, clearError: true));
 
     try {
       if (requiresLocationCheck &&
@@ -178,7 +179,7 @@ class FaceVerificationViewModel extends ChangeNotifier {
         throw Exception('Location data not available for in-person attendance');
       }
 
-      if (!_state.faceVerificationPassed) {
+      if (!_verificationState.faceVerificationPassed) {
         throw Exception('Face verification not completed');
       }
 
@@ -190,8 +191,9 @@ class FaceVerificationViewModel extends ChangeNotifier {
       }
 
       bool success = await _attendanceService.submitAttendance(
-        faceVerified: _state.faceVerificationPassed,
-        attendanceType: _state.attendanceType!,
+        faceVerified: _verificationState.faceVerificationPassed,
+        attendanceType: _verificationState.attendanceType ??
+            AttendanceType.inPerson, //TODO: check if this is safe and wise
         position: _locationViewModel.state.currentPosition,
         distanceFromCampus: _locationViewModel.state.distanceFromCampus,
         locationMethod: getLocationMethod(),
@@ -200,7 +202,7 @@ class FaceVerificationViewModel extends ChangeNotifier {
       );
 
       if (!success) {
-        updateState(_state.copyWith(
+        updateState(_verificationState.copyWith(
           errorMessage: _messageProvider
               .getErrorMessage(VerificationError.attendanceSubmissionFailed),
         ));
@@ -208,7 +210,7 @@ class FaceVerificationViewModel extends ChangeNotifier {
 
       return success;
     } catch (e) {
-      updateState(_state.copyWith(
+      updateState(_verificationState.copyWith(
         errorMessage: _messageProvider.getErrorMessage(
           VerificationError.attendanceSubmissionFailed,
           context: {'details': e.toString()},
@@ -216,19 +218,20 @@ class FaceVerificationViewModel extends ChangeNotifier {
       ));
       return false;
     } finally {
-      updateState(_state.copyWith(isLoading: false));
+      updateState(_verificationState.copyWith(isLoading: false));
     }
   }
 
   Future<bool> proceedWithAutomaticFlow() async {
-    if (_state.currentStep == VerificationStep.locationCheck) {
+    if (_verificationState.currentStep == VerificationStep.locationCheck) {
       bool locationSuccess = await checkLocation();
       if (!locationSuccess) return false;
 
       moveToNextStep();
     }
 
-    if (_state.currentStep == VerificationStep.attendanceSubmission) {
+    if (_verificationState.currentStep ==
+        VerificationStep.attendanceSubmission) {
       bool submissionSuccess = await submitAttendance();
       if (submissionSuccess) {
         moveToNextStep();
@@ -242,7 +245,7 @@ class FaceVerificationViewModel extends ChangeNotifier {
   void moveToNextStep() {
     VerificationStep nextStep;
 
-    switch (_state.currentStep) {
+    switch (_verificationState.currentStep) {
       case VerificationStep.faceVerification:
         nextStep = requiresLocationCheck
             ? VerificationStep.locationCheck
@@ -257,11 +260,11 @@ class FaceVerificationViewModel extends ChangeNotifier {
       case VerificationStep.completed:
         return;
     }
-    updateState(_state.copyWith(currentStep: nextStep));
+    updateState(_verificationState.copyWith(currentStep: nextStep));
   }
 
   void updateState(VerificationState newState) {
-    _state = newState;
+    _verificationState = newState;
     notifyListeners();
   }
 

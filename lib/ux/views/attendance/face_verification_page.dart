@@ -103,7 +103,7 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
 
   Future<void> handleAttendanceVerification(
       AttendanceType attendanceType) async {
-    if (viewModel.state.attendanceType == null) {
+    if (viewModel.verificationState.attendanceType == null) {
       viewModel.setAttendanceType(attendanceType);
     }
 
@@ -114,7 +114,8 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
       return;
     }
 
-    if (viewModel.state.currentStep == VerificationStep.completed && mounted) {
+    if (viewModel.verificationState.currentStep == VerificationStep.completed &&
+        mounted) {
       Navigation.navigateToScreenAndClearOnePrevious(
         context: context,
         screen: const VerificationSuccessPage(),
@@ -162,47 +163,52 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
         onPopInvoked: (result) => handleExit(),
         child: Scaffold(
           body: Consumer<FaceVerificationViewModel>(
-            builder: (context, vm, _) {
+            builder: (context, faceVericationViewModel, _) {
               return Stack(
                 children: [
                   // Main content
                   StepContent(
-                    viewModel: vm,
+                    viewModel: faceVericationViewModel,
                     cameraController: cameraController,
                     isCameraInitialized: isCameraInitialized,
                   ),
 
                   // Step indicator for attendance mode
                   if (shouldShowStepIndicator())
-                    StepIndicatorWidget(viewModel: vm),
+                    StepIndicatorWidget(viewModel: faceVericationViewModel),
 
                   // Attendance type indicator
-                  if (isAttendanceMode() && vm.state.attendanceType != null)
+                  if (isAttendanceMode() &&
+                      faceVericationViewModel
+                              .verificationState.attendanceType !=
+                          null)
                     AttendanceTypeIndicator(
-                      attendanceType:
-                          vm.state.attendanceType ?? AttendanceType.inPerson,
-                      viewModel: vm,
+                      attendanceType: faceVericationViewModel
+                              .verificationState.attendanceType ??
+                          AttendanceType.inPerson,
+                      viewModel: faceVericationViewModel,
                     ),
 
                   // Exit button
                   ExitButton(
                     mode: widget.mode,
-                    viewModel: vm,
+                    viewModel: faceVericationViewModel,
                     onExit: widget.onExit ?? handleExit,
                   ),
 
                   // Verification button
                   VerificationButton(
                     mode: widget.mode,
-                    viewModel: vm,
+                    viewModel: faceVericationViewModel,
                     onVerify: handleVerification,
                   ),
 
                   // Loading overlay
                   Visibility(
-                    visible: vm.isFaceVerifying,
-                    child:
-                        BlurredLoadingOverlay(showLoader: vm.state.isLoading),
+                    visible: faceVericationViewModel.isFaceVerifying,
+                    child: BlurredLoadingOverlay(
+                        showLoader: faceVericationViewModel
+                            .verificationState.isLoading),
                     // child: AppDialogs.showLoadingDialog(context),
                   ),
                 ],

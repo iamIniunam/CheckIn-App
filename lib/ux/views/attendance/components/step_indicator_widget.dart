@@ -33,39 +33,39 @@ class StepIndicatorWidget extends StatelessWidget {
             StepIndicatorItem(
               label: 'Face',
               icon: Icons.face,
-              isActive: viewModel.state.currentStep.index >=
+              isActive: viewModel.verificationState.currentStep.index >=
                   VerificationStep.faceVerification.index,
               isLoading:
-                  viewModel.state.currentStep == VerificationStep.faceVerification &&
-                      viewModel.state.isLoading,
+                  viewModel.verificationState.currentStep == VerificationStep.faceVerification &&
+                      viewModel.verificationState.isLoading,
             ),
             StepConnector(
-              isActive: viewModel.state.currentStep.index >
+              isActive: viewModel.verificationState.currentStep.index >
                   VerificationStep.faceVerification.index,
             ),
             if (viewModel.requiresLocationCheck) ...[
               StepIndicatorItem(
                 label: 'Location',
                 icon: Icons.location_on,
-                isActive: viewModel.state.currentStep.index >=
+                isActive: viewModel.verificationState.currentStep.index >=
                     VerificationStep.locationCheck.index,
                 isLoading:
-                    viewModel.state.currentStep == VerificationStep.locationCheck &&
-                        viewModel.state.isLoading,
+                    viewModel.verificationState.currentStep == VerificationStep.locationCheck &&
+                        viewModel.verificationState.isLoading,
               ),
               StepConnector(
-                isActive: viewModel.state.currentStep.index >
+                isActive: viewModel.verificationState.currentStep.index >
                     VerificationStep.locationCheck.index,
               ),
             ],
             StepIndicatorItem(
               label: 'Submit',
               icon: Icons.check_circle,
-              isActive: viewModel.state.currentStep.index >=
+              isActive: viewModel.verificationState.currentStep.index >=
                   VerificationStep.attendanceSubmission.index,
-              isLoading: viewModel.state.currentStep ==
+              isLoading: viewModel.verificationState.currentStep ==
                       VerificationStep.attendanceSubmission &&
-                  viewModel.state.isLoading,
+                  viewModel.verificationState.isLoading,
             ),
           ],
         ),

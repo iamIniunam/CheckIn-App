@@ -38,7 +38,8 @@ class AttendanceViewModel extends ChangeNotifier {
       _locationStatus = 'Location verified! Submitting attendance...';
       notifyListeners();
 
-      await submitAttendance(result.currentPosition!);
+      await submitAttendance(
+          result.currentPosition!); //TODO: change this null check
 
       _locationStatus = 'Attendance marked successfully!';
       setLoadingState(false);
