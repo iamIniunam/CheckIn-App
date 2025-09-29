@@ -22,50 +22,37 @@ class _OnlineAttendanceCodeEntryPageState
   Widget build(BuildContext context) {
     return AppPageScaffold(
       title: AppStrings.enterClassCode,
-      body: Column(
+      body: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                const Text(
-                  AppStrings.inputTheAttendanceCodeProvided,
-                  style: TextStyle(
-                      color: AppColors.defaultColor,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 16),
-                PrimaryTextFormField(
-                  labelText: AppStrings.classCode,
-                  controller: codeController,
-                  hintText: AppStrings.classCodeHint,
-                  keyboardType: TextInputType.visiblePassword,
-                  textInputAction: TextInputAction.done,
-                  textCapitalization: TextCapitalization.characters,
-                  onChanged: (p0) {
-                    setState(() {});
-                  },
-                ),
-                const SizedBox(height: 16),
-                PrimaryButton(
-                  enabled: codeController.text.isNotEmpty,
-                  onTap: () {
-                    Navigation.navigateToOnlineAttendance(context: context);
-                  },
-                  child: const Text(AppStrings.submit),
-                ),
-              ],
-            ),
+          const Text(
+            AppStrings.inputTheAttendanceCodeProvided,
+            style: TextStyle(
+                color: AppColors.defaultColor,
+                fontSize: 16,
+                fontWeight: FontWeight.w600),
           ),
-          // Padding(
-          //   padding: const EdgeInsets.all(16),
-          //   child: PrimaryButton(
-          //     enabled: codeController.text.isNotEmpty,
-          //     onTap: () {},
-          //     child: const Text('Submit'),
-          //   ),
-          // ),
+          const SizedBox(height: 16),
+          PrimaryTextFormField(
+            autofocus: true,
+            labelText: AppStrings.classCode,
+            controller: codeController,
+            hintText: AppStrings.classCodeHint,
+            keyboardType: TextInputType.visiblePassword,
+            textInputAction: TextInputAction.done,
+            textCapitalization: TextCapitalization.characters,
+            onChanged: (p0) {
+              setState(() {});
+            },
+          ),
+          const SizedBox(height: 16),
+          PrimaryButton(
+            enabled: codeController.text.isNotEmpty,
+            onTap: () {
+              Navigation.navigateToOnlineAttendance(context: context);
+            },
+            child: const Text(AppStrings.submit),
+          ),
         ],
       ),
     );

@@ -5,7 +5,9 @@ import 'package:attendance_app/ux/shared/models/models.dart.dart';
 abstract class VerificationMessageProvider {
   String getStepDescription(
       VerificationStep step, AttendanceType? attendanceType, bool isLoading);
-  String getButtonText(FaceVerificationMode mode, VerificationStep step);
+  String getButtonText(FaceVerificationMode mode, VerificationStep step,
+      {LocationVerificationStatus? locationStatus});
+  String getLocationStatusHeaderMessage(LocationVerificationStatus status);
   String getLocationStatusMessage(LocationVerificationStatus status);
   String getErrorMessage(VerificationError error,
       {Map<String, dynamic>? context});
@@ -39,7 +41,18 @@ class DefaultVerificationMessageProvider
   }
 
   @override
-  String getButtonText(FaceVerificationMode mode, VerificationStep step) {
+  String getButtonText(FaceVerificationMode mode, VerificationStep step,
+      {LocationVerificationStatus? locationStatus}) {
+    if (step == VerificationStep.locationCheck) {
+      switch (locationStatus) {
+        case LocationVerificationStatus.outOfRange:
+          return 'Return Home';
+        case LocationVerificationStatus.failed:
+          return 'Try Again';
+        default:
+          break;
+      }
+    }
     switch (mode) {
       case FaceVerificationMode.signUp:
         return 'Register Face';
@@ -52,14 +65,25 @@ class DefaultVerificationMessageProvider
   }
 
   @override
+  String getLocationStatusHeaderMessage(LocationVerificationStatus status) {
+    switch (status) {
+      case LocationVerificationStatus.successInRange ||
+            LocationVerificationStatus.outOfRange:
+        return 'Location verified';
+      case LocationVerificationStatus.failed:
+        return 'Verification failed';
+    }
+  }
+
+  @override
   String getLocationStatusMessage(LocationVerificationStatus status) {
     switch (status) {
       case LocationVerificationStatus.successInRange:
-        return 'Location verified';
+        return 'Great! You’re at the right location.';
       case LocationVerificationStatus.outOfRange:
-        return 'Out of range';
+        return 'Out of range. Attendance not possible here.';
       case LocationVerificationStatus.failed:
-        return 'Verification failed';
+        return 'Couldn’t verify your location.';
     }
   }
 

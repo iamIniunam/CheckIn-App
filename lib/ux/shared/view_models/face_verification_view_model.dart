@@ -43,12 +43,23 @@ class FaceVerificationViewModel extends ChangeNotifier {
 
   bool shouldEnableButton() {
     return !_verificationState.isLoading &&
-        _verificationState.currentStep == VerificationStep.faceVerification;
+            _verificationState.currentStep ==
+                VerificationStep.faceVerification ||
+        _locationViewModel.state.verificationStatus ==
+            LocationVerificationStatus.outOfRange ||
+        _locationViewModel.state.verificationStatus ==
+            LocationVerificationStatus.failed;
   }
 
   bool shouldShowButton(FaceVerificationMode mode) {
     if (mode == FaceVerificationMode.signUp) return true;
-    return _verificationState.currentStep == VerificationStep.faceVerification;
+    return _verificationState.currentStep ==
+            VerificationStep.faceVerification ||
+        _locationViewModel.state.verificationStatus ==
+            LocationVerificationStatus.outOfRange ||
+        _locationViewModel.state.verificationStatus ==
+            LocationVerificationStatus.failed;
+    //TODO: complete the action for location verification failed (try again) and find a way to simulate a failed instance
   }
 
   bool shouldShowRetryButton() {
@@ -59,11 +70,21 @@ class FaceVerificationViewModel extends ChangeNotifier {
   }
 
   String getButtonText(FaceVerificationMode mode) =>
-      _messageProvider.getButtonText(mode, _verificationState.currentStep);
+      _messageProvider.getButtonText(mode, _verificationState.currentStep,
+          locationStatus: _locationViewModel.state.verificationStatus);
 
-  String locationStatus() {
+  String locationStatusHeaderMessage() {
     if (_locationViewModel.state.verificationStatus == null) {
       return 'Verifying Location';
+    }
+    return _messageProvider.getLocationStatusHeaderMessage(
+        _locationViewModel.state.verificationStatus ??
+            LocationVerificationStatus.successInRange); //TODO: check this again
+  }
+
+  String locationStatusMessage() {
+    if (_locationViewModel.state.verificationStatus == null) {
+      return 'Checking if you\'re on campus...';
     }
     return _messageProvider.getLocationStatusMessage(
         _locationViewModel.state.verificationStatus ??

@@ -123,6 +123,13 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
     }
   }
 
+  Future<void> handleOutOfRange(
+      LocationVerificationStatus locationStatus) async {
+    if (locationStatus == LocationVerificationStatus.outOfRange) {
+      Navigation.navigateToHomePage(context: context);
+    }
+  }
+
   void handleExit() {
     if (widget.mode == FaceVerificationMode.signUp) {
       SignUpCancelDialog.show(
@@ -164,6 +171,9 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
         child: Scaffold(
           body: Consumer<FaceVerificationViewModel>(
             builder: (context, faceVericationViewModel, _) {
+              final locationStatus =
+                  faceVericationViewModel.locationState.verificationStatus;
+
               return Stack(
                 children: [
                   // Main content
@@ -200,7 +210,14 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
                   VerificationButton(
                     mode: widget.mode,
                     viewModel: faceVericationViewModel,
-                    onVerify: handleVerification,
+                    onVerify:
+                        locationStatus == LocationVerificationStatus.outOfRange
+                            ? () {
+                                handleOutOfRange(locationStatus ??
+                                    LocationVerificationStatus
+                                        .successInRange); //TODO: check this logis again
+                              }
+                            : handleVerification,
                   ),
 
                   // Loading overlay

@@ -34,9 +34,9 @@ class LocationCheckContent extends StatelessWidget {
               color: AppColors.defaultColor,
             ),
             const SizedBox(height: 24),
-            const Text(
-              'Verifying Location',
-              style: TextStyle(
+            Text(
+              viewModel.locationStatusHeaderMessage(),
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: AppColors.defaultColor,
@@ -44,7 +44,7 @@ class LocationCheckContent extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              viewModel.locationStatus(),
+              viewModel.locationStatusMessage(),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 16,
