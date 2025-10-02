@@ -1,6 +1,4 @@
 import 'package:attendance_app/platform/extensions/string_extensions.dart';
-import 'package:attendance_app/ux/navigation/navigation.dart';
-import 'package:attendance_app/ux/shared/components/app_buttons.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_images.dart';
 import 'package:flutter/material.dart';
@@ -83,7 +81,7 @@ class AppSuccessDialogWidget extends StatelessWidget {
                       style: const TextStyle(
                         color: AppColors.defaultColor,
                         fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -97,7 +95,7 @@ class AppSuccessDialogWidget extends StatelessWidget {
               child: Text(
                 message,
                 style: const TextStyle(
-                  color: AppColors.black,
+                  color: AppColors.defaultColor,
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
@@ -105,19 +103,15 @@ class AppSuccessDialogWidget extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            const Divider(
-              color: AppColors.grey,
-              thickness: 1,
-              height: 0,
-            ),
+            const Divider(color: AppColors.grey, thickness: 1, height: 0),
             InkWell(
               onTap: () {
                 Navigator.pop(context);
                 action?.call();
               },
               borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(8),
-                bottomRight: Radius.circular(8),
+                bottomLeft: Radius.circular(16),
+                bottomRight: Radius.circular(16),
               ),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -144,115 +138,202 @@ class AppSuccessDialogWidget extends StatelessWidget {
 }
 
 class AppAlertDialogWidget extends StatelessWidget {
-  final String title;
   final String message;
-  final String? firstOption;
-  final VoidCallback? onFirstOptionTap;
-  final String? secondOption;
-  final VoidCallback? onSecondOptionTap;
-  final Color? backgroundColor;
-  final Color? borderColor;
-  final Color? textColor;
-  final bool singleButton;
+  final String title;
+  final Function? action;
 
   const AppAlertDialogWidget({
     super.key,
-    required this.title,
     required this.message,
-    this.firstOption,
-    this.secondOption,
-    this.onFirstOptionTap,
-    this.onSecondOptionTap,
-    this.backgroundColor,
-    this.borderColor,
-    this.textColor,
-    this.singleButton = false,
+    required this.title,
+    required this.action,
   });
-
-  const AppAlertDialogWidget.singleButton({
-    super.key,
-    required this.title,
-    required this.message,
-    String? buttonText,
-    VoidCallback? onButtonTap,
-    this.backgroundColor,
-    this.borderColor,
-    this.textColor,
-  })  : firstOption = buttonText,
-        onFirstOptionTap = onButtonTap,
-        secondOption = null,
-        onSecondOptionTap = null,
-        singleButton = true;
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog.adaptive(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      content: Material(
-        elevation: 0,
-        color: AppColors.transparent,
-        child: Column(
+    return PopScope(
+      canPop: false,
+      child: AlertDialog(
+        contentPadding: const EdgeInsets.only(top: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
+            AppImages.svgErrorDialogIcon,
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                title,
+                style: const TextStyle(
                   color: AppColors.defaultColor,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppColors.defaultColor,
-                fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
-            const SizedBox(height: 24),
-            if (singleButton || secondOption == null) ...[
-              SizedBox(
-                width: double.infinity,
-                child: PrimaryButton(
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  backgroundColor: backgroundColor ?? AppColors.defaultColor,
-                  onTap: onFirstOptionTap ??
-                      () {
-                        Navigation.back(context: context, result: true);
-                      },
-                  child: Text(firstOption ?? 'Okay'),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                message,
+                style: const TextStyle(
+                  color: AppColors.defaultColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
-              )
-            ] else ...[
-              Row(
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Divider(color: AppColors.grey, thickness: 1, height: 0),
+            InkWell(
+              onTap: () {
+                Navigator.pop(context);
+                action?.call();
+              },
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(16),
+                bottomRight: Radius.circular(16),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Expanded(
-                    child: PrimaryOutlinedButton(
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      onTap: onFirstOptionTap ??
-                          () {
-                            Navigation.back(context: context, result: false);
-                          },
-                      child: Text(firstOption ?? 'No'),
-                    ),
-                  ),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: PrimaryButton(
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      backgroundColor: backgroundColor ?? AppColors.red500,
-                      onTap: onSecondOptionTap,
-                      child: Text(secondOption ?? ''),
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Text(
+                      'Okay',
+                      style: TextStyle(
+                        color: AppColors.defaultColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
               ),
-            ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class AppWarningAlertDialog extends StatelessWidget {
+  final String title;
+  final String message;
+  final String? firstOption;
+  final Function? onFirstOptionTap;
+  final String? secondOption;
+  final Function? onSecondOptionTap;
+  final Color? textColor;
+
+  const AppWarningAlertDialog({
+    super.key,
+    required this.title,
+    required this.message,
+    this.firstOption,
+    this.onFirstOptionTap,
+    this.secondOption,
+    this.onSecondOptionTap,
+    this.textColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      child: AlertDialog(
+        contentPadding: const EdgeInsets.only(top: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppImages.svgExclamationCircle,
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: AppColors.defaultColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                message,
+                style: const TextStyle(
+                  color: AppColors.defaultColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Divider(color: AppColors.grey, thickness: 1, height: 0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                      onFirstOptionTap?.call();
+                    },
+                    borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(16)),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Text(
+                        firstOption ?? 'No',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: AppColors.defaultColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  height: 51,
+                  width: 1,
+                  color: AppColors.grey,
+                ),
+                Expanded(
+                  child: InkWell(
+                    onTap: () {
+                      // Navigator.pop(context);
+                      onSecondOptionTap?.call();
+                    },
+                    borderRadius: const BorderRadius.only(
+                        bottomRight: Radius.circular(16)),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Text(
+                        secondOption ?? 'Yes, cancel',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: textColor ?? AppColors.defaultColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),

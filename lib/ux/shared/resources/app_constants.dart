@@ -7,8 +7,8 @@ class AppConstants {
   static const passwordKey = 'password';
   static const userStreamKey = 'user.stream';
 
-  static const double houseLat = 5.577116;
-  static const double houseLong = -0.2604938;
+  static const double houseLat = 5.5328015;
+  static const double houseLong = -0.3264844;
 
   static const double chisomLat = 5.5321914;
   static const double chisomLong = -0.3315539;

@@ -53,6 +53,9 @@ class DefaultVerificationMessageProvider
           break;
       }
     }
+    if (step == VerificationStep.completed) {
+      return 'Done';
+    }
     switch (mode) {
       case FaceVerificationMode.signUp:
         return 'Register Face';

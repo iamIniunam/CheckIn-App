@@ -5,6 +5,7 @@ import 'package:attendance_app/ux/shared/components/global_functions.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
+import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/user_view_model.dart';
@@ -14,7 +15,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ConfirmCoursesPage extends StatefulWidget {
-  const ConfirmCoursesPage({super.key});
+  const ConfirmCoursesPage({super.key, this.isEdit = false});
+
+  final bool isEdit;
 
   @override
   State<ConfirmCoursesPage> createState() => _ConfirmCoursesPageState();
@@ -47,8 +50,18 @@ class _ConfirmCoursesPageState extends State<ConfirmCoursesPage> {
     if (!mounted) return;
 
     if (success) {
-      Navigation.navigateToScreenAndClearOnePrevious(
-          context: context, screen: const NavigationHostPage());
+      widget.isEdit
+          ? AppDialogs.showSuccessDialog(
+              context: context,
+              message: 'Courses updated successfully',
+              action: () {
+                Navigation.back(context: context);
+              },
+            )
+          : Navigation.navigateToScreenAndClearOnePrevious(
+              context: context,
+              screen: const NavigationHostPage(),
+            );
     } else if (viewModel.errorMessage != null) {
       //TODO: complete this flow
       showAlert(
@@ -62,7 +75,7 @@ class _ConfirmCoursesPageState extends State<ConfirmCoursesPage> {
       builder: (context, viewModel, _) {
         return AppPageScaffold(
           hideAppBar: false,
-          showBackButton: false,
+          showBackButton: widget.isEdit,
           title: AppStrings.confirmSemeterCourses,
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

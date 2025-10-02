@@ -50,7 +50,6 @@ class Navigation {
       context: context,
       screen: FaceVerificationPage(
         mode: mode,
-        attendanceType: attendanceType,
         onExit: onExit,
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:attendance_app/platform/utils/permission_utils.dart';
+import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
 import 'package:attendance_app/ux/shared/components/blurred_loading_overlay.dart';
 import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/shared/view_models/face_verification_view_model.dart';
@@ -8,7 +9,6 @@ import 'package:attendance_app/ux/views/attendance/components/face_verification_
 import 'package:attendance_app/ux/views/attendance/components/step_content.dart';
 import 'package:attendance_app/ux/views/attendance/components/step_indicator_widget.dart';
 import 'package:attendance_app/ux/views/onboarding/confirm_courses_page.dart';
-import 'package:attendance_app/ux/views/attendance/verification_success_page.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
@@ -29,7 +29,7 @@ class FaceVerificationPage extends StatefulWidget {
 class _FaceVerificationPageState extends State<FaceVerificationPage> {
   CameraController? cameraController;
   bool isCameraInitialized = false;
-  late List<CameraDescription> cameras;
+  List<CameraDescription> cameras = [];
   late FaceVerificationViewModel viewModel;
 
   @override
@@ -107,26 +107,32 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
       viewModel.setAttendanceType(attendanceType);
     }
 
-    bool success =
-        await viewModel.startVerificationFlow(attendanceType: attendanceType);
+    // bool success =
+    await viewModel.startVerificationFlow(attendanceType: attendanceType);
 
-    if (!success && mounted) {
-      return;
-    }
+    // if (!success && mounted) {
+    //   return;
+    // }
 
-    if (viewModel.verificationState.currentStep == VerificationStep.completed &&
-        mounted) {
-      Navigation.navigateToScreenAndClearOnePrevious(
-        context: context,
-        screen: const VerificationSuccessPage(),
-      );
-    }
+    // if (viewModel.verificationState.currentStep == VerificationStep.completed &&
+    //     mounted) {
+    //   Navigation.navigateToScreenAndClearOnePrevious(
+    //     context: context,
+    //     screen: const VerificationSuccessPage(),
+    //   );
+    // }
+  }
+
+  Future<void> handleCompletion() async {
+    Navigation.navigateToScreen(
+        context: context, screen: const NavigationHostPage());
   }
 
   Future<void> handleOutOfRange(
       LocationVerificationStatus locationStatus) async {
     if (locationStatus == LocationVerificationStatus.outOfRange) {
-      Navigation.navigateToHomePage(context: context);
+      Navigation.navigateToScreen(
+          context: context, screen: const NavigationHostPage());
     }
   }
 
@@ -156,9 +162,17 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
 
   @override
   void dispose() {
-    cameraController?.dispose();
-    viewModel.dispose();
-    super.dispose();
+    // If dispose is async, use the following:
+    // await cameraController?.dispose();
+    // However, Flutter's dispose() cannot be async, so use then() for cleanup.
+    cameraController?.dispose().then((_) {
+      viewModel.dispose();
+      super.dispose();
+    });
+    // If dispose() is not async, keep as is:
+    // cameraController?.dispose();
+    // viewModel.dispose();
+    // super.dispose();
   }
 
   @override
@@ -167,66 +181,65 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
       value: viewModel,
       child: PopScope(
         canPop: false,
-        onPopInvoked: (result) => handleExit(),
+        onPopInvoked: (_) => handleExit(),
         child: Scaffold(
           body: Consumer<FaceVerificationViewModel>(
-            builder: (context, faceVericationViewModel, _) {
+            builder: (context, faceVerificationViewModel, _) {
               final locationStatus =
-                  faceVericationViewModel.locationState.verificationStatus;
+                  faceVerificationViewModel.locationState.verificationStatus;
+
+              final verificationStep =
+                  faceVerificationViewModel.verificationState.currentStep;
 
               return Stack(
                 children: [
                   // Main content
                   StepContent(
-                    viewModel: faceVericationViewModel,
+                    viewModel: faceVerificationViewModel,
                     cameraController: cameraController,
                     isCameraInitialized: isCameraInitialized,
                   ),
 
                   // Step indicator for attendance mode
                   if (shouldShowStepIndicator())
-                    StepIndicatorWidget(viewModel: faceVericationViewModel),
+                    StepIndicatorWidget(viewModel: faceVerificationViewModel),
 
                   // Attendance type indicator
                   if (isAttendanceMode() &&
-                      faceVericationViewModel
+                      faceVerificationViewModel
                               .verificationState.attendanceType !=
                           null)
                     AttendanceTypeIndicator(
-                      attendanceType: faceVericationViewModel
+                      attendanceType: faceVerificationViewModel
                               .verificationState.attendanceType ??
                           AttendanceType.inPerson,
-                      viewModel: faceVericationViewModel,
+                      viewModel: faceVerificationViewModel,
                     ),
 
                   // Exit button
                   ExitButton(
                     mode: widget.mode,
-                    viewModel: faceVericationViewModel,
+                    viewModel: faceVerificationViewModel,
                     onExit: widget.onExit ?? handleExit,
                   ),
 
                   // Verification button
                   VerificationButton(
                     mode: widget.mode,
-                    viewModel: faceVericationViewModel,
-                    onVerify:
-                        locationStatus == LocationVerificationStatus.outOfRange
-                            ? () {
-                                handleOutOfRange(locationStatus ??
-                                    LocationVerificationStatus
-                                        .successInRange); //TODO: check this logis again
-                              }
-                            : handleVerification,
+                    viewModel: faceVerificationViewModel,
+                    onVerify: getOnVerify(
+                        locationStatus ??
+                            LocationVerificationStatus
+                                .successInRange, //TODO: check this logic
+                        verificationStep),
                   ),
 
                   // Loading overlay
                   Visibility(
-                    visible: faceVericationViewModel.isFaceVerifying,
+                    visible: faceVerificationViewModel.isFaceVerifying,
                     child: BlurredLoadingOverlay(
-                        showLoader: faceVericationViewModel
+                        showLoader: faceVerificationViewModel
                             .verificationState.isLoading),
-                    // child: AppDialogs.showLoadingDialog(context),
                   ),
                 ],
               );
@@ -235,5 +248,16 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
         ),
       ),
     );
+  }
+
+  VoidCallback getOnVerify(LocationVerificationStatus locationStatus,
+      VerificationStep verificationStep) {
+    if (locationStatus == LocationVerificationStatus.outOfRange) {
+      return () => handleOutOfRange(locationStatus);
+    }
+    if (verificationStep == VerificationStep.completed) {
+      return () => handleCompletion();
+    }
+    return handleVerification;
   }
 }

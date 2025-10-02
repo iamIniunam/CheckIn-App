@@ -12,12 +12,12 @@ class SignUpCancelDialog {
     CameraController? cameraController,
   }) async {
     final result = await AppDialogs.showWarningDialog(
-      context,
+      context: context,
       title: AppStrings.cancelFaceRegistration,
       message: AppStrings.youreInTheMiddleOfRegistering,
       firstOption: AppStrings.stay,
       secondOption: AppStrings.yesCancel,
-      action: () {
+      onSecondOptionTap: () {
         Navigation.back(context: context, result: true);
       },
     );
@@ -39,12 +39,38 @@ class AttendanceCancelDialog {
     CameraController? cameraController,
   }) async {
     final result = await AppDialogs.showWarningDialog(
-      context,
+      context: context,
       title: AppStrings.cancelFaceVerification,
       message: AppStrings.ifYouExitNowYourAttendanceWont,
       secondOption: AppStrings.yesCancel,
       firstOption: 'No',
-      action: () {
+      onSecondOptionTap: () {
+        Navigation.back(context: context, result: true);
+      },
+    );
+    if (result == true) {
+      await cameraController?.dispose();
+      cameraController = null;
+      if (context.mounted) {
+        Navigation.navigateToScreen(
+            context: context, screen: const NavigationHostPage());
+      }
+    }
+  }
+}
+
+class LocationCancelDialog {
+  static Future<void> show({
+    required BuildContext context,
+    CameraController? cameraController,
+  }) async {
+    final result = await AppDialogs.showWarningDialog(
+      context: context,
+      title: AppStrings.cancelLocationVerification,
+      message: AppStrings.ifYouExitNowYourAttendanceWont,
+      secondOption: AppStrings.yesCancel,
+      firstOption: 'No',
+      onSecondOptionTap: () {
         Navigation.back(context: context, result: true);
       },
     );

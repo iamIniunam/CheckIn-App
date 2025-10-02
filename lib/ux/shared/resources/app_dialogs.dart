@@ -97,34 +97,18 @@ class AppDialogs {
       required String message,
       String? title,
       VoidCallback? action}) {
-    showAlertDialog(context,
-        title: title ?? AppStrings.alert, message: message, action: action);
-  }
-
-  static Future showAlertDialog(
-    BuildContext context, {
-    required String message,
-    String title = AppStrings.alert,
-    VoidCallback? action,
-  }) {
-    return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AppAlertDialogWidget.singleButton(
-        title: title,
+    showAlertDialog(
+        context: context,
+        title: title ?? AppStrings.alert,
         message: message,
-        onButtonTap: action,
-      ),
-    );
+        action: action);
   }
 
-  static Future showWarningDialog(
-    BuildContext context, {
+  static Future showAlertDialog({
+    required BuildContext context,
     required String message,
     String title = AppStrings.alert,
     VoidCallback? action,
-    String? firstOption,
-    String? secondOption,
   }) {
     return showDialog(
       context: context,
@@ -132,9 +116,32 @@ class AppDialogs {
       builder: (context) => AppAlertDialogWidget(
         title: title,
         message: message,
-        onSecondOptionTap: action,
+        action: action,
+      ),
+    );
+  }
+
+  static Future showWarningDialog({
+    required BuildContext context,
+    String title = AppStrings.alert,
+    required String message,
+    String? firstOption,
+    String? secondOption,
+    Color? textColor,
+    VoidCallback? onFirstOptionTap,
+    VoidCallback? onSecondOptionTap,
+  }) {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AppWarningAlertDialog(
+        title: title,
+        message: message,
         firstOption: firstOption,
         secondOption: secondOption,
+        textColor: textColor,
+        onFirstOptionTap: onFirstOptionTap,
+        onSecondOptionTap: onSecondOptionTap,
       ),
     );
   }

@@ -48,7 +48,8 @@ class FaceVerificationViewModel extends ChangeNotifier {
         _locationViewModel.state.verificationStatus ==
             LocationVerificationStatus.outOfRange ||
         _locationViewModel.state.verificationStatus ==
-            LocationVerificationStatus.failed;
+            LocationVerificationStatus.failed ||
+        _verificationState.currentStep == VerificationStep.completed;
   }
 
   bool shouldShowButton(FaceVerificationMode mode) {
@@ -58,7 +59,8 @@ class FaceVerificationViewModel extends ChangeNotifier {
         _locationViewModel.state.verificationStatus ==
             LocationVerificationStatus.outOfRange ||
         _locationViewModel.state.verificationStatus ==
-            LocationVerificationStatus.failed;
+            LocationVerificationStatus.failed ||
+        _verificationState.currentStep == VerificationStep.completed;
     //TODO: complete the action for location verification failed (try again) and find a way to simulate a failed instance
   }
 
