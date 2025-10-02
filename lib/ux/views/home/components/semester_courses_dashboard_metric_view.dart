@@ -61,14 +61,16 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
               padding: const EdgeInsets.only(
                   left: 16, top: 10, right: 16, bottom: 16),
               crossAxisCount: 3,
-              children: courseInfo
-                  .map(
-                    (course) => singleCourse(
-                      context: context,
-                      course: course,
-                    ),
-                  )
-                  .toList(),
+              children: courseInfo.length > 9
+                  ? courseInfo
+                      .take(9)
+                      .map((course) =>
+                          singleCourse(context: context, course: course))
+                      .toList()
+                  : courseInfo
+                      .map((course) =>
+                          singleCourse(context: context, course: course))
+                      .toList(),
             ),
           ],
         );
