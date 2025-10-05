@@ -213,7 +213,7 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
                       attendanceType: faceVerificationViewModel
                               .verificationState.attendanceType ??
                           AttendanceType.inPerson,
-                      viewModel: faceVerificationViewModel,
+                      // viewModel: faceVerificationViewModel,
                     ),
 
                   // Exit button

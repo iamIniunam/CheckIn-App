@@ -40,7 +40,8 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Future<void> handleSignUp() async {
-    if (!formKey.currentState!.validate()) {
+    final formState = formKey.currentState;
+    if (formState == null || !formState.validate()) {
       return;
     }
 

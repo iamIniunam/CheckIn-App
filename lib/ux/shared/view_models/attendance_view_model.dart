@@ -38,8 +38,14 @@ class AttendanceViewModel extends ChangeNotifier {
       _locationStatus = 'Location verified! Submitting attendance...';
       notifyListeners();
 
-      await submitAttendance(
-          result.currentPosition!); //TODO: change this null check
+      if (result.currentPosition == null) {
+        _locationError = 'Failed to get current position';
+        _locationStatus = 'Attendance failed';
+        setLoadingState(false);
+        return false;
+      }
+
+      await submitAttendance(result.currentPosition!); //TODO null check
 
       _locationStatus = 'Attendance marked successfully!';
       setLoadingState(false);
@@ -68,7 +74,7 @@ class AttendanceViewModel extends ChangeNotifier {
       'studentId': viewModel.idNumber,
       'timestamp': DateTime.now().toIso8601String(),
       'latitude': position.latitude,
-      'longtitude': position.longitude,
+      'longitude': position.longitude,
       'accuracy': position.accuracy,
       'locationMethod': position.accuracy > 50 ? 'indoor_gps' : 'gps',
     };

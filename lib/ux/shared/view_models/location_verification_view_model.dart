@@ -1,7 +1,7 @@
 import 'package:attendance_app/platform/services/location_service.dart';
 import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/shared/message_providers.dart';
-import 'package:attendance_app/ux/shared/models/models.dart.dart';
+import 'package:attendance_app/ux/shared/models/models.dart';
 import 'package:flutter/material.dart';
 
 class LocationVerificationViewModel extends ChangeNotifier {

@@ -1,6 +1,6 @@
 import 'package:attendance_app/platform/services/location_service.dart';
 import 'package:attendance_app/ux/shared/enums.dart';
-import 'package:attendance_app/ux/shared/models/models.dart.dart';
+import 'package:attendance_app/ux/shared/models/models.dart';
 
 abstract class VerificationMessageProvider {
   String getStepDescription(
@@ -70,8 +70,8 @@ class DefaultVerificationMessageProvider
   @override
   String getLocationStatusHeaderMessage(LocationVerificationStatus status) {
     switch (status) {
-      case LocationVerificationStatus.successInRange ||
-            LocationVerificationStatus.outOfRange:
+      case LocationVerificationStatus.successInRange:
+      case LocationVerificationStatus.outOfRange:
         return 'Location verified';
       case LocationVerificationStatus.failed:
         return 'Verification failed';
@@ -152,9 +152,9 @@ Try:
           '\nMethod: GPS (±${LocationService.formatDistance(locationState.currentPosition?.accuracy ?? 0)})';
     }
 
-    if (locationState.verificationStatus != null) {
-      info +=
-          '\nStatus: ${getLocationStatusMessage(locationState.verificationStatus!)}'; //TODO: check the null checl
+    final verificationStatus = locationState.verificationStatus;
+    if (verificationStatus != null) {
+      info += '\nStatus: ${getLocationStatusMessage(verificationStatus)}';
     }
 
     return info;

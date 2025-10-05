@@ -2,7 +2,7 @@ import 'package:attendance_app/platform/services/attendance_service.dart';
 import 'package:attendance_app/platform/services/face_verification_service.dart';
 import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/shared/message_providers.dart';
-import 'package:attendance_app/ux/shared/models/models.dart.dart';
+import 'package:attendance_app/ux/shared/models/models.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:attendance_app/ux/shared/view_models/location_verification_view_model.dart';
 import 'package:flutter/material.dart';

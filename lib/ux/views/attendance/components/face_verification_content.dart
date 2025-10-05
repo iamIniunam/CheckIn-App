@@ -30,6 +30,7 @@ class FaceVerificationContent extends StatelessWidget {
                   child: SizedBox(
                     height: previewSize?.width,
                     width: previewSize?.height,
+                    // cameraController is non-null here because of the guard above
                     child: CameraPreview(cameraController!),
                   ),
                 ),

@@ -1,15 +1,13 @@
 import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/shared/message_providers.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
-import 'package:attendance_app/ux/shared/view_models/face_verification_view_model.dart';
 import 'package:flutter/material.dart';
 
 class AttendanceTypeIndicator extends StatelessWidget {
-  const AttendanceTypeIndicator(
-      {super.key, required this.attendanceType, required this.viewModel});
+  const AttendanceTypeIndicator({super.key, required this.attendanceType});
 
   final AttendanceType attendanceType;
-  final FaceVerificationViewModel viewModel;
+  // final FaceVerificationViewModel viewModel;
 
   static final VerificationMessageProvider messageProvider =
       DefaultVerificationMessageProvider();
