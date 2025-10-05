@@ -29,4 +29,10 @@ class AppImages {
       SvgPicture.asset('assets/svgs/chat_icon_2.svg');
   static SvgPicture svgSearchIcon =
       SvgPicture.asset('assets/svgs/search_icon.svg');
+  static SvgPicture svgSuccessDialogIcon =
+      SvgPicture.asset('assets/svgs/success_dialog_icon.svg');
+  static SvgPicture svgErrorDialogIcon =
+      SvgPicture.asset('assets/svgs/error_dialog_icon.svg');
+  static SvgPicture svgExclamationCircle =
+      SvgPicture.asset('assets/svgs/exclamation_circle.svg');
 }

@@ -1,9 +1,11 @@
-import 'package:attendance_app/platform/providers/student_info_provider.dart';
 import 'package:attendance_app/ux/shared/components/app_material.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_images.dart';
-import 'package:attendance_app/ux/shared/resources/app_page.dart';
+import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
+import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/user_view_model.dart';
+import 'package:attendance_app/ux/views/profile/components/profile_detail_item.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,11 +19,30 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   String? newPhoneNumber;
 
+  late UserViewModel userViewModel;
+  late CourseViewModel courseViewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    userViewModel = context.read<UserViewModel>();
+    courseViewModel = context.read<CourseViewModel>();
+  }
+
+  String getUserStream() {
+    String savedStream = userViewModel.savedPrimaryStream;
+    if (savedStream.isNotEmpty) {
+      return savedStream;
+    }
+
+    String calculatedStream =
+        userViewModel.getUserPrimaryStream(courseViewModel.chosenStreams);
+    return calculatedStream;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final idNumber = context.watch<StudentInfoProvider>().idNumber;
-    final level = context.watch<StudentInfoProvider>().level;
-    final semester = context.watch<StudentInfoProvider>().semester;
+    final semester = userViewModel.semester;
 
     String semesterText;
     if (semester == '1') {
@@ -66,9 +87,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           fontSize: 24,
                           fontWeight: FontWeight.bold),
                     ),
-                    const Text(
-                      AppStrings.sampleCourse,
-                      style: TextStyle(
+                    Text(
+                      userViewModel.program,
+                      style: const TextStyle(
                           color: Colors.grey,
                           fontSize: 18,
                           fontWeight: FontWeight.w500),
@@ -84,43 +105,27 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          profileDetailItem(
+                          ProfileDetailItem(
                               title: AppStrings.studentIdNumber,
-                              value: idNumber),
-                          profileDetailItem(
+                              value: userViewModel.idNumber),
+                          ProfileDetailItem(
                               title: AppStrings.studentLevel,
-                              value: 'Level $level'),
-                          profileDetailItem(
+                              value: 'Level ${userViewModel.level}'),
+                          ProfileDetailItem(
                               title: AppStrings.currentSemester,
                               value: '$semesterText Semester'),
-                          profileDetailItem(
-                              title: AppStrings.stream,
-                              value: AppStrings.sampleStream),
-                          profileDetailItem(
+                          ProfileDetailItem(
+                              title: AppStrings.stream, value: getUserStream()),
+                          const ProfileDetailItem(
                               title: AppStrings.schoolEmail,
                               value: AppStrings.sampleSchoolEmail),
-                          profileDetailItem(
+                          const ProfileDetailItem(
                               title: AppStrings.nationality,
                               value: AppStrings.sampleNationality),
-                          profileDetailItem(
+                          ProfileDetailItem(
                             title: AppStrings.studentPhoneNumber,
                             value:
                                 newPhoneNumber ?? AppStrings.samplePhoneNumber,
-                            // onTap: () async {
-                            //   final result = await showAppBottomSheet(
-                            //     context: context,
-                            //     title: AppStrings.editPhoneNumber,
-                            //     child: const EditPhoneNumberBottomSheet(),
-                            //   );
-
-                            //   if (result != null &&
-                            //       result is String &&
-                            //       result.isNotEmpty) {
-                            //     setState(() {
-                            //       newPhoneNumber = result;
-                            //     });
-                            //   }
-                            // },
                           ),
                         ],
                       ),
@@ -131,39 +136,6 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget profileDetailItem({required String title, required String value}) {
-    return Ink(
-      padding: const EdgeInsets.only(top: 16, bottom: 12),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Colors.grey.withOpacity(0.5), width: 1),
-        ),
-      ),
-      child: Row(
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-                color: Colors.grey, fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                    color: AppColors.defaultColor, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

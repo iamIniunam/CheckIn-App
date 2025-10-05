@@ -16,16 +16,26 @@ class AppStrings {
   static const confirmPassword = 'Confirm Password';
   static const reenterYourPassword = 'Re-enter your password';
   static const invalidEmail = 'Invalid Email';
-  static const pleaseEnterAValidAitEmailAdd =
+  static const pleaseEnterAValidAitEmail =
       'Please enter a valid AIT email address';
   static const signUpFailed = 'Sign up failed';
   static const passwordsDoNotMatch = 'Passwords do not match';
-  static const idNumberHintText = 'e.g. ENG23A000159Y';
+  static const idNumberHintText = 'e.g. ENG23A00159Y';
   static const login = 'Login';
   static const level = 'Level';
   static const semester = 'Semester';
   static const levelHintText = 'e.g. 100';
   static const semesterHintText = 'e.g. 1';
+
+  static const invalidIdNumber = 'Invalid ID Number';
+  static const invalidIdNumberErrorMessage =
+      'Please enter a valid AIT \nID number';
+  static const invalidLevel = 'Invalid Level';
+  static const invalidLevelErrorMessage =
+      'Please enter a value between \n100 - 400';
+  static const invalidSemester = 'Invalid Semester';
+  static const invalidSemesterErrorMessage =
+      'Please enter a value between \n1 and 2';
 
   //BottomNav
   static const home = 'Home';
@@ -124,6 +134,7 @@ class AppStrings {
       'If you exit now, your attendance won’t be marked. Are you sure you want to cancel?';
   static const registerFace = 'Register Face';
   static const verifyFace = 'Verify Face';
+  static const cancelLocationVerification = 'Cancel Location Verification?';
 
   //Confrim semester courses
   static const confirmSemeterCourses = 'Confirm Semester Courses';
@@ -143,4 +154,7 @@ class AppStrings {
       'Input the attendance code provided by your lecturer';
   static const classCodeHint = 'e.g. AIT-CS103-7XKP';
   static const submit = 'Submit';
+
+  static const cancel = 'Cancel';
+  static const alert = 'Alert';
 }

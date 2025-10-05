@@ -55,6 +55,7 @@ dependencies:
   geolocator:
   geolocator_android: 4.6.1
   mobile_scanner: ^3.5.7
+  searchfield: 1.0.6
 
 
 

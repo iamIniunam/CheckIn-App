@@ -1,8 +1,7 @@
-// ignore_for_file: avoid_print
-
-import 'package:attendance_app/platform/providers/course_provider.dart';
-import 'package:attendance_app/platform/providers/student_info_provider.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
+import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/user_view_model.dart';
 import 'package:attendance_app/ux/views/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +20,7 @@ void main() async {
             messagingSenderId: '',
             projectId: 'attendance-app-2759d'));
   } catch (e) {
-    print(e);
+    debugPrint('$e');
   }
   SharedPreferences prefs = await SharedPreferences.getInstance();
   isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
@@ -29,8 +28,9 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => CourseProvider()),
-        ChangeNotifierProvider(create: (_) => StudentInfoProvider()),
+        ChangeNotifierProvider(create: (_) => AuthViewModel()),
+        ChangeNotifierProvider(create: (_) => UserViewModel(pref: prefs)),
+        ChangeNotifierProvider(create: (_) => CourseViewModel()),
       ],
       child: const MyApp(),
     ),

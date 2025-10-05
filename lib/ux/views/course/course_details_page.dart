@@ -1,16 +1,17 @@
 import 'package:attendance_app/platform/extensions/date_time_extensions.dart';
+import 'package:attendance_app/platform/services/selected_courses_service.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
-import 'package:attendance_app/ux/shared/resources/app_page.dart';
+import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
+import 'package:attendance_app/ux/views/course/components/course_detail_item.dart';
+import 'package:attendance_app/ux/views/course/components/session_history.dart';
 import 'package:flutter/material.dart';
 
 class CourseDetailsPage extends StatefulWidget {
-  const CourseDetailsPage(
-      {super.key, required this.courseCode, required this.lecturer});
+  const CourseDetailsPage({super.key, required this.course});
 
-  final String courseCode;
-  final String lecturer;
+  final Course course;
 
   @override
   State<CourseDetailsPage> createState() => _CourseDetailsPageState();
@@ -48,6 +49,9 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
         status: AppStrings.present),
   ];
 
+  String? get courseStream =>
+      SelectedCoursesService().getStreamForCourse(widget.course.courseCode);
+
   @override
   Widget build(BuildContext context) {
     return AppPageScaffold(
@@ -65,19 +69,48 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        widget.courseCode,
-                        style: const TextStyle(
-                            color: AppColors.defaultColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        widget.lecturer,
-                        style: const TextStyle(
-                            color: Colors.grey,
-                            // fontSize: 16,
-                            fontWeight: FontWeight.bold),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.course.courseCode,
+                                style: const TextStyle(
+                                    color: AppColors.defaultColor,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                widget.course.courseTitle ?? '',
+                                style: const TextStyle(
+                                    color: Colors.grey,
+                                    // fontSize: 16,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryTeal.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: AppColors.primaryTeal.withOpacity(0.5),
+                              ),
+                            ),
+                            child: Text(
+                              courseStream ?? '',
+                              style: const TextStyle(
+                                color: AppColors.defaultColor,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 10),
                       Container(
@@ -88,14 +121,14 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: AppColors.defaultColor),
                         ),
-                        child: Column(
+                        child: const Column(
                           children: [
-                            courseDetailItem(
+                            CourseDetailItem(
                                 title: AppStrings.attendanceThreshold,
                                 value: '18/20'),
-                            courseDetailItem(
+                            CourseDetailItem(
                                 title: AppStrings.midSemester, value: '6/10'),
-                            courseDetailItem(
+                            CourseDetailItem(
                                 title: AppStrings.endOfSemester, value: '6/20'),
                           ],
                         ),
@@ -111,80 +144,12 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
                       ),
                       ...sessions
                           .map((sessionData) =>
-                              sessionHistory(session: sessionData))
+                              SessionHistory(session: sessionData))
                           .toList(),
                     ],
                   ),
                 ),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget courseDetailItem({
-    required String title,
-    required String value,
-  }) {
-    return Container(
-      padding: const EdgeInsets.only(bottom: 16),
-      decoration: const BoxDecoration(
-        color: AppColors.transparent,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-                color: Colors.grey.shade600, fontWeight: FontWeight.w600),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-                color: AppColors.defaultColor, fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget sessionHistory({required Session session}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      decoration: const BoxDecoration(
-        color: AppColors.transparent,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                session.session,
-                style: const TextStyle(
-                    color: AppColors.defaultColor, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                session.date,
-                style: TextStyle(
-                    color: Colors.grey.shade600, fontWeight: FontWeight.w600),
-              ),
-            ],
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-                color: AppColors.primaryTeal,
-                borderRadius: BorderRadius.circular(8)),
-            child: Text(
-              session.status,
-              style: TextStyle(
-                  color: session.getStatusColor, fontWeight: FontWeight.w600),
             ),
           ),
         ],

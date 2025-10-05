@@ -1,25 +1,26 @@
-// ignore_for_file: use_build_context_synchronously
-
+import 'package:attendance_app/platform/utils/permission_utils.dart';
 import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
-import 'package:attendance_app/ux/shared/components/app_dialogs.dart';
-import 'package:attendance_app/ux/shared/components/app_material.dart';
 import 'package:attendance_app/ux/shared/components/blurred_loading_overlay.dart';
-import 'package:attendance_app/ux/shared/components/global_functions.dart';
-import 'package:attendance_app/ux/shared/resources/app_buttons.dart';
-import 'package:attendance_app/ux/shared/resources/app_colors.dart';
-import 'package:attendance_app/ux/shared/resources/app_strings.dart';
+import 'package:attendance_app/ux/shared/enums.dart';
+import 'package:attendance_app/ux/shared/view_models/face_verification_view_model.dart';
+import 'package:attendance_app/ux/views/attendance/alert_dialogs/cancel_dialog.dart';
+import 'package:attendance_app/ux/views/attendance/components/attendance_type_indicator.dart';
+import 'package:attendance_app/ux/views/attendance/components/face_verification_buttons.dart';
+import 'package:attendance_app/ux/views/attendance/components/step_content.dart';
+import 'package:attendance_app/ux/views/attendance/components/step_indicator_widget.dart';
 import 'package:attendance_app/ux/views/onboarding/confirm_courses_page.dart';
-import 'package:attendance_app/ux/views/onboarding/sign_up_page.dart';
-import 'package:attendance_app/ux/views/attendance/verification_success_page.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
+import 'package:provider/provider.dart';
 
 class FaceVerificationPage extends StatefulWidget {
-  const FaceVerificationPage({super.key, this.onExit, required this.mode});
+  const FaceVerificationPage(
+      {super.key, this.onExit, required this.mode, this.attendanceType});
 
   final void Function()? onExit;
   final FaceVerificationMode mode;
+  final AttendanceType? attendanceType;
 
   @override
   State<FaceVerificationPage> createState() => _FaceVerificationPageState();
@@ -28,222 +29,235 @@ class FaceVerificationPage extends StatefulWidget {
 class _FaceVerificationPageState extends State<FaceVerificationPage> {
   CameraController? cameraController;
   bool isCameraInitialized = false;
-  late List<CameraDescription> cameras;
-
-  bool isVerifying = false;
+  List<CameraDescription> cameras = [];
+  late FaceVerificationViewModel viewModel;
 
   @override
   void initState() {
     super.initState();
+    viewModel = FaceVerificationViewModel();
+
+    if (widget.attendanceType != null) {
+      viewModel
+          .setAttendanceType(widget.attendanceType ?? AttendanceType.inPerson);
+    }
+
     initializeCamera();
   }
 
   Future<void> initializeCamera() async {
-    cameras = await availableCameras();
-    cameraController = CameraController(
-      cameras.firstWhere(
-        (camera) {
-          return camera.lensDirection == CameraLensDirection.front;
-        },
-        orElse: () {
-          return cameras.first;
-        },
-      ),
-      ResolutionPreset.medium,
-    );
-    await cameraController?.initialize();
-    if (mounted) {
-      setState(() {
-        isCameraInitialized = true;
-      });
+    try {
+      final permissionGranted = await PermissionUtils.requestCameraPermission(
+          showSettingsOption: true);
+
+      if (!permissionGranted) {
+        debugPrint("Camera permission not granted, stopping initialization.");
+        return;
+      }
+
+      cameras = await availableCameras();
+      cameraController = CameraController(
+        cameras.firstWhere(
+          (camera) => camera.lensDirection == CameraLensDirection.front,
+          orElse: () => cameras.first,
+        ),
+        ResolutionPreset.medium,
+        enableAudio: false,
+      );
+
+      await cameraController?.initialize();
+
+      if (mounted) {
+        setState(() {
+          isCameraInitialized = true;
+        });
+      }
+    } catch (e) {
+      debugPrint("Unexpected Camera Error: $e");
     }
   }
 
-  void verifyFace() async {
-    // Sample face verification logic
-    setState(() {
-      isVerifying = true;
-    });
-
-    await Future.delayed(const Duration(seconds: 2));
-
-    if (!mounted) return;
-    setState(() {
-      isVerifying = false;
-    });
-
+  Future<void> handleVerification() async {
     switch (widget.mode) {
       case FaceVerificationMode.signUp:
-        Navigation.navigateToScreenAndClearOnePrevious(
-            context: context, screen: const ConfirmCoursesPage());
+        await handleSignUpVerification();
         break;
-
-      case FaceVerificationMode.attendance:
-        Navigation.navigateToScreenAndClearOnePrevious(
-            context: context, screen: const VerificationSuccessPage());
+      case FaceVerificationMode.attendanceInPerson:
+        await handleAttendanceVerification(AttendanceType.inPerson);
+        break;
+      case FaceVerificationMode.attendanceOnline:
+        await handleAttendanceVerification(AttendanceType.online);
         break;
     }
   }
 
-  Future<void> showAttendanceCancelDialog() async {
-    final result = await showAdaptiveDialog(
+  Future<void> handleSignUpVerification() async {
+    bool success = await viewModel.verifyFace();
+    if (success && mounted) {
+      Navigation.navigateToScreenAndClearOnePrevious(
         context: context,
-        builder: (context) {
-          return AppAlertDialog(
-            title: AppStrings.cancelFaceVerification,
-            desc: AppStrings.ifYouExitNowYourAttendanceWont,
-            secondOption: AppStrings.yesCancel,
-            firstOption: 'No',
-            onFirstOptionTap: () {
-              Navigation.back(context: context, result: false);
-            },
-            onSecondOptionTap: () {
-              Navigation.back(context: context, result: true);
-            },
-          );
-        });
-    if (result == true) {
-      await cameraController?.dispose();
-      cameraController = null;
-      if (mounted) {
-        Navigation.navigateToScreen(
-            context: context, screen: const NavigationHostPage());
-      }
+        screen: const ConfirmCoursesPage(),
+      );
     }
   }
 
-  Future<void> showSignUpCancelDialog() async {
-    final result = await showAdaptiveDialog(
-        context: context,
-        builder: (context) {
-          return AppAlertDialog(
-            title: AppStrings.cancelFaceRegistration,
-            desc: AppStrings.youreInTheMiddleOfRegistering,
-            firstOption: AppStrings.stay,
-            secondOption: AppStrings.yesCancel,
-            onFirstOptionTap: () {
-              Navigation.back(context: context, result: false);
-            },
-            onSecondOptionTap: () {
-              Navigation.back(context: context, result: true);
-            },
-          );
-        });
-    if (result == true) {
-      await cameraController?.dispose();
-      cameraController = null;
-      if (mounted) {
-        Navigation.navigateToScreen(
-            context: context, screen: const SignUpPage());
-      }
+  Future<void> handleAttendanceVerification(
+      AttendanceType attendanceType) async {
+    if (viewModel.verificationState.attendanceType == null) {
+      viewModel.setAttendanceType(attendanceType);
     }
+
+    // bool success =
+    await viewModel.startVerificationFlow(attendanceType: attendanceType);
+
+    // if (!success && mounted) {
+    //   return;
+    // }
+
+    // if (viewModel.verificationState.currentStep == VerificationStep.completed &&
+    //     mounted) {
+    //   Navigation.navigateToScreenAndClearOnePrevious(
+    //     context: context,
+    //     screen: const VerificationSuccessPage(),
+    //   );
+    // }
+  }
+
+  Future<void> handleCompletion() async {
+    Navigation.navigateToScreen(
+        context: context, screen: const NavigationHostPage());
+  }
+
+  Future<void> handleOutOfRange(
+      LocationVerificationStatus locationStatus) async {
+    if (locationStatus == LocationVerificationStatus.outOfRange) {
+      Navigation.navigateToScreen(
+          context: context, screen: const NavigationHostPage());
+    }
+  }
+
+  void handleExit() {
+    if (widget.mode == FaceVerificationMode.signUp) {
+      SignUpCancelDialog.show(
+        context: context,
+        cameraController: cameraController,
+      );
+    } else {
+      AttendanceCancelDialog.show(
+        context: context,
+        cameraController: cameraController,
+      );
+    }
+  }
+
+  bool shouldShowStepIndicator() {
+    return widget.mode == FaceVerificationMode.attendanceInPerson ||
+        widget.mode == FaceVerificationMode.attendanceOnline;
+  }
+
+  bool isAttendanceMode() {
+    return widget.mode == FaceVerificationMode.attendanceInPerson ||
+        widget.mode == FaceVerificationMode.attendanceOnline;
   }
 
   @override
   void dispose() {
-    cameraController?.dispose();
-    super.dispose();
+    // If dispose is async, use the following:
+    // await cameraController?.dispose();
+    // However, Flutter's dispose() cannot be async, so use then() for cleanup.
+    cameraController?.dispose().then((_) {
+      viewModel.dispose();
+      super.dispose();
+    });
+    // If dispose() is not async, keep as is:
+    // cameraController?.dispose();
+    // viewModel.dispose();
+    // super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    double size = MediaQuery.of(context).size.width * 0.93;
-    final previewSize = cameraController?.value.previewSize;
-    return PopScope(
-      canPop: false,
-      onPopInvoked: (result) {
-        if (widget.mode == FaceVerificationMode.signUp) {
-          showSignUpCancelDialog();
-        } else {
-          showAttendanceCancelDialog();
-        }
-      },
-      child: Scaffold(
-        body: Stack(
-          children: [
-            Center(
-              child: (isCameraInitialized && previewSize != null)
-                  ? ClipOval(
-                      child: SizedBox(
-                        height: size,
-                        width: size,
-                        child: FittedBox(
-                          fit: BoxFit.cover,
-                          child: SizedBox(
-                            height: previewSize.width,
-                            width: previewSize.height,
-                            child: CameraPreview(cameraController!),
-                          ),
-                        ),
-                      ),
-                    )
-                  : const CircularProgressIndicator(),
-            ),
-            Align(
-              alignment: Alignment.topRight,
-              child: Padding(
-                padding: EdgeInsets.only(
-                    top: MediaQuery.of(context).padding.top + 30, right: 12),
-                child: AppMaterial(
-                  inkwellBorderRadius: BorderRadius.circular(10),
-                  onTap: widget.onExit ??
-                      () {
-                        if (widget.mode == FaceVerificationMode.signUp) {
-                          showSignUpCancelDialog();
-                        } else {
-                          showAttendanceCancelDialog();
-                        }
-                      },
-                  child: Ink(
-                    width: 85,
-                    padding: const EdgeInsets.only(left: 5, top: 5, bottom: 5),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Exit',
-                          style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.black),
-                        ),
-                        SizedBox(width: 5),
-                        Icon(
-                          Icons.close_sharp,
-                          size: 25,
-                          color: AppColors.black,
-                        ),
-                      ],
-                    ),
+    return ChangeNotifierProvider.value(
+      value: viewModel,
+      child: PopScope(
+        canPop: false,
+        onPopInvoked: (_) => handleExit(),
+        child: Scaffold(
+          body: Consumer<FaceVerificationViewModel>(
+            builder: (context, faceVerificationViewModel, _) {
+              final locationStatus =
+                  faceVerificationViewModel.locationState.verificationStatus;
+
+              final verificationStep =
+                  faceVerificationViewModel.verificationState.currentStep;
+
+              return Stack(
+                children: [
+                  // Main content
+                  StepContent(
+                    viewModel: faceVerificationViewModel,
+                    cameraController: cameraController,
+                    isCameraInitialized: isCameraInitialized,
                   ),
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding:
-                    const EdgeInsets.only(left: 30, right: 30, bottom: 50.0),
-                child: PrimaryButton(
-                  onTap: verifyFace,
-                  child:
-                      // isVerifying
-                      //     ? const SizedBox(
-                      //         height: 20,
-                      //         width: 20,
-                      //         child: CircularProgressIndicator(
-                      //             strokeWidth: 2.5, color: AppColors.white))
-                      //     :
-                      Text(widget.mode == FaceVerificationMode.signUp
-                          ? AppStrings.registerFace
-                          : AppStrings.verifyFace),
-                ),
-              ),
-            ),
-            BlurredLoadingOverlay(showLoader: isVerifying),
-          ],
+
+                  // Step indicator for attendance mode
+                  if (shouldShowStepIndicator())
+                    StepIndicatorWidget(viewModel: faceVerificationViewModel),
+
+                  // Attendance type indicator
+                  if (isAttendanceMode() &&
+                      faceVerificationViewModel
+                              .verificationState.attendanceType !=
+                          null)
+                    AttendanceTypeIndicator(
+                      attendanceType: faceVerificationViewModel
+                              .verificationState.attendanceType ??
+                          AttendanceType.inPerson,
+                      // viewModel: faceVerificationViewModel,
+                    ),
+
+                  // Exit button
+                  ExitButton(
+                    mode: widget.mode,
+                    viewModel: faceVerificationViewModel,
+                    onExit: widget.onExit ?? handleExit,
+                  ),
+
+                  // Verification button
+                  VerificationButton(
+                    mode: widget.mode,
+                    viewModel: faceVerificationViewModel,
+                    onVerify: getOnVerify(
+                        locationStatus ??
+                            LocationVerificationStatus
+                                .successInRange, //TODO: check this logic
+                        verificationStep),
+                  ),
+
+                  // Loading overlay
+                  Visibility(
+                    visible: faceVerificationViewModel.isFaceVerifying,
+                    child: BlurredLoadingOverlay(
+                        showLoader: faceVerificationViewModel
+                            .verificationState.isLoading),
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
+  }
+
+  VoidCallback getOnVerify(LocationVerificationStatus locationStatus,
+      VerificationStep verificationStep) {
+    if (locationStatus == LocationVerificationStatus.outOfRange) {
+      return () => handleOutOfRange(locationStatus);
+    }
+    if (verificationStep == VerificationStep.completed) {
+      return () => handleCompletion();
+    }
+    return handleVerification;
   }
 }

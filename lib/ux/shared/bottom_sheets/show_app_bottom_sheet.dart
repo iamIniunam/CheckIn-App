@@ -70,20 +70,17 @@ Future showAppBottomSheet({
                                 visible: showCloseButton,
                                 child: Material(
                                   color: AppColors.transparent,
-                                  child: Ink(
-                                    color: AppColors.transparent,
-                                    child: InkWell(
-                                        borderRadius:
-                                            BorderRadius.circular(100),
-                                        onTap: () {
-                                          Navigation.back(context: context);
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(10.0),
-                                          child:
-                                              AppImages.svgCloseBottomSheetIcon,
-                                        )),
-                                  ),
+                                  child: InkWell(
+                                      borderRadius:
+                                          BorderRadius.circular(100),
+                                      onTap: () {
+                                        Navigation.back(context: context);
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(10.0),
+                                        child:
+                                            AppImages.svgCloseBottomSheetIcon,
+                                      )),
                                 ),
                               ),
                             ],

@@ -24,12 +24,12 @@ void showAlert(
         ),
       ),
       isCloseButton: false,
-      overlayColor: Colors.black.withOpacity(0.5),
+      overlayColor: AppColors.black.withOpacity(0.5),
       titleStyle: const TextStyle(
           color: AppColors.defaultColor,
           fontSize: 18,
           fontWeight: FontWeight.w700),
-      descStyle: const TextStyle(color: Colors.grey, fontSize: 16),
+      descStyle: const TextStyle(color: AppColors.grey, fontSize: 16),
       alertPadding: const EdgeInsets.all(65),
     ),
     context: context,
@@ -40,12 +40,11 @@ void showAlert(
         onPressed: () {
           Navigator.pop(context);
         },
-        // width: 200,
-        color: Colors.blueGrey.shade900,
+        color: AppColors.defaultColor,
         radius: BorderRadius.circular(20),
         child: Text(
           buttonText ?? 'Try again',
-          style: const TextStyle(color: Colors.white, fontSize: 20),
+          style: const TextStyle(color: AppColors.white, fontSize: 20),
         ),
       ),
     ],
@@ -64,5 +63,3 @@ Color statusColor(String status) {
       return Colors.grey.shade500;
   }
 }
-
-enum FaceVerificationMode { signUp, attendance }

@@ -3,7 +3,7 @@ import 'package:attendance_app/platform/extensions/date_time_extensions.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
-import 'package:attendance_app/ux/views/course_details_page.dart';
+import 'package:attendance_app/ux/views/course/course_details_page.dart';
 import 'package:flutter/material.dart';
 
 class CourseCard extends StatelessWidget {
@@ -19,13 +19,10 @@ class CourseCard extends StatelessWidget {
         onTap: () {
           Navigation.navigateToScreen(
             context: context,
-            screen: CourseDetailsPage(
-              courseCode: course.courseCode,
-              lecturer: course.lecturer ?? '',
-            ),
+            screen: CourseDetailsPage(course: course),
           );
         },
-        child: Ink(
+        child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
             children: [
@@ -48,9 +45,10 @@ class CourseCard extends StatelessWidget {
                     Text(
                       DateTime.now().day.toString(),
                       style: const TextStyle(
-                          color: AppColors.defaultColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold),
+                        color: AppColors.defaultColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -107,9 +105,10 @@ class CourseCard extends StatelessWidget {
                           child: Text(
                             course.status ?? '',
                             style: TextStyle(
-                                color: course.getStatusColor,
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold),
+                              color: course.getStatusColor,
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
