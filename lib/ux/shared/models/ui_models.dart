@@ -3,6 +3,44 @@ import 'package:attendance_app/ux/shared/components/global_functions.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 
+class Student {
+  final String idNumber;
+  final String firstName;
+  final String lastName;
+  final String program;
+  final String passowrd;
+  // final String level;
+  // final String semester;
+
+  Student({
+    required this.idNumber,
+    required this.firstName,
+    required this.lastName,
+    required this.program,
+    required this.passowrd,
+  });
+
+  factory Student.fromJson(Map<String, dynamic> json) {
+    return Student(
+      idNumber: json['idnumber'] ?? json['id_number'] ?? '',
+      firstName: json['first_name'],
+      lastName: json['last_name'],
+      program: json['program'],
+      passowrd: json['password'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'idnumber': idNumber,
+      'firstName': firstName,
+      'lastName': lastName,
+      'program': program,
+      'password': passowrd,
+    };
+  }
+}
+
 class Course {
   final String courseCode;
   final String? courseTitle;

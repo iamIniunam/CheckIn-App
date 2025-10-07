@@ -32,17 +32,17 @@ class _ConfirmCoursesPageState extends State<ConfirmCoursesPage> {
     userViewModel = context.read<UserViewModel>();
   }
 
-  String get semesterText {
-    final semester = userViewModel.semester;
-    switch (semester) {
-      case '1':
-        return '1st';
-      case '2':
-        return '2nd';
-      default:
-        return 'Unknown';
-    }
-  }
+  // String get semesterText {
+  //   final semester = userViewModel.semester;
+  //   switch (semester) {
+  //     case '1':
+  //       return '1st';
+  //     case '2':
+  //       return '2nd';
+  //     default:
+  //       return 'Unknown';
+  //   }
+  // }
 
   Future<void> onConfirmPressed(CourseViewModel viewModel) async {
     final success = await viewModel.confirmCourses();
@@ -86,7 +86,8 @@ class _ConfirmCoursesPageState extends State<ConfirmCoursesPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '${userViewModel.level} Level, $semesterText Semester',
+                      // '${userViewModel.level} Level, $semesterText Semester',
+                      '',
                       style: const TextStyle(
                         color: AppColors.defaultColor,
                         fontSize: 16,

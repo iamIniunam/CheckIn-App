@@ -1,6 +1,8 @@
 class AppConstants {
   AppConstants._();
 
+  static const apiBaseUrl = 'http://10.61.33.161:8000/api';
+
   static const idNumberKey = 'id.number';
   static const levelKey = 'level';
   static const semesterKey = 'semester';

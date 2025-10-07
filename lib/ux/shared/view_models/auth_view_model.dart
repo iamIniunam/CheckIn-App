@@ -1,170 +1,55 @@
-import 'package:attendance_app/ux/shared/resources/app_constants.dart';
+import 'package:attendance_app/platform/repositories/auth_repository.dart';
+import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthViewModel extends ChangeNotifier {
-  String idNumber = '';
-  String level = '';
-  String semester = '';
-  String password = '';
-  String selectedProgram = '';
-  int selectedProgramId = 0;
+  final AuthRepository _authRepository;
+
+  AuthViewModel({AuthRepository? authRepository})
+      : _authRepository = authRepository ?? AuthRepository();
 
   bool _isLoading = false;
+  String? _errorMessage;
+  Student? _currentStudent;
+
   bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
+  Student? get currentStudent => _currentStudent;
 
-  void updateIDNumber(String value) {
-    idNumber = value;
-    notifyListeners();
+  bool get isLoggedIn => _currentStudent != null;
+
+  Future<bool> login(String idNumber, String password) async {
+    setLoadingState(null, true);
+
+    final response = await _authRepository.login(
+      idNumber: idNumber,
+      password: password,
+    );
+
+    if (response.success && response.data != null) {
+      _currentStudent = response.data;
+      setLoadingState(null, false);
+      return true;
+    } else {
+      setLoadingState(response.message, false);
+      return false;
+    }
   }
 
-  void updateLevel(String value) {
-    level = value;
-    notifyListeners();
-  }
-
-  void updateSemester(String value) {
-    semester = value;
-    notifyListeners();
-  }
-
-  void updatePassword(String value) {
-    password = value;
-    notifyListeners();
-  }
-
-  void updateProgram(String program) {
-    selectedProgram = program;
-    selectedProgramId = AppConstants.getProgramId(program);
-    notifyListeners();
-  }
-
-  void setLoadingState(bool loading) {
+  void setLoadingState(String? message, bool loading) {
+    _errorMessage = message;
     _isLoading = loading;
     notifyListeners();
   }
 
-  Future<bool> saveDetailsToCache() async {
-    try {
-      setLoadingState(true);
-
-      final pref = await SharedPreferences.getInstance();
-
-      await Future.wait([
-        pref.setString(AppConstants.idNumberKey, idNumber),
-        pref.setString(AppConstants.levelKey, level),
-        pref.setString(AppConstants.semesterKey, semester),
-        pref.setString(AppConstants.passwordKey, password),
-        pref.setString(AppConstants.programKey, selectedProgram),
-        pref.setInt(AppConstants.programIdKey, selectedProgramId),
-      ]);
-
-      setLoadingState(false);
-      return true;
-    } catch (e) {
-      setLoadingState(false);
-      return false;
-    }
+  void logout() {
+    _currentStudent = null;
+    _errorMessage = null;
+    notifyListeners();
   }
 
-  Future<bool> signUp() async {
-    if (!enableButton) return false;
-
-    return await saveDetailsToCache();
+  void clearError() {
+    _errorMessage = null;
+    notifyListeners();
   }
-
-  static Future<bool> isUserSignedUp() async {
-    try {
-      final pref = await SharedPreferences.getInstance();
-
-      final idNumber = pref.getString(AppConstants.idNumberKey);
-      final level = pref.getString(AppConstants.levelKey);
-      final semester = pref.getString(AppConstants.semesterKey);
-      final password = pref.getString(AppConstants.passwordKey);
-      final program = pref.getString(AppConstants.programKey);
-
-      return idNumber != null &&
-          level != null &&
-          semester != null &&
-          password != null &&
-          program != null &&
-          idNumber.isNotEmpty &&
-          level.isNotEmpty &&
-          semester.isNotEmpty &&
-          password.isNotEmpty &&
-          program.isNotEmpty;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  Future<bool> clearUserData() async {
-    try {
-      final pref = await SharedPreferences.getInstance();
-
-      await Future.wait([
-        pref.remove(AppConstants.idNumberKey),
-        pref.remove(AppConstants.levelKey),
-        pref.remove(AppConstants.semesterKey),
-        pref.remove(AppConstants.passwordKey),
-        pref.remove(AppConstants.programKey),
-        pref.remove(AppConstants.programIdKey),
-      ]);
-
-      idNumber = '';
-      level = '';
-      semester = '';
-      password = '';
-      selectedProgram = '';
-      selectedProgramId = 0;
-
-      notifyListeners();
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  bool isValidIdNumber(String idNumber) {
-    if (idNumber.length != 12) {
-      return false;
-    }
-
-    bool hasAorB = idNumber.contains('A') || idNumber.contains('B');
-    bool hasY = idNumber.contains('Y');
-    bool hasValidPrefix = idNumber.contains('ENG') ||
-        idNumber.contains('ADS') ||
-        idNumber.contains('ABS');
-
-    return hasValidPrefix && hasAorB && hasY;
-  }
-
-  bool isValidLevel(String level) {
-    return (level == '100' ||
-            level == '200' ||
-            level == '300' ||
-            level == '400') &&
-        level.length == 3;
-  }
-
-  bool isValidSemester(String semester) {
-    return (semester == '1' || semester == '2') && semester.length == 1;
-  }
-
-  bool get isIdNumberValid => idNumber.isEmpty || isValidIdNumber(idNumber);
-  bool get isLevelValid => level.isEmpty || isValidLevel(level);
-  bool get isSemesterValid => semester.isEmpty || isValidSemester(semester);
-
-  bool get enableButton {
-    return idNumber.isNotEmpty &&
-        level.isNotEmpty &&
-        semester.isNotEmpty &&
-        password.isNotEmpty &&
-        selectedProgram.isNotEmpty &&
-        isValidIdNumber(idNumber) &&
-        isValidLevel(level) &&
-        isValidSemester(semester);
-  }
-
-  int get programIdForApi => selectedProgramId;
 }

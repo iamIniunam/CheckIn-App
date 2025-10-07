@@ -108,9 +108,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           ProfileDetailItem(
                               title: AppStrings.studentIdNumber,
                               value: userViewModel.idNumber),
-                          ProfileDetailItem(
-                              title: AppStrings.studentLevel,
-                              value: 'Level ${userViewModel.level}'),
+                          // ProfileDetailItem(
+                          //     title: AppStrings.studentLevel,
+                          //     value: 'Level ${userViewModel.level}'),
                           ProfileDetailItem(
                               title: AppStrings.currentSemester,
                               value: '$semesterText Semester'),
