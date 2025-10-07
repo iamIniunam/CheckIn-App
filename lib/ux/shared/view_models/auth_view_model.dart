@@ -1,6 +1,8 @@
 import 'package:attendance_app/platform/repositories/auth_repository.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
+import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthViewModel extends ChangeNotifier {
   final AuthRepository _authRepository;
@@ -8,6 +10,8 @@ class AuthViewModel extends ChangeNotifier {
   AuthViewModel({AuthRepository? authRepository})
       : _authRepository = authRepository ?? AuthRepository();
 
+  String level = '';
+  int semester = 0;
   bool _isLoading = false;
   String? _errorMessage;
   Student? _currentStudent;
@@ -28,10 +32,36 @@ class AuthViewModel extends ChangeNotifier {
 
     if (response.success && response.data != null) {
       _currentStudent = response.data;
+      saveLevelAndSemesterToCache();
       setLoadingState(null, false);
       return true;
     } else {
       setLoadingState(response.message, false);
+      return false;
+    }
+  }
+
+  void updateLevel(String value) {
+    level = value;
+    notifyListeners();
+  }
+
+  void updateSemester(int value) {
+    semester = value;
+    notifyListeners();
+  }
+
+  Future<bool> saveLevelAndSemesterToCache() async {
+    try {
+      final pref = await SharedPreferences.getInstance();
+
+      await Future.wait([
+        pref.setString(AppConstants.levelKey, level),
+        pref.setInt(AppConstants.semesterKey, semester),
+      ]);
+
+      return true;
+    } catch (e) {
       return false;
     }
   }

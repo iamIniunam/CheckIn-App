@@ -50,7 +50,7 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
   ];
 
   String? get courseStream =>
-      SelectedCoursesService().getStreamForCourse(widget.course.courseCode);
+      SelectedCourseService().getStreamForCourse(widget.course.courseCode);
 
   @override
   Widget build(BuildContext context) {

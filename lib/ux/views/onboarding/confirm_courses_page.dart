@@ -29,20 +29,26 @@ class _ConfirmCoursesPageState extends State<ConfirmCoursesPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CourseViewModel>().loadCourses(
+            userViewModel.level,
+            userViewModel.semester,
+          );
+    });
     userViewModel = context.read<UserViewModel>();
   }
 
-  // String get semesterText {
-  //   final semester = userViewModel.semester;
-  //   switch (semester) {
-  //     case '1':
-  //       return '1st';
-  //     case '2':
-  //       return '2nd';
-  //     default:
-  //       return 'Unknown';
-  //   }
-  // }
+  String get semesterText {
+    final semester = userViewModel.semester;
+    switch (semester) {
+      case 1:
+        return '1st';
+      case 2:
+        return '2nd';
+      default:
+        return 'Unknown';
+    }
+  }
 
   Future<void> onConfirmPressed(CourseViewModel viewModel) async {
     final success = await viewModel.confirmCourses();
@@ -71,111 +77,145 @@ class _ConfirmCoursesPageState extends State<ConfirmCoursesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CourseViewModel>(
-      builder: (context, viewModel, _) {
-        return AppPageScaffold(
-          hideAppBar: false,
-          showBackButton: widget.isEdit,
-          title: AppStrings.confirmSemeterCourses,
-          body: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 16, right: 8, bottom: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      // '${userViewModel.level} Level, $semesterText Semester',
-                      '',
-                      style: const TextStyle(
-                        color: AppColors.defaultColor,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  itemCount: viewModel.availableCourses.length,
-                  itemBuilder: (context, index) {
-                    final course = viewModel.availableCourses[index];
-                    final selectedStream = viewModel.getCourseStream(course);
+    return AppPageScaffold(
+      hideAppBar: false,
+      showBackButton: widget.isEdit,
+      title: AppStrings.confirmSemeterCourses,
+      body: Consumer<CourseViewModel>(builder: (context, viewModel, _) {
+        if (viewModel.isLoadingCourses) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-                    return ConfirmCourseCard(
-                      semesterCourse: course,
-                      selectedStream: selectedStream,
-                      onTapStream: (stream) {
-                        viewModel.updateCourseStream(course, stream);
-                      },
-                    );
-                  },
-                ),
+        // Error state
+        // if (viewModel.hasLoadError) {
+        //   return Center(
+        //     child: Column(
+        //       mainAxisAlignment: MainAxisAlignment.center,
+        //       children: [
+        //         const Icon(Icons.error_outline, size: 48, color: Colors.red),
+        //         const SizedBox(height: 16),
+        //         Text(
+        //           viewModel.loadError ?? 'An error occurred',
+        //           style: const TextStyle(color: Colors.red),
+        //           textAlign: TextAlign.center,
+        //         ),
+        //         const SizedBox(height: 16),
+        //         ElevatedButton.icon(
+        //           onPressed: () => viewModel.reloadCourses(
+        //             userViewModel.level,
+        //             userViewModel.semester,
+        //           ),
+        //           icon: const Icon(Icons.refresh),
+        //           label: const Text('Retry'),
+        //         ),
+        //       ],
+        //     ),
+        //   );
+        // }
+
+        // Empty state
+        if (viewModel.availableCourses.isEmpty) {
+          return Center(
+            child: Text(
+                'No courses available for this level ${userViewModel.level} semester ${userViewModel.semester}'),
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 16, right: 8, bottom: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${userViewModel.level} Level, $semesterText Semester',
+                    style: const TextStyle(
+                      color: AppColors.defaultColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding:
-                          const EdgeInsets.only(left: 16, top: 8, right: 16),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: RichText(
-                          text: TextSpan(
-                            text: 'Total credit hours: ',
-                            style: const TextStyle(
-                              color: AppColors.defaultColor,
-                              fontFamily: 'Nunito',
-                            ),
-                            children: <TextSpan>[
-                              TextSpan(
-                                text:
-                                    '${viewModel.totalCreditHours}/${AppConstants.requiredCreditHours}',
-                                style: const TextStyle(
-                                  color: AppColors.defaultColor,
-                                  fontFamily: 'Nunito',
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
+            ),
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                itemCount: viewModel.availableCourses.length,
+                itemBuilder: (context, index) {
+                  final course = viewModel.availableCourses[index];
+                  final selectedStream = viewModel.getCourseStream(course);
+
+                  return ConfirmCourseCard(
+                    semesterCourse: course,
+                    selectedStream: selectedStream,
+                    onTapStream: (stream) {
+                      viewModel.updateCourseStream(course, stream);
+                    },
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16, top: 8, right: 16),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: RichText(
+                        text: TextSpan(
+                          text: 'Total credit hours: ',
+                          style: const TextStyle(
+                            color: AppColors.defaultColor,
+                            fontFamily: 'Nunito',
                           ),
+                          children: <TextSpan>[
+                            TextSpan(
+                              text:
+                                  '${viewModel.totalCreditHours}/${AppConstants.requiredCreditHours}',
+                              style: const TextStyle(
+                                color: AppColors.defaultColor,
+                                fontFamily: 'Nunito',
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    BackAndNextButtonRow(
-                      enableBackButton: viewModel.canAddCourse,
-                      enableNextButton: viewModel.canConfirm,
-                      firstText: AppStrings.addCourse,
-                      secondText: AppStrings.confirm,
-                      onTapFirstButton: () {
-                        Navigation.navigateToScreen(
-                            context: context, screen: const AddCoursePage());
-                      },
-                      onTapNextButton: () {
-                        onConfirmPressed(viewModel);
-                      },
-                      nextWidget: viewModel.isConfirming
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: AppColors.white,
-                              ),
-                            )
-                          : null,
-                    ),
-                  ],
-                ),
+                  ),
+                  BackAndNextButtonRow(
+                    enableBackButton: viewModel.canAddCourse,
+                    enableNextButton: viewModel.canConfirm,
+                    firstText: AppStrings.addCourse,
+                    secondText: AppStrings.confirm,
+                    onTapFirstButton: () {
+                      Navigation.navigateToScreen(
+                          context: context, screen: const AddCoursePage());
+                    },
+                    onTapNextButton: () {
+                      onConfirmPressed(viewModel);
+                    },
+                    nextWidget: viewModel.isConfirming
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: AppColors.white,
+                            ),
+                          )
+                        : null,
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         );
-      },
+      }),
     );
   }
 }

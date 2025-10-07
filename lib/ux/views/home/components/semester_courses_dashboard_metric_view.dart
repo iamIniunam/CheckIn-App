@@ -17,11 +17,10 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: SelectedCoursesService(),
+      listenable: SelectedCourseService(),
       builder: (context, child) {
-        final selectedSemesterCourses =
-            SelectedCoursesService().selectedCourses;
-        final selectedStreams = SelectedCoursesService().selectedStreams;
+        final selectedSemesterCourses = SelectedCourseService().selectedCourses;
+        final selectedStreams = SelectedCourseService().selectedStreams;
 
         if (selectedSemesterCourses.isEmpty) {
           return const SelectedCoursesEmptyState();

@@ -42,9 +42,13 @@ class Student {
 }
 
 class Course {
+  final int? id;
   final String courseCode;
   final String? courseTitle;
   final int? creditHours;
+  final String? level;
+  final int? semester;
+  final String? school;
   final String? status;
   final bool showStatus;
   late final Color color;
@@ -67,13 +71,49 @@ class Course {
   Color get getStatusColor => statusColor(status ?? '');
 
   Course({
+    this.id,
     required this.courseCode,
     this.courseTitle,
     this.creditHours,
+    this.level,
+    this.semester,
+    this.school,
     this.status,
     this.showStatus = false,
     int? index,
   }) : color = Course.getColorByIndex(index ?? 0);
+
+  factory Course.fromJson(Map<String, dynamic> json) {
+    return Course(
+      id: json['id'],
+      courseCode: json['code'],
+      courseTitle: json['name'],
+      level: json['level'],
+      semester: json['semester'],
+      school: json['school'],
+      creditHours: json['credit_hours'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': courseTitle,
+      'code': courseCode,
+      'level': level,
+      'semester': semester,
+      'school': school,
+      'credit_hours': creditHours,
+    };
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Course && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }
 
 class Session {

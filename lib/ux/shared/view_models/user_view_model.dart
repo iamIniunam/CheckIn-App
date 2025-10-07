@@ -10,7 +10,7 @@ class UserViewModel extends ChangeNotifier {
   String get idNumber => pref.getString(AppConstants.idNumberKey) ?? '';
   String get level => pref.getString(AppConstants.levelKey) ?? '';
   String get program => pref.getString(AppConstants.programKey) ?? '';
-  String get semester => pref.getString(AppConstants.semesterKey) ?? '';
+  int get semester => pref.getInt(AppConstants.semesterKey) ?? 0;
   String get password => pref.getString(AppConstants.passwordKey) ?? '';
 
   String getUserPrimaryStream(Map<dynamic, String?> chosenStreams) {

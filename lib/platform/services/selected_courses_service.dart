@@ -1,11 +1,11 @@
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:flutter/material.dart';
 
-class SelectedCoursesService extends ChangeNotifier {
-  static final SelectedCoursesService _instance =
-      SelectedCoursesService._internal();
-  factory SelectedCoursesService() => _instance;
-  SelectedCoursesService._internal();
+class SelectedCourseService extends ChangeNotifier {
+  static final SelectedCourseService _instance =
+      SelectedCourseService._internal();
+  factory SelectedCourseService() => _instance;
+  SelectedCourseService._internal();
 
   List<Course> _selectedCourses = [];
   Map<String, String> _selectedStreams = {};
@@ -43,8 +43,12 @@ class SelectedCoursesService extends ChangeNotifier {
         (sum, course) => sum + (course.creditHours ?? 0),
       );
 
+  // Optional: Save to local storage or backend
   Future<void> saveSelectedCourses() async {
-    try {} catch (e) {
+    try {
+      // TODO: Implement persistence if needed
+      debugPrint('Saving ${_selectedCourses.length} courses');
+    } catch (e) {
       debugPrint('Error saving selected courses: $e');
     }
   }

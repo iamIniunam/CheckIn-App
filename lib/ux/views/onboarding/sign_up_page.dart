@@ -150,9 +150,9 @@ class _SignUpPageState extends State<SignUpPage> {
                                           hintText: AppStrings.levelHintText,
                                           bottomPadding: 0,
                                           textInputAction: TextInputAction.next,
-                                          // onChanged: (value) {
-                                          //   viewModel.updateLevel(value);
-                                          // },
+                                          onChanged: (value) {
+                                            viewModel.updateLevel(value);
+                                          },
                                           // errorText: vm.level.isNotEmpty &&
                                           //         !vm.isLevelValid
                                           //     ? 'Between 100 - 400'
@@ -167,9 +167,10 @@ class _SignUpPageState extends State<SignUpPage> {
                                           bottomPadding: 0,
                                           hintText: AppStrings.semesterHintText,
                                           textInputAction: TextInputAction.next,
-                                          // onChanged: (value) {
-                                          //   viewModel.updateSemester(value);
-                                          // },
+                                          onChanged: (value) {
+                                            viewModel.updateSemester(
+                                                int.tryParse(value) ?? 0);
+                                          },
                                           // errorText: vm.semester.isNotEmpty &&
                                           //         !vm.isSemesterValid
                                           //     ? 'Enter 1 or 2'

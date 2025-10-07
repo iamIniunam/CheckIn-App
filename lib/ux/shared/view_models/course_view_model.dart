@@ -1,59 +1,38 @@
+import 'package:attendance_app/platform/repositories/course_repository.dart';
 import 'package:attendance_app/platform/services/selected_courses_service.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:flutter/material.dart';
 
 class CourseViewModel extends ChangeNotifier {
-  final SelectedCoursesService _selectedCoursesService =
-      SelectedCoursesService();
+  final CourseRepository _repository;
+  final SelectedCourseService _selectedCoursesService;
 
+  CourseViewModel({
+    CourseRepository? repository,
+    SelectedCourseService? selectedCoursesService,
+  })  : _repository = repository ?? CourseRepository(),
+        _selectedCoursesService =
+            selectedCoursesService ?? SelectedCourseService();
+
+  // Available courses from API
+  List<Course> _availableCourses = [];
+  bool _isLoadingCourses = false;
+  String? _loadError;
+
+  // Selected courses state
   final Set<Course> _selectedCourses = {};
   final Map<Course, String?> _chosenStreams = {};
   bool _isConfirming = false;
   String? _errorMessage;
 
-  final List<Course> _availableCourses = [
-    Course(
-        courseCode: 'CS306',
-        creditHours: 1,
-        courseTitle: 'Computer Architecture Lab'),
-    Course(
-        courseCode: 'CS311', creditHours: 3, courseTitle: 'Datebase system 1'),
-    Course(
-        courseCode: 'CE301/CE302',
-        creditHours: 3,
-        courseTitle: 'Electronic Device & Circuits Electronics Lab'),
-    Course(
-        courseCode: 'CE303',
-        creditHours: 1,
-        courseTitle: 'Embedded Microprocessor Systems'),
-    Course(
-        courseCode: 'EEE303',
-        creditHours: 1,
-        courseTitle: 'Communication Systems 1'),
-    Course(
-        courseCode: 'CE304',
-        creditHours: 3,
-        courseTitle: 'Systems and Signals'),
-    Course(
-        courseCode: 'CS208',
-        creditHours: 3,
-        courseTitle: 'Data Communications & Computer Networks 1'),
-    Course(
-        courseCode: 'ENG307',
-        creditHours: 1,
-        courseTitle: 'Eng Lab 4 - Microcomputer Tech Lab'),
-    Course(
-        courseCode: 'ENG306',
-        creditHours: 2,
-        courseTitle: 'Research Methodology'),
-    Course(
-        courseCode: 'FAB301',
-        creditHours: 0,
-        courseTitle: 'Digital Fabrication for Product Development'),
-  ];
-
+  // Getters for available courses
   List<Course> get availableCourses => List.unmodifiable(_availableCourses);
+  bool get isLoadingCourses => _isLoadingCourses;
+  String? get loadError => _loadError;
+  bool get hasLoadError => _loadError != null;
+
+  // Getters for selected courses
   List<Course> get selectedCourses => _selectedCourses.toList();
   Map<Course, String?> get chosenStreams => Map.unmodifiable(_chosenStreams);
   bool get isConfirming => _isConfirming;
@@ -68,6 +47,42 @@ class CourseViewModel extends ChangeNotifier {
       !_isConfirming;
 
   bool get canAddCourse => totalCreditHours < AppConstants.requiredCreditHours;
+
+  Future<void> loadCourses(String level, int semester) async {
+    setLoadingState(null, true);
+
+    try {
+      final response = await _repository.fetchCoursesForLevelAndSemester(
+        level,
+        semester,
+      );
+
+      if (response.data != null) {
+        _availableCourses = response.data ?? [];
+        _loadError = null;
+      } else {
+        _loadError = response.message ?? 'Failed to load courses';
+        _availableCourses = [];
+      }
+    } catch (e) {
+      _loadError = 'An unexpected error occurred: ${e.toString()}';
+      _availableCourses = [];
+    } finally {
+      _isLoadingCourses = false;
+      notifyListeners();
+    }
+  }
+
+  // Retry loading courses
+  Future<void> reloadCourses(String level, int semester) async {
+    return loadCourses(level, semester);
+  }
+
+  void setLoadingState(String? message, bool loading) {
+    _loadError = message;
+    _isLoadingCourses = loading;
+    notifyListeners();
+  }
 
   bool isCourseSelected(Course course) {
     return _chosenStreams[course] != null;
@@ -105,6 +120,7 @@ class CourseViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // TODO: Add API call to save selected courses to backend
       await Future.delayed(const Duration(seconds: 1));
       _selectedCoursesService.updateSelectedCourses(
           _selectedCourses.toList(), _chosenStreams);
