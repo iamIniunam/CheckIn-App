@@ -8,6 +8,10 @@ class CourseRepository {
   CourseRepository({CourseApi? courseApi})
       : _courseApi = courseApi ?? CourseApi();
 
+  Future<ApiResponse<List<Course>>> fetchAllCourses() async {
+    return await _courseApi.getAllCourses();
+  }
+
   Future<ApiResponse<List<Course>>> fetchCoursesForLevelAndSemester(
       String level, int semester) async {
     return await _courseApi.getCoursesForLevelAndSemester(level, semester);

@@ -15,7 +15,8 @@ class CourseViewModel extends ChangeNotifier {
         _selectedCoursesService =
             selectedCoursesService ?? SelectedCourseService();
 
-  // Available courses from API
+  // All courses from API
+  List<Course> _allCourses = [];
   List<Course> _availableCourses = [];
   bool _isLoadingCourses = false;
   String? _loadError;
@@ -26,7 +27,8 @@ class CourseViewModel extends ChangeNotifier {
   bool _isConfirming = false;
   String? _errorMessage;
 
-  // Getters for available courses
+  // Getters for all courses
+  List<Course> get allCourses => List.unmodifiable(_allCourses);
   List<Course> get availableCourses => List.unmodifiable(_availableCourses);
   bool get isLoadingCourses => _isLoadingCourses;
   String? get loadError => _loadError;
@@ -48,7 +50,29 @@ class CourseViewModel extends ChangeNotifier {
 
   bool get canAddCourse => totalCreditHours < AppConstants.requiredCreditHours;
 
-  Future<void> loadCourses(String level, int semester) async {
+  Future<void> loadAllCourses() async {
+    setLoadingState(null, true);
+
+    try {
+      final response = await _repository.fetchAllCourses();
+
+      if (response.data != null) {
+        _allCourses = response.data ?? [];
+        _loadError = null;
+      } else {
+        _loadError = response.message ?? 'Failed to load courses';
+        _allCourses = [];
+      }
+    } catch (e) {
+      _loadError = 'An unexpected error occurred: ${e.toString()}';
+      _allCourses = [];
+    } finally {
+      _isLoadingCourses = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadCoursesForLevels(String level, int semester) async {
     setLoadingState(null, true);
 
     try {
@@ -74,8 +98,8 @@ class CourseViewModel extends ChangeNotifier {
   }
 
   // Retry loading courses
-  Future<void> reloadCourses(String level, int semester) async {
-    return loadCourses(level, semester);
+  Future<void> reloadCoursesForLevels(String level, int semester) async {
+    return loadCoursesForLevels(level, semester);
   }
 
   void setLoadingState(String? message, bool loading) {
@@ -88,14 +112,14 @@ class CourseViewModel extends ChangeNotifier {
     return _chosenSchools[course] != null;
   }
 
-  String? getCourseStream(Course course) {
+  String? getCourseSchool(Course course) {
     return _chosenSchools[course];
   }
 
-  void updateCourseStream(Course course, String? stream) {
+  void updateCourseSchool(Course course, String? school) {
     clearError();
 
-    if (_chosenSchools[course] == stream) {
+    if (_chosenSchools[course] == school) {
       _chosenSchools.remove(course);
       _selectedCourses.remove(course);
     } else {
@@ -106,7 +130,7 @@ class CourseViewModel extends ChangeNotifier {
           return;
         }
       }
-      _chosenSchools[course] = stream;
+      _chosenSchools[course] = school;
       _selectedCourses.add(course);
     }
     notifyListeners();

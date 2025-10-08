@@ -42,7 +42,7 @@ class _ConfirmCoursesPageState extends State<ConfirmCoursesPage> {
         return;
       }
 
-      context.read<CourseViewModel>().loadCourses(
+      context.read<CourseViewModel>().loadCoursesForLevels(
             userViewModel.level,
             userViewModel.semester,
           );
@@ -168,13 +168,13 @@ class _ConfirmCoursesPageState extends State<ConfirmCoursesPage> {
                 itemCount: viewModel.availableCourses.length,
                 itemBuilder: (context, index) {
                   final course = viewModel.availableCourses[index];
-                  final selectedStream = viewModel.getCourseStream(course);
+                  final selectedSchool = viewModel.getCourseSchool(course);
 
                   return ConfirmCourseCard(
                     semesterCourse: course,
-                    selectedStream: selectedStream,
-                    onTapStream: (stream) {
-                      viewModel.updateCourseStream(course, stream);
+                    selectedSchool: selectedSchool,
+                    onTapSchool: (school) {
+                      viewModel.updateCourseSchool(course, school);
                     },
                   );
                 },

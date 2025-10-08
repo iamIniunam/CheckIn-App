@@ -9,12 +9,12 @@ class ConfirmCourseCard extends StatelessWidget {
   const ConfirmCourseCard(
       {super.key,
       required this.semesterCourse,
-      required this.selectedStream,
-      required this.onTapStream});
+      required this.selectedSchool,
+      required this.onTapSchool});
 
   final Course semesterCourse;
-  final String? selectedStream;
-  final ValueChanged<String> onTapStream;
+  final String? selectedSchool;
+  final ValueChanged<String> onTapSchool;
 
   @override
   Widget build(BuildContext context) {
@@ -22,12 +22,12 @@ class ConfirmCourseCard extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 10),
       child: Container(
         decoration: BoxDecoration(
-          color: (selectedStream != null)
+          color: (selectedSchool != null)
               ? AppColors.primaryTeal
               : AppColors.white,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: (selectedStream != null)
+            color: (selectedSchool != null)
                 ? AppColors.defaultColor
                 : AppColors.grey,
           ),
@@ -63,12 +63,12 @@ class ConfirmCourseCard extends StatelessWidget {
               child: Wrap(
                 spacing: 10,
                 runSpacing: 10,
-                children: AppConstants.streams
+                children: AppConstants.schools
                     .map(
-                      (stream) => SingleStream(
-                        stream: stream,
-                        selected: selectedStream == stream,
-                        onTap: onTapStream,
+                      (school) => SingleSchool(
+                        school: school,
+                        selected: selectedSchool == school,
+                        onTap: onTapSchool,
                       ),
                     )
                     .toList(),
@@ -81,14 +81,14 @@ class ConfirmCourseCard extends StatelessWidget {
   }
 }
 
-class SingleStream extends StatelessWidget {
-  const SingleStream(
+class SingleSchool extends StatelessWidget {
+  const SingleSchool(
       {super.key,
-      required this.stream,
+      required this.school,
       required this.selected,
       required this.onTap});
 
-  final String stream;
+  final String school;
   final bool selected;
   final ValueChanged<String> onTap;
 
@@ -97,7 +97,7 @@ class SingleStream extends StatelessWidget {
     return AppMaterial(
       inkwellBorderRadius: BorderRadius.circular(10),
       onTap: () {
-        onTap(stream);
+        onTap(school);
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
@@ -111,7 +111,7 @@ class SingleStream extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              stream,
+              school,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(

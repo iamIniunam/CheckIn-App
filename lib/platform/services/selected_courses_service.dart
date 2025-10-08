@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
+import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SelectedCourseService extends ChangeNotifier {
   static final SelectedCourseService _instance =
@@ -13,8 +17,8 @@ class SelectedCourseService extends ChangeNotifier {
   List<Course> get selectedCourses => List.unmodifiable(_selectedCourses);
   Map<String, String> get selectedStreams => Map.unmodifiable(_selectedStreams);
 
-  void updateSelectedCourses(
-      List<Course> courses, Map<Course, String?> streams) {
+  Future<void> updateSelectedCourses(
+      List<Course> courses, Map<Course, String?> streams) async {
     _selectedCourses = List.from(courses);
     _selectedStreams = {};
 
@@ -25,12 +29,33 @@ class SelectedCourseService extends ChangeNotifier {
       }
     }
 
+    // Persist selection to SharedPreferences
+    try {
+      final pref = await SharedPreferences.getInstance();
+      final coursesJson =
+          jsonEncode(_selectedCourses.map((c) => c.toJson()).toList());
+      final streamsJson = jsonEncode(_selectedStreams);
+      await pref.setString(AppConstants.selectedCoursesKey, coursesJson);
+      await pref.setString(AppConstants.selectedSchoolsKey, streamsJson);
+    } catch (e) {
+      debugPrint('Error persisting selected courses: $e');
+    }
+
     notifyListeners();
   }
 
-  void clearSelectedCourses() {
+  Future<void> clearSelectedCourses() async {
     _selectedCourses.clear();
     _selectedStreams.clear();
+
+    try {
+      final pref = await SharedPreferences.getInstance();
+      await pref.remove(AppConstants.selectedCoursesKey);
+      await pref.remove(AppConstants.selectedSchoolsKey);
+    } catch (e) {
+      debugPrint('Error clearing persisted selected courses: $e');
+    }
+
     notifyListeners();
   }
 

@@ -24,14 +24,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> initializeApp() async {
     final authViewModel = context.read<AuthViewModel>();
-    debugPrint('Starting app initialization...');
 
     final isLoggedIn = await authViewModel.getIsUserLoggedIn();
-
-    debugPrint('Is logged in: $isLoggedIn');
-    debugPrint('Current student: ${authViewModel.currentStudent?.idNumber}');
-    debugPrint('Level: ${authViewModel.currentStudent?.level}');
-    debugPrint('Semester: ${authViewModel.currentStudent?.semester}');
 
     await Future.delayed(const Duration(seconds: 1));
 

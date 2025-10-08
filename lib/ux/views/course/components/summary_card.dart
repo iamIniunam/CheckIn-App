@@ -17,40 +17,41 @@ class SummaryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.defaultColor),
       ),
-      child: Column(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            '${viewModel.attendancePercentage.toStringAsFixed(1)}%',
-            style: const TextStyle(
-              fontSize: 48,
-              fontWeight: FontWeight.bold,
-              color: AppColors.defaultColor,
-            ),
-          ),
-          const Text(
-            'Attendance Rate',
-            style: TextStyle(
-              fontSize: 18,
-              color: AppColors.defaultColor,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+          Column(
             children: [
-              StatColumn(
-                  icon: Icons.class_rounded,
-                  value: viewModel.totalClasses.toString(),
-                  label: 'Total'),
-              StatColumn(
-                  icon: Icons.check_circle_rounded,
-                  value: viewModel.attendedClasses.toString(),
-                  label: 'Present'),
-              StatColumn(
-                  icon: Icons.cancel_rounded,
-                  value: viewModel.missedClasses.toString(),
-                  label: 'Absent'),
+              Text(
+                '${viewModel.attendancePercentage.toStringAsFixed(1)}%',
+                style: const TextStyle(
+                  fontSize: 48,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.defaultColor,
+                ),
+              ),
+              const Text(
+                'Attendance Rate',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: AppColors.defaultColor,
+                ),
+              ),
             ],
+          ),
+          const SizedBox(width: 8),
+          StatColumn(
+              icon: Icons.class_rounded,
+              value: viewModel.totalClasses.toString(),
+              label: 'Total'),
+          StatColumn(
+              icon: Icons.check_circle_rounded,
+              value: viewModel.attendedClasses.toString(),
+              label: 'Present'),
+          StatColumn(
+            icon: Icons.cancel_rounded,
+            value: viewModel.missedClasses.toString(),
+            label: 'Absent',
           ),
         ],
       ),

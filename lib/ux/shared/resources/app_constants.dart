@@ -33,7 +33,7 @@ class AppConstants {
       200.0; // extra meters for network location
 
   static const int requiredCreditHours = 18;
-  static const List<String> streams = [
+  static const List<String> schools = [
     'Seaview (Day)',
     'KCC (Evening)',
     'Seaview (Weekend)',
@@ -41,7 +41,7 @@ class AppConstants {
   ];
 
   static const String selectedCoursesKey = 'selected.courses';
-  static const String selectedStreamsKey = 'selected.streams';
+  static const String selectedSchoolsKey = 'selected.schools';
 
   static const List<String> programs = [
     'BSc. Information Technology', //id 1

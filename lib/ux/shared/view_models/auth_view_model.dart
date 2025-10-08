@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:attendance_app/platform/repositories/auth_repository.dart';
+import 'package:attendance_app/platform/services/selected_courses_service.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:flutter/material.dart';
@@ -131,6 +132,7 @@ class AuthViewModel extends ChangeNotifier {
 
   Future<void> logout() async {
     await setIsUserLoggedIn(false);
+    await SelectedCourseService().clearSelectedCourses();
     _currentStudent = null;
     _errorMessage = null;
     notifyListeners();

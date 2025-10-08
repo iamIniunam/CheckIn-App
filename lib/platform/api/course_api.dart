@@ -6,8 +6,45 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class CourseApi {
-  final _basePath = '/courses/getCoursesForLevelAndSemester';
-  final _courseAttendancebasePath = '/student/getCourseAttendanceRecord';
+  final _courseBasePath = '/courses/getAllCourses';
+  final _coursesForLevelBasePath = '/courses/getCoursesForLevelAndSemester';
+  final _courseAttendanceBasePath = '/student/getCourseAttendanceRecord';
+
+  Future<ApiResponse<List<Course>>> getAllCourses() async {
+    try {
+      final networkHelper = NetworkHelper(
+        url: AppConstants.apiBaseUrl,
+        path: _courseBasePath,
+        method: HttpMethod.get,
+        errorMessage: 'Failed to get courses',
+      );
+
+      final response = await networkHelper.getData();
+      debugPrint('All Courses Response: $response');
+
+      if (response != null) {
+        if (response['data'] != null) {
+          final List<dynamic> coursesJson = response['data'] as List<dynamic>;
+          final List<Course> courses = coursesJson
+              .map((json) => Course.fromJson(json as Map<String, dynamic>))
+              .toList();
+
+          return ApiResponse.success(courses);
+        } else {
+          return ApiResponse.error(
+              response['message'] ?? 'Failed to get courses');
+        }
+      } else {
+        return ApiResponse.error('Network error. Please try again');
+      }
+    } on http.ClientException {
+      return ApiResponse.error('Network error. Please check your connection.');
+    } on FormatException {
+      return ApiResponse.error('Invalid response from server');
+    } catch (e) {
+      return ApiResponse.error('An unexpected error occured: ${e.toString()}');
+    }
+  }
 
   Future<ApiResponse<List<Course>>> getCoursesForLevelAndSemester(
       String level, int semester) async {
@@ -15,7 +52,7 @@ class CourseApi {
       final networkHelper = NetworkHelper(
         url: AppConstants.apiBaseUrl,
         method: HttpMethod.get,
-        path: '$_basePath/$level/$semester',
+        path: '$_coursesForLevelBasePath/$level/$semester',
         errorMessage: 'Failed to get courses',
       );
 
@@ -49,7 +86,7 @@ class CourseApi {
   Future<ApiResponse<List<CourseAttendanceRecord>>> getCourseAttendanceRecord(
       int courseId, String studentId) async {
     try {
-      final path = '$_courseAttendancebasePath/$courseId/$studentId';
+      final path = '$_courseAttendanceBasePath/$courseId/$studentId';
 
       final networkHelper = NetworkHelper(
         url: AppConstants.apiBaseUrl,
@@ -58,7 +95,7 @@ class CourseApi {
         errorMessage: 'Failed to get attendance',
       );
       debugPrint(
-          'Url: ${AppConstants.apiBaseUrl}$_courseAttendancebasePath/$courseId/$studentId');
+          'Url: ${AppConstants.apiBaseUrl}$_courseAttendanceBasePath/$courseId/$studentId');
 
       final response = await networkHelper.getData();
       debugPrint('Attendance Record Response: $response');
