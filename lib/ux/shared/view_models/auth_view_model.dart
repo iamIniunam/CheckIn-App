@@ -33,6 +33,7 @@ class AuthViewModel extends ChangeNotifier {
     if (response.success && response.data != null) {
       _currentStudent = response.data;
       saveLevelAndSemesterToCache();
+      setIsUserLoggedIn(true);
       setLoadingState(null, false);
       return true;
     } else {
@@ -64,6 +65,26 @@ class AuthViewModel extends ChangeNotifier {
     } catch (e) {
       return false;
     }
+  }
+
+  Future<bool?> getIsUserLoggedIn() async {
+    final pref = await SharedPreferences.getInstance();
+    return pref.getBool(AppConstants.loggedInKey);
+  }
+
+  Future<void> setIsUserLoggedIn(bool? value) async {
+    final pref = await SharedPreferences.getInstance();
+    if (value == null) {
+      await pref.remove(AppConstants.loggedInKey);
+      _currentStudent = null;
+      notifyListeners();
+      return;
+    }
+    await pref.setBool(AppConstants.loggedInKey, value);
+    if (!value) {
+      _currentStudent = null;
+    }
+    notifyListeners();
   }
 
   void setLoadingState(String? message, bool loading) {

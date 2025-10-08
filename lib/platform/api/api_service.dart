@@ -27,7 +27,7 @@ class ApiService {
       final response = await networkHelper.getData();
       debugPrint('Response: $response');
 
-      if (response != null) {
+      if (response != null) { 
         if (response['data'] != null) {
           return ApiResponse.success(response['data']);
         } else {

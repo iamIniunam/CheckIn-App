@@ -7,7 +7,7 @@ class UserViewModel extends ChangeNotifier {
 
   final SharedPreferences pref;
 
-  String get idNumber => pref.getString(AppConstants.idNumberKey) ?? '';
+  // String get idNumber => pref.getString(AppConstants.idNumberKey) ?? '';
   String get level => pref.getString(AppConstants.levelKey) ?? '';
   String get program => pref.getString(AppConstants.programKey) ?? '';
   int get semester => pref.getInt(AppConstants.semesterKey) ?? 0;

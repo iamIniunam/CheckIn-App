@@ -2,8 +2,11 @@ import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_images.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
+import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
+import 'package:attendance_app/ux/views/onboarding/confirm_courses_page.dart';
 import 'package:attendance_app/ux/views/onboarding/sign_up_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -19,10 +22,22 @@ class _SplashScreenState extends State<SplashScreen> {
     initializeApp();
   }
 
-  void initializeApp() {
-    Future.delayed(const Duration(seconds: 2), () {
-      Navigation.navigateToScreen(context: context, screen: const SignUpPage());
-    });
+  Future<void> initializeApp() async {
+    await Future.delayed(const Duration(seconds: 1));
+
+    if (!mounted) return;
+
+    final authViewModel = context.read<AuthViewModel>();
+    final isLoggedIn = await authViewModel.getIsUserLoggedIn();
+
+    if (!mounted) return;
+
+    if (isLoggedIn == true) {
+      Navigation.navigateToScreen(
+          context: context, screen: const ConfirmCoursesPage());
+      return;
+    }
+    Navigation.navigateToScreen(context: context, screen: const SignUpPage());
   }
 
   @override

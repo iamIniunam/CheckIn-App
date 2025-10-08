@@ -105,9 +105,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ProfileDetailItem(
-                              title: AppStrings.studentIdNumber,
-                              value: userViewModel.idNumber),
+                          // ProfileDetailItem(
+                          //     title: AppStrings.studentIdNumber,
+                          //     value: userViewModel.idNumber),
                           // ProfileDetailItem(
                           //     title: AppStrings.studentLevel,
                           //     value: 'Level ${userViewModel.level}'),

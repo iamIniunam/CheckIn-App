@@ -71,7 +71,7 @@ class AttendanceViewModel extends ChangeNotifier {
 
   Future<void> submitAttendance(Position position) async {
     Map<String, dynamic> attendanceData = {
-      'studentId': viewModel.idNumber,
+      // 'studentId': viewModel.idNumber,
       'timestamp': DateTime.now().toIso8601String(),
       'latitude': position.latitude,
       'longitude': position.longitude,
