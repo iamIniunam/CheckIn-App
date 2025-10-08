@@ -1,3 +1,4 @@
+import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/components/app_material.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_images.dart';
@@ -5,6 +6,9 @@ import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/user_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
+import 'package:attendance_app/ux/shared/components/app_buttons.dart';
+import 'package:attendance_app/ux/views/onboarding/sign_up_page.dart';
 import 'package:attendance_app/ux/views/profile/components/profile_detail_item.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -64,6 +68,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 padding: const EdgeInsets.only(left: 16, right: 16, bottom: 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
                   children: [
                     AppMaterial(
                       customBorder: const CircleBorder(),
@@ -80,9 +85,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Text(
-                      AppStrings.sampleFullName,
-                      style: TextStyle(
+                    Text(
+                      userViewModel.fullName,
+                      style: const TextStyle(
                           color: AppColors.defaultColor,
                           fontSize: 24,
                           fontWeight: FontWeight.bold),
@@ -116,18 +121,43 @@ class _ProfilePageState extends State<ProfilePage> {
                               value: '$semesterText Semester'),
                           ProfileDetailItem(
                               title: AppStrings.school, value: getUserSchool()),
-                          const ProfileDetailItem(
-                              title: AppStrings.schoolEmail,
-                              value: AppStrings.sampleSchoolEmail),
-                          const ProfileDetailItem(
-                              title: AppStrings.nationality,
-                              value: AppStrings.sampleNationality),
-                          ProfileDetailItem(
-                            title: AppStrings.studentPhoneNumber,
-                            value:
-                                newPhoneNumber ?? AppStrings.samplePhoneNumber,
-                          ),
+                          // const ProfileDetailItem(
+                          //     title: AppStrings.schoolEmail,
+                          //     value: AppStrings.sampleSchoolEmail),
+                          // const ProfileDetailItem(
+                          //     title: AppStrings.nationality,
+                          //     value: AppStrings.sampleNationality),
+                          // ProfileDetailItem(
+                          //   title: AppStrings.studentPhoneNumber,
+                          //   value:
+                          //       newPhoneNumber ?? AppStrings.samplePhoneNumber,
+                          // ),
                         ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    const Spacer(),
+                    // Logout button pinned to the bottom
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: PrimaryButton(
+                        backgroundColor: AppColors.transparent,
+                        foregroundColor: AppColors.red500,
+                        overlayColor: AppColors.red500.withOpacity(0.05),
+                        onTap: () async {
+                          await context.read<AuthViewModel>().logout();
+                          if (!mounted) return;
+                          Navigation.navigateToScreen(
+                              context: context, screen: const SignUpPage());
+                        },
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.logout_rounded, size: 20),
+                            SizedBox(width: 4),
+                            Text('Logout'),
+                          ],
+                        ),
                       ),
                     ),
                   ],

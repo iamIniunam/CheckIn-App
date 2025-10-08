@@ -22,7 +22,7 @@ class UserViewModel extends ChangeNotifier {
   String get firstName => authViewModel.currentStudent?.firstName ?? '';
   String get lastName => authViewModel.currentStudent?.lastName ?? '';
 
-  String get fullName => '$lastName $firstName';
+  String get fullName => '$lastName, $firstName';
 
   String getUserPrimarySchool(Map<dynamic, String?> chosenSchools) {
     if (chosenSchools.isEmpty) return '';
