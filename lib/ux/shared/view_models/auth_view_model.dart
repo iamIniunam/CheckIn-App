@@ -25,10 +25,8 @@ class AuthViewModel extends ChangeNotifier {
   Future<bool> login(String idNumber, String password) async {
     setLoadingState(null, true);
 
-    final response = await _authRepository.login(
-      idNumber: idNumber,
-      password: password,
-    );
+    final response =
+        await _authRepository.login(idNumber: idNumber, password: password);
 
     if (response.success && response.data != null) {
       _currentStudent = response.data;

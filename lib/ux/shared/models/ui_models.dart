@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:attendance_app/ux/shared/components/global_functions.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:flutter/material.dart';
@@ -116,18 +115,119 @@ class Course {
   int get hashCode => id.hashCode;
 }
 
-class Session {
-  final int weekNumber;
-  final String date;
-  final String status;
+// class Session {
+//   final int weekNumber;
+//   final String date;
+//   final String status;
 
-  String get session => 'Week $weekNumber';
+//   String get session => 'Week $weekNumber';
 
+//   Color get getStatusColor => statusColor(status);
+
+//   Session({
+//     required this.weekNumber,
+//     required this.date,
+//     required this.status,
+//   });
+// }
+
+class AttendanceClass {
+  final int id;
+  final String name;
+  final int courseId;
+  final DateTime date;
+
+  AttendanceClass({
+    required this.id,
+    required this.name,
+    required this.courseId,
+    required this.date,
+  });
+
+  factory AttendanceClass.fromJson(Map<String, dynamic> json) {
+    return AttendanceClass(
+      id: json['id'] as int,
+      name: json['name'] as String,
+      courseId: json['course_id'] as int,
+      date: DateTime.parse(json['date'] as String),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'course_id': courseId,
+      'date': date.toIso8601String(),
+    };
+  }
+}
+
+class AttendanceRecord {
+  final int id;
+  final String studentId;
+  final int classId;
+  final DateTime date;
+
+  AttendanceRecord({
+    required this.id,
+    required this.studentId,
+    required this.classId,
+    required this.date,
+  });
+
+  factory AttendanceRecord.fromJson(Map<String, dynamic> json) {
+    return AttendanceRecord(
+      id: json['id'] as int,
+      studentId: json['student_id'] as String,
+      classId: json['class_id'] as int,
+      date: DateTime.parse(json['date'] as String),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'student_id': studentId,
+      'class_id': classId,
+      'date': date.toIso8601String(),
+    };
+  }
+}
+
+class CourseAttendanceRecord {
+  final AttendanceClass attendanceClass;
+  final AttendanceRecord? attendanceRecord;
+
+  CourseAttendanceRecord(
+      {required this.attendanceClass, this.attendanceRecord});
+
+  bool get isPresent => attendanceRecord != null;
+
+  String get status => isPresent ? 'Present' : 'Absent';
   Color get getStatusColor => statusColor(status);
 
-  Session({
-    required this.weekNumber,
-    required this.date,
-    required this.status,
-  });
+  factory CourseAttendanceRecord.fromJson(Map<String, dynamic> json) {
+    try {
+      return CourseAttendanceRecord(
+        attendanceClass:
+            AttendanceClass.fromJson(json['class'] as Map<String, dynamic>),
+        attendanceRecord: json['attendance_record'] != null
+            ? AttendanceRecord.fromJson(
+                json['attendance_record'] as Map<String, dynamic>)
+            : null,
+      );
+    } catch (e) {
+      debugPrint('Error parsing CourseAttendanceRecord: $e');
+      debugPrint('JSON: $json');
+      rethrow;
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'class': attendanceClass.toJson(),
+      'attendance_record': attendanceRecord?.toJson(),
+    };
+  }
 }

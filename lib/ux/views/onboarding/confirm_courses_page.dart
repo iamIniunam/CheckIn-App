@@ -1,6 +1,7 @@
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
 import 'package:attendance_app/ux/shared/components/back_and_next_button_row.dart';
+import 'package:attendance_app/ux/shared/components/empty_state_widget.dart';
 import 'package:attendance_app/ux/shared/components/global_functions.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
@@ -115,10 +116,9 @@ class _ConfirmCoursesPageState extends State<ConfirmCoursesPage> {
 
         // Empty state
         if (viewModel.availableCourses.isEmpty) {
-          return Center(
-            child: Text(
-                'No courses available for this level ${userViewModel.level} semester ${userViewModel.semester}'),
-          );
+          return EmptyStateWidget(
+              message:
+                  'No courses available for this level ${userViewModel.level} semester ${userViewModel.semester}');
         }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

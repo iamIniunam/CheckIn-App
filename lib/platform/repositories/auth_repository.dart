@@ -1,12 +1,11 @@
 import 'package:attendance_app/platform/api/api_response.dart';
-import 'package:attendance_app/platform/api/api_service.dart';
+import 'package:attendance_app/platform/api/auth_api.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 
 class AuthRepository {
-  final ApiService _apiService;
+  final AuthApi _authApi;
 
-  AuthRepository({ApiService? apiService})
-      : _apiService = apiService ?? ApiService();
+  AuthRepository({AuthApi? authApi}) : _authApi = authApi ?? AuthApi();
 
   Future<ApiResponse<Student>> login({
     required String idNumber,
@@ -14,7 +13,7 @@ class AuthRepository {
   }) async {
     try {
       final response =
-          await _apiService.login(idNumber: idNumber, password: password);
+          await _authApi.login(idNumber: idNumber, password: password);
 
       if (response.success && response.data != null) {
         final studentData = response.data?['student'] ?? response.data;

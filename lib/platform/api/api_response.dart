@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 class ApiResponse<T> {
   final bool success;
   final T? data;
@@ -19,3 +21,5 @@ class ApiResponse<T> {
     return ApiResponse(success: true, message: message, statusCode: statusCode);
   }
 }
+
+// enum ApiResponseStatus { Success, NoInternet, Error, Timeout, Unknown }

@@ -111,9 +111,9 @@ class AppStrings {
   static const courseDetails = 'Course Details';
   static const sampleEligibilityText =
       'Your are eligible for mid semester exams';
-  static const attendanceThreshold = 'Attendance Threshold';
-  static const midSemester = 'Mid Semester';
-  static const endOfSemester = 'End of Semester';
+  static const attendanceThreshold = 'Attendance\nThreshold';
+  static const midSemester = 'Mid\nSemester';
+  static const endOfSemester = 'End of\nSemester';
 
   //Notifications
   static const notifications = 'Notifications';

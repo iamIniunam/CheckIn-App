@@ -1,11 +1,12 @@
+import 'package:attendance_app/platform/extensions/date_time_extensions.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class SessionHistory extends StatelessWidget {
-  const SessionHistory({super.key, required this.session});
+  const SessionHistory({super.key, required this.record});
 
-  final Session session;
+  final CourseAttendanceRecord record;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +20,7 @@ class SessionHistory extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                session.session,
+                record.attendanceClass.name,
                 style: const TextStyle(
                   color: AppColors.defaultColor,
                   fontWeight: FontWeight.bold,
@@ -27,7 +28,7 @@ class SessionHistory extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                session.date,
+                record.attendanceClass.date.fullFriendlyDate(),
                 style: TextStyle(
                   color: Colors.grey.shade600,
                   fontWeight: FontWeight.w600,
@@ -41,9 +42,9 @@ class SessionHistory extends StatelessWidget {
                 color: AppColors.primaryTeal,
                 borderRadius: BorderRadius.circular(8)),
             child: Text(
-              session.status,
+              record.status,
               style: TextStyle(
-                color: session.getStatusColor,
+                color: record.getStatusColor,
                 fontWeight: FontWeight.w600,
               ),
             ),
