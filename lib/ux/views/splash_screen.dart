@@ -23,19 +23,33 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> initializeApp() async {
+    final authViewModel = context.read<AuthViewModel>();
+    debugPrint('Starting app initialization...');
+
+    final isLoggedIn = await authViewModel.getIsUserLoggedIn();
+
+    debugPrint('Is logged in: $isLoggedIn');
+    debugPrint('Current student: ${authViewModel.currentStudent?.idNumber}');
+    debugPrint('Level: ${authViewModel.currentStudent?.level}');
+    debugPrint('Semester: ${authViewModel.currentStudent?.semester}');
+
     await Future.delayed(const Duration(seconds: 1));
 
     if (!mounted) return;
 
-    final authViewModel = context.read<AuthViewModel>();
-    final isLoggedIn = await authViewModel.getIsUserLoggedIn();
-
-    if (!mounted) return;
-
     if (isLoggedIn == true) {
+      // final hasRequiredData = authViewModel.currentStudent?.level != null &&
+      //     (authViewModel.currentStudent?.level ?? '').isNotEmpty &&
+      //     authViewModel.currentStudent?.semester != null &&
+      //     (authViewModel.currentStudent?.semester ?? 0) > 0;
+
+      // debugPrint('Has required data: $hasRequiredData');
+
+      // if (hasRequiredData) {
       Navigation.navigateToScreen(
           context: context, screen: const ConfirmCoursesPage());
       return;
+      // }
     }
     Navigation.navigateToScreen(context: context, screen: const SignUpPage());
   }

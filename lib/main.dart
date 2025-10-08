@@ -24,13 +24,18 @@ void main() async {
   //   debugPrint('$e');
   // }
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  // isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  final authViewModel = AuthViewModel();
 
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthViewModel()),
-        ChangeNotifierProvider(create: (_) => UserViewModel(pref: prefs)),
+        ChangeNotifierProvider.value(value: authViewModel),
+        ChangeNotifierProxyProvider<AuthViewModel, UserViewModel>(
+          create: (_) =>
+              UserViewModel(pref: prefs, authViewModel: authViewModel),
+          update: (_, auth, previous) =>
+              previous ?? UserViewModel(pref: prefs, authViewModel: auth),
+        ),
         ChangeNotifierProvider(create: (_) => CourseViewModel()),
         ChangeNotifierProvider(create: (_) => AttendanceViewModel()),
       ],

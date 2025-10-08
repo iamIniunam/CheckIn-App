@@ -6,9 +6,7 @@ class AttendanceViewModel extends ChangeNotifier {
   final CourseRepository _courseRepository;
 
   AttendanceViewModel({CourseRepository? courseRepository})
-      : _courseRepository = courseRepository ?? CourseRepository() {
-    debugPrint('===== AttendanceViewModel created =====');
-  }
+      : _courseRepository = courseRepository ?? CourseRepository();
 
   List<CourseAttendanceRecord> _attendanceRecords = [];
   bool _isLoading = false;
@@ -35,10 +33,6 @@ class AttendanceViewModel extends ChangeNotifier {
     try {
       final response = await _courseRepository.fetchCourseAttendanceRecord(
           courseId, studentId);
-
-      debugPrint('Response success: ${response.success}');
-      debugPrint('Response data: ${response.data}');
-      debugPrint('Response message: ${response.message}');
 
       if (response.success && response.data != null) {
         _attendanceRecords = response.data ?? [];

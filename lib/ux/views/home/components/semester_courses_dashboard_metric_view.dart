@@ -26,18 +26,21 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
           return const SelectedCoursesEmptyState();
         }
 
-        final courseInfo = selectedSemesterCourses
-            .asMap()
-            .entries
-            .map((entry) => Course(
-                  courseCode: entry.value.courseCode,
-                  courseTitle: entry.value.courseTitle,
-                  creditHours: entry.value.creditHours,
-                  status: entry.value.status,
-                  showStatus: entry.value.showStatus,
-                  index: entry.key,
-                ))
-            .toList();
+        final courseInfo = selectedSemesterCourses.asMap().entries.map((entry) {
+          final courseData = entry.value;
+          return Course(
+            id: courseData.id,
+            courseCode: courseData.courseCode,
+            courseTitle: courseData.courseTitle,
+            creditHours: courseData.creditHours,
+            level: courseData.level,
+            semester: courseData.semester,
+            school: courseData.school,
+            status: courseData.status,
+            showStatus: courseData.showStatus,
+            index: entry.key,
+          );
+        }).toList();
 
         return Column(
           children: [

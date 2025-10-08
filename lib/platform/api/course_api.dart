@@ -48,13 +48,8 @@ class CourseApi {
 
   Future<ApiResponse<List<CourseAttendanceRecord>>> getCourseAttendanceRecord(
       int courseId, String studentId) async {
-    debugPrint('===== CourseApi.getCourseAttendanceRecord called =====');
-    debugPrint('courseId: $courseId, studentId: $studentId');
-
     try {
       final path = '$_courseAttendancebasePath/$courseId/$studentId';
-      final fullUrl = '${AppConstants.apiBaseUrl}$path';
-      debugPrint('Full URL: $fullUrl');
 
       final networkHelper = NetworkHelper(
         url: AppConstants.apiBaseUrl,

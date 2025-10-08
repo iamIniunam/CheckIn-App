@@ -22,7 +22,7 @@ class CourseViewModel extends ChangeNotifier {
 
   // Selected courses state
   final Set<Course> _selectedCourses = {};
-  final Map<Course, String?> _chosenStreams = {};
+  final Map<Course, String?> _chosenSchools = {};
   bool _isConfirming = false;
   String? _errorMessage;
 
@@ -34,7 +34,7 @@ class CourseViewModel extends ChangeNotifier {
 
   // Getters for selected courses
   List<Course> get selectedCourses => _selectedCourses.toList();
-  Map<Course, String?> get chosenStreams => Map.unmodifiable(_chosenStreams);
+  Map<Course, String?> get chosenSchools => Map.unmodifiable(_chosenSchools);
   bool get isConfirming => _isConfirming;
   String? get errorMessage => _errorMessage;
 
@@ -85,18 +85,18 @@ class CourseViewModel extends ChangeNotifier {
   }
 
   bool isCourseSelected(Course course) {
-    return _chosenStreams[course] != null;
+    return _chosenSchools[course] != null;
   }
 
   String? getCourseStream(Course course) {
-    return _chosenStreams[course];
+    return _chosenSchools[course];
   }
 
   void updateCourseStream(Course course, String? stream) {
     clearError();
 
-    if (_chosenStreams[course] == stream) {
-      _chosenStreams.remove(course);
+    if (_chosenSchools[course] == stream) {
+      _chosenSchools.remove(course);
       _selectedCourses.remove(course);
     } else {
       if (!_selectedCourses.contains(course)) {
@@ -106,7 +106,7 @@ class CourseViewModel extends ChangeNotifier {
           return;
         }
       }
-      _chosenStreams[course] = stream;
+      _chosenSchools[course] = stream;
       _selectedCourses.add(course);
     }
     notifyListeners();
@@ -123,7 +123,7 @@ class CourseViewModel extends ChangeNotifier {
       // TODO: Add API call to save selected courses to backend
       await Future.delayed(const Duration(seconds: 1));
       _selectedCoursesService.updateSelectedCourses(
-          _selectedCourses.toList(), _chosenStreams);
+          _selectedCourses.toList(), _chosenSchools);
 
       _isConfirming = false;
       notifyListeners();

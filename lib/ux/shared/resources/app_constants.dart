@@ -7,7 +7,8 @@ class AppConstants {
   static const levelKey = 'level';
   static const semesterKey = 'semester';
   static const passwordKey = 'password';
-  static const userStreamKey = 'user.stream';
+  static const userSchoolKey = 'user.school';
+  static const appUserKey = 'app.user';
 
   static const double houseLat = 5.5328015;
   static const double houseLong = -0.3264844;

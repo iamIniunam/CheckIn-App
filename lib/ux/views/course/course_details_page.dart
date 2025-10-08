@@ -5,7 +5,7 @@ import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance_view_model.dart';
-import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/user_view_model.dart';
 import 'package:attendance_app/ux/views/course/components/session_history.dart';
 import 'package:attendance_app/ux/views/course/components/summary_card.dart';
 import 'package:flutter/material.dart';
@@ -21,44 +21,17 @@ class CourseDetailsPage extends StatefulWidget {
 }
 
 class _CourseDetailsPageState extends State<CourseDetailsPage> {
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   WidgetsBinding.instance.addPostFrameCallback((_) {
-  //     if (widget.course.id != null) {
-  //       context.read<AttendanceViewModel>().loadAttendanceRecords(
-  //             widget.course.id ?? 0,
-  //             'ENG23A00028Y',
-  //           );
-  //     }
-  //   });
-  // }
+  late UserViewModel userViewModel;
 
   @override
   void initState() {
     super.initState();
-    debugPrint('===== CourseDetailsPage initState called =====');
-    debugPrint('Course ID: ${widget.course.id}');
-    debugPrint('Course Code: ${widget.course.courseCode}');
+    userViewModel = context.read<UserViewModel>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      debugPrint('===== PostFrameCallback executing =====');
-
-      final authViewModel = context.read<AuthViewModel>();
-      final studentId = authViewModel.currentStudent?.idNumber;
-
-      debugPrint('Student ID from auth: $studentId');
-
-      if (widget.course.id != null && studentId != null) {
-        debugPrint(
-            'Loading attendance for course: ${widget.course.id}, student: $studentId');
+      if (widget.course.id != null && userViewModel.idNumber.isNotEmpty) {
         context.read<AttendanceViewModel>().loadAttendanceRecords(
-              widget.course.id ?? 0,
-              studentId,
-            );
-      } else {
-        debugPrint(
-            '❌ Missing data - Course ID: ${widget.course.id}, Student ID: $studentId');
+            widget.course.id ?? 0, userViewModel.idNumber);
       }
     });
   }
@@ -68,9 +41,6 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('Building CourseDetailsPage for: ${widget.course.courseCode}');
-    debugPrint('Course has ID: ${widget.course.id}');
-
     return AppPageScaffold(
       hasRefreshIndicator: true,
       title: AppStrings.courseDetails,

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:attendance_app/platform/repositories/auth_repository.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
@@ -9,9 +11,6 @@ class AuthViewModel extends ChangeNotifier {
 
   AuthViewModel({AuthRepository? authRepository})
       : _authRepository = authRepository ?? AuthRepository();
-
-  String level = '';
-  int semester = 0;
   bool _isLoading = false;
   String? _errorMessage;
   Student? _currentStudent;
@@ -22,16 +21,32 @@ class AuthViewModel extends ChangeNotifier {
 
   bool get isLoggedIn => _currentStudent != null;
 
-  Future<bool> login(String idNumber, String password) async {
+  Future<bool> login(
+      {required String idNumber,
+      required String password,
+      required String level,
+      required int semester}) async {
     setLoadingState(null, true);
 
     final response =
         await _authRepository.login(idNumber: idNumber, password: password);
 
     if (response.success && response.data != null) {
-      _currentStudent = response.data;
-      saveLevelAndSemesterToCache();
-      setIsUserLoggedIn(true);
+      _currentStudent = Student(
+        idNumber: response.data?.idNumber ?? '',
+        firstName: response.data?.firstName ?? '',
+        lastName: response.data?.lastName ?? '',
+        program: response.data?.program ?? '',
+        password: response.data?.password ?? '',
+        level: level,
+        semester: semester,
+      );
+
+      if (_currentStudent != null) {
+        await saveStudentData(_currentStudent);
+      }
+      await setIsUserLoggedIn(true);
+
       setLoadingState(null, false);
       return true;
     } else {
@@ -40,40 +55,62 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  void updateLevel(String value) {
-    level = value;
-    notifyListeners();
+  Future<void> saveStudentData(Student? student) async {
+    final pref = await SharedPreferences.getInstance();
+    if (student != null) {
+      await pref.setString(
+        AppConstants.appUserKey,
+        jsonEncode(
+          student.toJson(),
+        ),
+      );
+    }
   }
 
-  void updateSemester(int value) {
-    semester = value;
-    notifyListeners();
-  }
-
-  Future<bool> saveLevelAndSemesterToCache() async {
+  Future<void> loadStudentData() async {
     try {
       final pref = await SharedPreferences.getInstance();
+      final studentJson = pref.getString(AppConstants.appUserKey);
 
-      await Future.wait([
-        pref.setString(AppConstants.levelKey, level),
-        pref.setInt(AppConstants.semesterKey, semester),
-      ]);
+      debugPrint('Raw student JSON: $studentJson');
 
-      return true;
+      if (studentJson != null && studentJson.isNotEmpty) {
+        final decodedJson = jsonDecode(studentJson);
+        debugPrint('Decoded JSON: $decodedJson');
+
+        _currentStudent = Student.fromJson(decodedJson,
+            level: decodedJson['level'], semester: decodedJson['semester']);
+
+        notifyListeners();
+      } else {
+        debugPrint('No student data found in SharedPreferences');
+      }
     } catch (e) {
-      return false;
+      debugPrint('Error loading student data: $e');
+      final pref = await SharedPreferences.getInstance();
+      await pref.remove(AppConstants.appUserKey);
+      await pref.remove(AppConstants.loggedInKey);
+      _currentStudent = null;
+      notifyListeners();
     }
   }
 
   Future<bool?> getIsUserLoggedIn() async {
     final pref = await SharedPreferences.getInstance();
-    return pref.getBool(AppConstants.loggedInKey);
+    final isLoggedIn = pref.getBool(AppConstants.loggedInKey);
+
+    if (isLoggedIn == true) {
+      await loadStudentData();
+    }
+
+    return isLoggedIn;
   }
 
   Future<void> setIsUserLoggedIn(bool? value) async {
     final pref = await SharedPreferences.getInstance();
     if (value == null) {
       await pref.remove(AppConstants.loggedInKey);
+      await pref.remove(AppConstants.appUserKey);
       _currentStudent = null;
       notifyListeners();
       return;
@@ -81,6 +118,7 @@ class AuthViewModel extends ChangeNotifier {
     await pref.setBool(AppConstants.loggedInKey, value);
     if (!value) {
       _currentStudent = null;
+      await pref.remove(AppConstants.appUserKey);
     }
     notifyListeners();
   }
@@ -91,7 +129,8 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void logout() {
+  Future<void> logout() async {
+    await setIsUserLoggedIn(false);
     _currentStudent = null;
     _errorMessage = null;
     notifyListeners();

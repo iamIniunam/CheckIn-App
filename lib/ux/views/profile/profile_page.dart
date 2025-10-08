@@ -29,15 +29,15 @@ class _ProfilePageState extends State<ProfilePage> {
     courseViewModel = context.read<CourseViewModel>();
   }
 
-  String getUserStream() {
-    String savedStream = userViewModel.savedPrimaryStream;
-    if (savedStream.isNotEmpty) {
-      return savedStream;
+  String getUserSchool() {
+    String savedSchool = userViewModel.savedPrimarySchool;
+    if (savedSchool.isNotEmpty) {
+      return savedSchool;
     }
 
-    String calculatedStream =
-        userViewModel.getUserPrimaryStream(courseViewModel.chosenStreams);
-    return calculatedStream;
+    String calculatedSchool =
+        userViewModel.getUserPrimarySchool(courseViewModel.chosenSchools);
+    return calculatedSchool;
   }
 
   @override
@@ -45,9 +45,9 @@ class _ProfilePageState extends State<ProfilePage> {
     final semester = userViewModel.semester;
 
     String semesterText;
-    if (semester == '1') {
+    if (semester == 1) {
       semesterText = '1st';
-    } else if (semester == '2') {
+    } else if (semester == 2) {
       semesterText = '2nd';
     } else {
       semesterText = 'Unknown';
@@ -108,14 +108,14 @@ class _ProfilePageState extends State<ProfilePage> {
                           // ProfileDetailItem(
                           //     title: AppStrings.studentIdNumber,
                           //     value: userViewModel.idNumber),
-                          // ProfileDetailItem(
-                          //     title: AppStrings.studentLevel,
-                          //     value: 'Level ${userViewModel.level}'),
+                          ProfileDetailItem(
+                              title: AppStrings.studentLevel,
+                              value: 'Level ${userViewModel.level}'),
                           ProfileDetailItem(
                               title: AppStrings.currentSemester,
                               value: '$semesterText Semester'),
                           ProfileDetailItem(
-                              title: AppStrings.stream, value: getUserStream()),
+                              title: AppStrings.school, value: getUserSchool()),
                           const ProfileDetailItem(
                               title: AppStrings.schoolEmail,
                               value: AppStrings.sampleSchoolEmail),

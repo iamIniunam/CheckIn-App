@@ -7,36 +7,62 @@ class Student {
   final String firstName;
   final String lastName;
   final String program;
-  final String passowrd;
-  // final String level;
-  // final String semester;
+  final String password;
+  final String? level;
+  final int? semester;
 
-  Student({
-    required this.idNumber,
-    required this.firstName,
-    required this.lastName,
-    required this.program,
-    required this.passowrd,
-  });
+  Student(
+      {required this.idNumber,
+      required this.firstName,
+      required this.lastName,
+      required this.program,
+      required this.password,
+      this.level,
+      this.semester});
 
-  factory Student.fromJson(Map<String, dynamic> json) {
+  factory Student.fromJson(Map<String, dynamic> json,
+      {String? level, int? semester}) {
     return Student(
       idNumber: json['idnumber'] ?? json['id_number'] ?? '',
-      firstName: json['first_name'],
-      lastName: json['last_name'],
-      program: json['program'],
-      passowrd: json['password'],
+      firstName: json['first_name'] ?? '',
+      lastName: json['last_name'] ?? '',
+      program: json['program'] ?? '',
+      password: json['password'] ?? '',
+      level: level,
+      semester: semester,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'idnumber': idNumber,
-      'firstName': firstName,
-      'lastName': lastName,
+      'first_name': firstName,
+      'last_name': lastName,
       'program': program,
-      'password': passowrd,
+      'password': password,
+      'level': level,
+      'semester': semester,
     };
+  }
+
+  Student copyWith({
+    String? idNumber,
+    String? firstName,
+    String? lastName,
+    String? program,
+    String? password,
+    String? level,
+    int? semester,
+  }) {
+    return Student(
+      idNumber: idNumber ?? this.idNumber,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      program: program ?? this.program,
+      password: password ?? this.password,
+      level: level ?? this.level,
+      semester: semester ?? this.semester,
+    );
   }
 }
 

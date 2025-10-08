@@ -30,13 +30,23 @@ class _ConfirmCoursesPageState extends State<ConfirmCoursesPage> {
   @override
   void initState() {
     super.initState();
+    userViewModel = context.read<UserViewModel>();
+    debugPrint('Level: ${userViewModel.level}');
+    debugPrint('Semester: ${userViewModel.semester}');
+    debugPrint('ID: ${userViewModel.idNumber}');
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (userViewModel.level.isEmpty || userViewModel.semester == 0) {
+        debugPrint('ERROR: Missing level or semester data!');
+        // Optionally navigate back or show error
+        return;
+      }
+
       context.read<CourseViewModel>().loadCourses(
             userViewModel.level,
             userViewModel.semester,
           );
     });
-    userViewModel = context.read<UserViewModel>();
   }
 
   String get semesterText {
@@ -83,6 +93,19 @@ class _ConfirmCoursesPageState extends State<ConfirmCoursesPage> {
       showBackButton: widget.isEdit,
       title: AppStrings.confirmSemeterCourses,
       body: Consumer<CourseViewModel>(builder: (context, viewModel, _) {
+        if (userViewModel.level.isEmpty || userViewModel.semester == 0) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Loading user data...'),
+              ],
+            ),
+          );
+        }
+
         if (viewModel.isLoadingCourses) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -118,7 +141,7 @@ class _ConfirmCoursesPageState extends State<ConfirmCoursesPage> {
         if (viewModel.availableCourses.isEmpty) {
           return EmptyStateWidget(
               message:
-                  'No courses available for this level ${userViewModel.level} semester ${userViewModel.semester}');
+                  'No courses available for level ${userViewModel.level} semester ${userViewModel.semester}');
         }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

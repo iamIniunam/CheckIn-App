@@ -57,8 +57,8 @@ class AppStrings {
   static const sampleStudentLevel = 'Level 300';
   static const currentSemester = 'Current Semester';
   static const sampleCurrentSemester = 'Semester 1';
-  static const stream = 'Stream';
-  static const sampleStream = 'Seaview Weekend';
+  static const school = 'School';
+  static const sampleSchool = 'Seaview Weekend';
   static const editPhoneNumber = 'Edit Phone Number';
   static const changePhoneNumberHint = 'Enter your new phone number';
   static const updateProfile = 'Update Profile';
