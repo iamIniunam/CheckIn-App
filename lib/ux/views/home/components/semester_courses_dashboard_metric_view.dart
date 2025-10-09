@@ -141,7 +141,8 @@ class SelectedCoursesEmptyState extends StatelessWidget {
           child: AppMaterial(
             onTap: () {
               Navigation.navigateToScreen(
-                  context: context, screen: const CourseEnrollmentPage());
+                  context: context,
+                  screen: const CourseEnrollmentPage(isEdit: true));
             },
             child: Container(
               width: double.infinity,
@@ -160,7 +161,7 @@ class SelectedCoursesEmptyState extends StatelessWidget {
                   ),
                   SizedBox(height: 16),
                   Text(
-                    'No courses selected',
+                    'No courses enrolled',
                     style: TextStyle(
                       color: AppColors.grey,
                       fontSize: 16,
@@ -169,7 +170,7 @@ class SelectedCoursesEmptyState extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'Complete your course selection to see your courses here',
+                    'Complete your course enrollment to see your courses here',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: AppColors.grey,

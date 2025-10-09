@@ -71,8 +71,7 @@ Future showAppBottomSheet({
                                 child: Material(
                                   color: AppColors.transparent,
                                   child: InkWell(
-                                      borderRadius:
-                                          BorderRadius.circular(100),
+                                      borderRadius: BorderRadius.circular(100),
                                       onTap: () {
                                         Navigation.back(context: context);
                                       },

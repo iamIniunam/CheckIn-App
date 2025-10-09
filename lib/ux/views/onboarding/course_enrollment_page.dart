@@ -14,6 +14,7 @@ import 'package:attendance_app/ux/shared/resources/app_images.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
 import 'package:attendance_app/ux/views/onboarding/confirm_course_card.dart';
+import 'package:attendance_app/ux/views/onboarding/course_registration_info_bottom_sheet.dart';
 import 'package:attendance_app/ux/views/onboarding/filter_courses_bottom_page.dart';
 import 'dart:async';
 
@@ -107,7 +108,23 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
   Widget build(BuildContext context) {
     return AppPageScaffold(
       showBackButton: widget.isEdit,
-      title: AppStrings.confirmSemesterCourses,
+      title: AppStrings.courseEnrollment,
+      actions: [
+        Padding(
+          padding: const EdgeInsets.all(18),
+          child: InkWell(
+            onTap: () {
+              showAppBottomSheet(
+                  context: context,
+                  title: 'Course Enrollment Notice',
+                  showCloseButton: false,
+                  child: const CourseRegistrationInfoBottomSheet());
+            },
+            child: const Icon(Icons.info_outline,
+                color: AppColors.defaultColor, size: 20),
+          ),
+        ),
+      ],
       body: Column(
         children: [
           Padding(

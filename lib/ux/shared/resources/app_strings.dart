@@ -137,6 +137,7 @@ class AppStrings {
   static const cancelLocationVerification = 'Cancel Location Verification?';
 
   //Confrim semester courses
+  static const courseEnrollment = 'Course Enrollment';
   static const confirmSemesterCourses = 'Confirm Semester Courses';
   static const addCourse = 'Add course';
   static const confirm = 'Confirm';
