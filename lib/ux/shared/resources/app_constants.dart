@@ -40,6 +40,9 @@ class AppConstants {
     'KCC (Weekend)',
   ];
 
+  static const List<int> levels = [100, 200, 300, 400];
+  static const List<int> semesters = [1, 2];
+
   static const String selectedCoursesKey = 'selected.courses';
   static const String selectedSchoolsKey = 'selected.schools';
 

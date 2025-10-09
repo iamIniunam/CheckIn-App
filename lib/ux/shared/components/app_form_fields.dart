@@ -4,7 +4,7 @@ import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class SearchTextFormField extends StatelessWidget {
+class SearchTextFormField extends StatefulWidget {
   final TextEditingController? controller;
   final String? labelText;
   final String? hintText;
@@ -45,6 +45,34 @@ class SearchTextFormField extends StatelessWidget {
   });
 
   @override
+  State<SearchTextFormField> createState() => _SearchTextFormFieldState();
+}
+
+class _SearchTextFormFieldState extends State<SearchTextFormField> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller ?? TextEditingController();
+    _controller.addListener(_onTextChanged);
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onTextChanged);
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
+    super.dispose();
+  }
+
+  void _onTextChanged() {
+    setState(() {});
+    widget.onChanged?.call(_controller.text.trim());
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       height: 42,
@@ -53,7 +81,7 @@ class SearchTextFormField extends StatelessWidget {
         borderRadius: BorderRadius.circular(10.0),
       ),
       child: TextField(
-        autofocus: autofocus,
+        autofocus: widget.autofocus,
         cursorColor: AppColors.defaultColor,
         style: const TextStyle(
             color: AppColors.defaultColor,
@@ -61,7 +89,7 @@ class SearchTextFormField extends StatelessWidget {
             fontWeight: FontWeight.w500),
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.only(top: 4, left: 10, right: 10),
-          hintText: hintText ?? AppStrings.search,
+          hintText: widget.hintText ?? AppStrings.search,
           hintStyle: const TextStyle(
             color: AppColors.grey,
             fontSize: 14,
@@ -77,9 +105,9 @@ class SearchTextFormField extends StatelessWidget {
             child: AppImages.svgSearchIcon,
           ),
           suffixIcon: Visibility(
-            visible: controller?.text.isNotEmpty ?? false,
+            visible: _controller.text.isNotEmpty,
             child: InkWell(
-              onTap: onClear,
+              onTap: widget.onClear,
               child: const Padding(
                 padding: EdgeInsets.all(10.0),
                 child: Icon(
@@ -91,11 +119,11 @@ class SearchTextFormField extends StatelessWidget {
             ),
           ),
         ),
-        inputFormatters: inputFormatters,
+        inputFormatters: widget.inputFormatters,
         keyboardType: TextInputType.text,
-        controller: controller,
-        onChanged: onChanged,
-        onSubmitted: onSubmitted,
+        controller: _controller,
+        onChanged: widget.onChanged,
+        onSubmitted: widget.onSubmitted,
         textInputAction: TextInputAction.search,
         textCapitalization: TextCapitalization.sentences,
       ),

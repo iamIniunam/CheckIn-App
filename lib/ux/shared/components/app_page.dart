@@ -25,7 +25,6 @@ class AppPageScaffold extends StatelessWidget {
   final bool showBackButton;
   final Widget? appBarLeadingIcon;
   final bool showInformationBanner;
-  final bool hasRefreshIndicator;
   final bool showDivider;
   final String? informationBannerText;
 
@@ -50,7 +49,6 @@ class AppPageScaffold extends StatelessWidget {
       this.showBackButton = true,
       this.appBarLeadingIcon,
       this.showInformationBanner = false,
-      this.hasRefreshIndicator = false,
       this.showDivider = false,
       this.informationBannerText});
 
@@ -117,10 +115,7 @@ class AppPageScaffold extends StatelessWidget {
                       // else if (hideAppBar == false && showDivider == true)
                       //   const AppDivider(),
                       Expanded(
-                        child: hasRefreshIndicator
-                            ? RefreshIndicator(
-                                onRefresh: () async {}, child: body)
-                            : body,
+                        child: body,
                       ),
                     ],
                   ),

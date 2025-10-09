@@ -57,6 +57,7 @@ dependencies:
   mobile_scanner: ^3.5.7
   searchfield: 1.0.6
   http: ^1.2.0
+  badges: ^3.1.2
 
 
 

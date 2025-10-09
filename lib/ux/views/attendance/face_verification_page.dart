@@ -96,7 +96,7 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
     if (success && mounted) {
       Navigation.navigateToScreenAndClearOnePrevious(
         context: context,
-        screen: const ConfirmCoursesPage(),
+        screen: const AddCoursePage(),
       );
     }
   }

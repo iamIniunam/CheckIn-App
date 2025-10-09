@@ -35,4 +35,7 @@ class AppImages {
       SvgPicture.asset('assets/svgs/error_dialog_icon.svg');
   static SvgPicture svgExclamationCircle =
       SvgPicture.asset('assets/svgs/exclamation_circle.svg');
+  static SvgPicture svgFilterIcon =
+      SvgPicture.asset('assets/svgs/filter_icon.svg');
+  static SvgPicture svgLine = SvgPicture.asset('assets/svgs/line.svg');
 }

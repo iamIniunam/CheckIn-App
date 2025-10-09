@@ -1,3 +1,4 @@
+import 'package:attendance_app/platform/course_search_helper.dart';
 import 'package:attendance_app/platform/repositories/course_repository.dart';
 import 'package:attendance_app/platform/services/selected_courses_service.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
@@ -17,9 +18,15 @@ class CourseViewModel extends ChangeNotifier {
 
   // All courses from API
   List<Course> _allCourses = [];
-  List<Course> _availableCourses = [];
+  List<Course> _filteredCourses = [];
+  String _searchQuery = '';
   bool _isLoadingCourses = false;
   String? _loadError;
+
+  //Filter state
+  int? _selectedLevel;
+  int? _selectedSemester;
+  bool _hasActiveFilter = false;
 
   // Selected courses state
   final Set<Course> _selectedCourses = {};
@@ -27,12 +34,32 @@ class CourseViewModel extends ChangeNotifier {
   bool _isConfirming = false;
   String? _errorMessage;
 
+  //Getters for courses with search applied
+  List<Course> get displayedCourses {
+    final courseToSearch = _hasActiveFilter ? _filteredCourses : _allCourses;
+    if (_searchQuery.isEmpty) {
+      return List.unmodifiable(courseToSearch);
+    }
+
+    return CourseSearchHelper.searchCourses(courseToSearch, _searchQuery);
+  }
+
   // Getters for all courses
   List<Course> get allCourses => List.unmodifiable(_allCourses);
-  List<Course> get availableCourses => List.unmodifiable(_availableCourses);
+  String get searchQuery => _searchQuery;
+  bool get isSearching => _searchQuery.isNotEmpty;
   bool get isLoadingCourses => _isLoadingCourses;
   String? get loadError => _loadError;
   bool get hasLoadError => _loadError != null;
+
+  //Filter getters
+  int? get selectedLevel => _selectedLevel;
+  int? get selectedSemester => _selectedSemester;
+  bool get hasActiveFilter => _hasActiveFilter;
+  String get filterSummary {
+    if (!_hasActiveFilter) return 'No filters applied';
+    return 'Level $_selectedLevel, Semester $_selectedSemester';
+  }
 
   // Getters for selected courses
   List<Course> get selectedCourses => _selectedCourses.toList();
@@ -49,6 +76,57 @@ class CourseViewModel extends ChangeNotifier {
       !_isConfirming;
 
   bool get canAddCourse => totalCreditHours < AppConstants.requiredCreditHours;
+
+  void searchCourses(String query) {
+    _searchQuery = query;
+    notifyListeners();
+  }
+
+  void clearSearch() {
+    _searchQuery = '';
+    notifyListeners();
+  }
+
+  Future<void> applyFilter(int? level, int? semester) async {
+    if (level == null || semester == null) {
+      clearFilter();
+      return;
+    }
+
+    _selectedLevel = level;
+    _selectedSemester = semester;
+    _hasActiveFilter = true;
+
+    setLoadingState(null, true);
+
+    try {
+      final response = await _repository.fetchCoursesForLevelAndSemester(
+          level.toString(), semester);
+
+      if (response.data != null) {
+        _filteredCourses = response.data ?? [];
+        _loadError = null;
+      } else {
+        _loadError = response.message ?? 'Failed to load filtered courses';
+        _filteredCourses = [];
+      }
+    } catch (e) {
+      _loadError = 'An unexpected error occurred: ${e.toString()}';
+      _filteredCourses = [];
+    } finally {
+      _isLoadingCourses = false;
+      notifyListeners();
+    }
+  }
+
+  void clearFilter() {
+    _selectedLevel = null;
+    _selectedSemester = null;
+    _hasActiveFilter = false;
+    _filteredCourses = [];
+    _searchQuery = '';
+    notifyListeners();
+  }
 
   Future<void> loadAllCourses() async {
     setLoadingState(null, true);
@@ -72,35 +150,35 @@ class CourseViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> loadCoursesForLevels(String level, int semester) async {
-    setLoadingState(null, true);
+  // Future<void> loadCoursesForLevels(String level, int semester) async {
+  //   setLoadingState(null, true);
 
-    try {
-      final response = await _repository.fetchCoursesForLevelAndSemester(
-        level,
-        semester,
-      );
+  //   try {
+  //     final response = await _repository.fetchCoursesForLevelAndSemester(
+  //       level,
+  //       semester,
+  //     );
 
-      if (response.data != null) {
-        _availableCourses = response.data ?? [];
-        _loadError = null;
-      } else {
-        _loadError = response.message ?? 'Failed to load courses';
-        _availableCourses = [];
-      }
-    } catch (e) {
-      _loadError = 'An unexpected error occurred: ${e.toString()}';
-      _availableCourses = [];
-    } finally {
-      _isLoadingCourses = false;
-      notifyListeners();
-    }
-  }
+  //     if (response.data != null) {
+  //       _availableCourses = response.data ?? [];
+  //       _loadError = null;
+  //     } else {
+  //       _loadError = response.message ?? 'Failed to load courses';
+  //       _availableCourses = [];
+  //     }
+  //   } catch (e) {
+  //     _loadError = 'An unexpected error occurred: ${e.toString()}';
+  //     _availableCourses = [];
+  //   } finally {
+  //     _isLoadingCourses = false;
+  //     notifyListeners();
+  //   }
+  // }
 
   // Retry loading courses
-  Future<void> reloadCoursesForLevels(String level, int semester) async {
-    return loadCoursesForLevels(level, semester);
-  }
+  // Future<void> reloadCoursesForLevels(String level, int semester) async {
+  //   return loadCoursesForLevels(level, semester);
+  // }
 
   void setLoadingState(String? message, bool loading) {
     _loadError = message;

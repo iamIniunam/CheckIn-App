@@ -1,68 +1,81 @@
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
-import 'package:attendance_app/ux/shared/components/back_and_next_button_row.dart';
-import 'package:attendance_app/ux/shared/components/empty_state_widget.dart';
-import 'package:attendance_app/ux/shared/components/global_functions.dart';
-import 'package:attendance_app/ux/shared/resources/app_colors.dart';
+import 'package:attendance_app/ux/shared/bottom_sheets/show_app_bottom_sheet.dart';
+import 'package:attendance_app/ux/shared/components/app_buttons.dart';
+import 'package:attendance_app/ux/shared/components/app_form_fields.dart';
+import 'package:attendance_app/ux/shared/components/app_material.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
+import 'package:attendance_app/ux/shared/components/empty_state_widget.dart';
+import 'package:attendance_app/ux/shared/components/page_loading_indicator.dart';
+import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
+import 'package:attendance_app/ux/shared/resources/app_images.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
-import 'package:attendance_app/ux/shared/view_models/user_view_model.dart';
-import 'package:attendance_app/ux/views/onboarding/add_course_page.dart';
 import 'package:attendance_app/ux/views/onboarding/confirm_course_card.dart';
+import 'package:attendance_app/ux/views/onboarding/filter_courses_bottom_page.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class ConfirmCoursesPage extends StatefulWidget {
-  const ConfirmCoursesPage({super.key, this.isEdit = false});
+class AddCoursePage extends StatefulWidget {
+  const AddCoursePage({super.key, this.isEdit = false});
 
   final bool isEdit;
 
   @override
-  State<ConfirmCoursesPage> createState() => _ConfirmCoursesPageState();
+  State<AddCoursePage> createState() => _AddCoursePageState();
 }
 
-class _ConfirmCoursesPageState extends State<ConfirmCoursesPage> {
-  late UserViewModel userViewModel;
+class _AddCoursePageState extends State<AddCoursePage> {
+  TextEditingController searchController = TextEditingController();
+  late CourseViewModel viewModel;
+  Timer? _searchDebounce;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    viewModel = context.read<CourseViewModel>();
+  }
 
   @override
   void initState() {
     super.initState();
-    userViewModel = context.read<UserViewModel>();
-    debugPrint('Level: ${userViewModel.level}');
-    debugPrint('Semester: ${userViewModel.semester}');
-    debugPrint('ID: ${userViewModel.idNumber}');
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (userViewModel.level.isEmpty || userViewModel.semester == 0) {
-        debugPrint('ERROR: Missing level or semester data!');
-        // Optionally navigate back or show error
-        return;
-      }
-
-      context.read<CourseViewModel>().loadCoursesForLevels(
-            userViewModel.level,
-            userViewModel.semester,
-          );
+      viewModel.loadAllCourses();
     });
   }
 
-  String get semesterText {
-    final semester = userViewModel.semester;
-    switch (semester) {
-      case 1:
-        return '1st';
-      case 2:
-        return '2nd';
-      default:
-        return 'Unknown';
-    }
+  void onSearchChanged(String value) {
+    final query = value.trim();
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+      viewModel.searchCourses(query);
+    });
+  }
+
+  void clearSearch() {
+    searchController.clear();
+    viewModel.clearSearch();
   }
 
   Future<void> onConfirmPressed(CourseViewModel viewModel) async {
-    final success = await viewModel.confirmCourses();
+    // Show a modal loading dialog while confirmCourses runs.
+    AppDialogs.showLoadingDialog(context);
+    bool success = false;
+    try {
+      success = await viewModel.confirmCourses();
+    } finally {
+      // Dismiss the loading dialog if it's still showing.
+      if (mounted) {
+        try {
+          Navigator.of(context, rootNavigator: true).pop();
+        } catch (_) {}
+      }
+    }
 
     if (!mounted) return;
 
@@ -79,166 +92,188 @@ class _ConfirmCoursesPageState extends State<ConfirmCoursesPage> {
               context: context,
               screen: const NavigationHostPage(),
             );
-    } else if (viewModel.errorMessage != null) {
-      //TODO: complete this flow
-      showAlert(
-          context: context, title: 'title', desc: viewModel.errorMessage ?? '');
+    } else if (!success && viewModel.errorMessage != null) {
+      AppDialogs.showErrorDialog(
+          context: context, message: viewModel.errorMessage ?? '');
     }
+  }
+
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    searchController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return AppPageScaffold(
-      hideAppBar: false,
       showBackButton: widget.isEdit,
-      title: AppStrings.confirmSemeterCourses,
-      body: Consumer<CourseViewModel>(builder: (context, viewModel, _) {
-        if (userViewModel.level.isEmpty || userViewModel.semester == 0) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+      title: AppStrings.confirmSemesterCourses,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
               children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Loading user data...'),
+                Expanded(
+                  child: SearchTextFormField(
+                    controller: searchController,
+                    onClear: clearSearch,
+                    hintText: AppStrings.searchCourses,
+                    onSubmitted: (value) {
+                      viewModel.searchCourses(value.trim());
+                      FocusScope.of(context).unfocus();
+                    },
+                    onChanged: (value) => onSearchChanged(value),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Consumer<CourseViewModel>(
+                  builder: (context, courseViewModel, _) {
+                    return AppMaterial(
+                      color: AppColors.field,
+                      borderRadius: BorderRadius.circular(10),
+                      inkwellBorderRadius: BorderRadius.circular(10),
+                      onTap: () {
+                        showAppBottomSheet(
+                          context: context,
+                          title: 'Filter Courses',
+                          child: FilterCoursesBottomSheet(
+                            initialLevel: courseViewModel.selectedLevel,
+                            initialSemester: courseViewModel.selectedSemester,
+                            onApply: (level, semester) {
+                              courseViewModel.applyFilter(level, semester);
+                              Navigation.back(context: context);
+                            },
+                            onReset: () {
+                              courseViewModel.clearFilter();
+                              Navigation.back(context: context);
+                            },
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(9),
+                        child: courseViewModel.hasActiveFilter
+                            ? Badge(child: AppImages.svgFilterIcon)
+                            : AppImages.svgFilterIcon,
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
-          );
-        }
+          ),
+          Consumer<CourseViewModel>(
+            builder: (context, courseViewModel, _) {
+              if (courseViewModel.isLoadingCourses) {
+                return const PageLoadingIndicator();
+              }
 
-        if (viewModel.isLoadingCourses) {
-          return const Center(child: CircularProgressIndicator());
-        }
+              final courses = courseViewModel.displayedCourses;
 
-        // Error state
-        // if (viewModel.hasLoadError) {
-        //   return Center(
-        //     child: Column(
-        //       mainAxisAlignment: MainAxisAlignment.center,
-        //       children: [
-        //         const Icon(Icons.error_outline, size: 48, color: Colors.red),
-        //         const SizedBox(height: 16),
-        //         Text(
-        //           viewModel.loadError ?? 'An error occurred',
-        //           style: const TextStyle(color: Colors.red),
-        //           textAlign: TextAlign.center,
-        //         ),
-        //         const SizedBox(height: 16),
-        //         ElevatedButton.icon(
-        //           onPressed: () => viewModel.reloadCourses(
-        //             userViewModel.level,
-        //             userViewModel.semester,
-        //           ),
-        //           icon: const Icon(Icons.refresh),
-        //           label: const Text('Retry'),
-        //         ),
-        //       ],
-        //     ),
-        //   );
-        // }
+              if (courses.isEmpty) {
+                EmptyStateWidget(
+                  icon: courseViewModel.isSearching
+                      ? Icons.search_off_rounded
+                      : Icons.school_rounded,
+                  message: courseViewModel.isSearching
+                      ? 'No courses found'
+                      : 'No courses available',
+                );
+              }
 
-        // Empty state
-        if (viewModel.availableCourses.isEmpty) {
-          return EmptyStateWidget(
-              message:
-                  'No courses available for level ${userViewModel.level} semester ${userViewModel.semester}');
-        }
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 16, right: 8, bottom: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '${userViewModel.level} Level, $semesterText Semester',
-                    style: const TextStyle(
-                      color: AppColors.defaultColor,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                itemCount: viewModel.availableCourses.length,
-                itemBuilder: (context, index) {
-                  final course = viewModel.availableCourses[index];
-                  final selectedSchool = viewModel.getCourseSchool(course);
-
-                  return ConfirmCourseCard(
-                    semesterCourse: course,
-                    selectedSchool: selectedSchool,
-                    onTapSchool: (school) {
-                      viewModel.updateCourseSchool(course, school);
-                    },
-                  );
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 16, top: 8, right: 16),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: RichText(
-                        text: TextSpan(
-                          text: 'Total credit hours: ',
-                          style: const TextStyle(
-                            color: AppColors.defaultColor,
-                            fontFamily: 'Nunito',
-                          ),
-                          children: <TextSpan>[
-                            TextSpan(
-                              text:
-                                  '${viewModel.totalCreditHours}/${AppConstants.requiredCreditHours}',
+              return Expanded(
+                child: Column(
+                  children: [
+                    if (courseViewModel.isSearching ||
+                        courseViewModel.hasActiveFilter)
+                      Padding(
+                        padding:
+                            const EdgeInsets.only(left: 16, top: 8, right: 16),
+                        child: Row(
+                          children: [
+                            Text(
+                              '${courses.length} course${courses.length == 1 ? '' : 's'} found',
                               style: const TextStyle(
                                 color: AppColors.defaultColor,
-                                fontFamily: 'Nunito',
-                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w300,
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                  ),
-                  BackAndNextButtonRow(
-                    enableBackButton: viewModel.canAddCourse,
-                    enableNextButton: viewModel.canConfirm,
-                    firstText: AppStrings.addCourse,
-                    secondText: AppStrings.confirm,
-                    onTapFirstButton: () {
-                      Navigation.navigateToScreen(
-                          context: context, screen: const AddCoursePage());
-                    },
-                    onTapNextButton: () {
-                      onConfirmPressed(viewModel);
-                    },
-                    nextWidget: viewModel.isConfirming
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              color: AppColors.white,
+                    Expanded(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        itemCount: courses.length,
+                        itemBuilder: (context, index) {
+                          final course = courses[index];
+                          final selectedSchool =
+                              courseViewModel.getCourseSchool(course);
+
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 12),
+                            child: ConfirmCourseCard(
+                              semesterCourse: course,
+                              selectedSchool: selectedSchool,
+                              onTapSchool: (school) {
+                                courseViewModel.updateCourseSchool(
+                                    course, school);
+                              },
                             ),
-                          )
-                        : null,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
-      }),
+                          );
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          left: 16, top: 8, right: 16, bottom: 16),
+                      child: Column(
+                        children: [
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: RichText(
+                              text: TextSpan(
+                                text: 'Total credit hours: ',
+                                style: const TextStyle(
+                                  color: AppColors.defaultColor,
+                                  fontFamily: 'Nunito',
+                                ),
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text:
+                                        '${courseViewModel.totalCreditHours}/${AppConstants.requiredCreditHours}',
+                                    style: const TextStyle(
+                                      color: AppColors.defaultColor,
+                                      fontFamily: 'Nunito',
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          PrimaryButton(
+                            enabled: courseViewModel.canConfirm,
+                            onTap: () {
+                              onConfirmPressed(courseViewModel);
+                            },
+                            child: const Text('Confirm'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:attendance_app/platform/repositories/auth_repository.dart';
-import 'package:attendance_app/platform/services/selected_courses_service.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:flutter/material.dart';
@@ -23,10 +22,7 @@ class AuthViewModel extends ChangeNotifier {
   bool get isLoggedIn => _currentStudent != null;
 
   Future<bool> login(
-      {required String idNumber,
-      required String password,
-      required String level,
-      required int semester}) async {
+      {required String idNumber, required String password}) async {
     setLoadingState(null, true);
 
     final response =
@@ -39,8 +35,6 @@ class AuthViewModel extends ChangeNotifier {
         lastName: response.data?.lastName ?? '',
         program: response.data?.program ?? '',
         password: response.data?.password ?? '',
-        level: level,
-        semester: semester,
       );
 
       if (_currentStudent != null) {
@@ -79,8 +73,7 @@ class AuthViewModel extends ChangeNotifier {
         final decodedJson = jsonDecode(studentJson);
         debugPrint('Decoded JSON: $decodedJson');
 
-        _currentStudent = Student.fromJson(decodedJson,
-            level: decodedJson['level'], semester: decodedJson['semester']);
+        _currentStudent = Student.fromJson(decodedJson);
 
         notifyListeners();
       } else {
@@ -132,7 +125,6 @@ class AuthViewModel extends ChangeNotifier {
 
   Future<void> logout() async {
     await setIsUserLoggedIn(false);
-    await SelectedCourseService().clearSelectedCourses();
     _currentStudent = null;
     _errorMessage = null;
     notifyListeners();

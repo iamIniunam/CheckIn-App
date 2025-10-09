@@ -10,10 +10,14 @@ class AttendanceViewModel extends ChangeNotifier {
 
   List<CourseAttendanceRecord> _attendanceRecords = [];
   bool _isLoading = false;
+  bool _isRefreshing = false;
   String? _errorMessage;
+  int? _lastCourseId;
+  String? _lastStudentId;
 
   List<CourseAttendanceRecord> get attendanceRecords => _attendanceRecords;
   bool get isLoading => _isLoading;
+  bool get isRefreshing => _isRefreshing;
   String? get errorMessage => _errorMessage;
   bool get hasError => _errorMessage != null;
 
@@ -29,6 +33,10 @@ class AttendanceViewModel extends ChangeNotifier {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
+
+    // remember parameters so we can refresh later
+    _lastCourseId = courseId;
+    _lastStudentId = studentId;
 
     try {
       final response = await _courseRepository.fetchCourseAttendanceRecord(
@@ -48,6 +56,42 @@ class AttendanceViewModel extends ChangeNotifier {
       debugPrint('Exception in loadAttendanceRecords: $e');
     } finally {
       _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Refreshes the currently loaded attendance records using the last
+  /// requested courseId and studentId. This uses [_isRefreshing] so UI can
+  /// differentiate between first-load and background refresh.
+  Future<void> refresh() async {
+    if (_lastCourseId == null || _lastStudentId == null) return;
+    // If already refreshing, avoid duplicate refreshes
+    if (_isRefreshing) return;
+
+    _isRefreshing = true;
+    notifyListeners();
+
+    try {
+      final response = await _courseRepository.fetchCourseAttendanceRecord(
+          _lastCourseId!, _lastStudentId!);
+
+      if (response.success && response.data != null) {
+        _attendanceRecords = response.data ?? [];
+        _errorMessage = null;
+        debugPrint(
+            'Successfully refreshed ${_attendanceRecords.length} records');
+      } else {
+        _errorMessage =
+            response.message ?? 'Failed to refresh attendance records';
+        _attendanceRecords = [];
+        debugPrint('Failed to refresh: $_errorMessage');
+      }
+    } catch (e) {
+      _errorMessage = 'An unexpected error occurred: ${e.toString()}';
+      _attendanceRecords = [];
+      debugPrint('Exception in refresh: $e');
+    } finally {
+      _isRefreshing = false;
       notifyListeners();
     }
   }

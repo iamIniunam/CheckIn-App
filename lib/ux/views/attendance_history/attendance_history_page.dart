@@ -93,7 +93,6 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
       hideAppBar: true,
       headerTitle: AppStrings.attendanceHistory,
       headerSubtitle: AppStrings.viewYourAttendanceHistory,
-      hasRefreshIndicator: true,
       body: ListView.builder(
         padding: const EdgeInsets.symmetric(vertical: 8),
         itemCount: periods.length,

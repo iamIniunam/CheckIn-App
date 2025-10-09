@@ -138,7 +138,7 @@ class SelectedCoursesEmptyState extends StatelessWidget {
           child: AppMaterial(
             onTap: () {
               Navigation.navigateToScreen(
-                  context: context, screen: const ConfirmCoursesPage());
+                  context: context, screen: const AddCoursePage());
             },
             child: Container(
               width: double.infinity,

@@ -8,7 +8,7 @@ import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/user_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/components/app_buttons.dart';
-import 'package:attendance_app/ux/views/onboarding/sign_up_page.dart';
+import 'package:attendance_app/ux/views/onboarding/login_page.dart';
 import 'package:attendance_app/ux/views/profile/components/profile_detail_item.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -135,7 +135,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 24),
                     const Spacer(),
                     // Logout button pinned to the bottom
                     Padding(
@@ -148,7 +147,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           await context.read<AuthViewModel>().logout();
                           if (!mounted) return;
                           Navigation.navigateToScreen(
-                              context: context, screen: const SignUpPage());
+                              context: context, screen: const LoginPage());
                         },
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,

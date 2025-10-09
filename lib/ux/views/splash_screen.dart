@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
       // if (hasRequiredData) {
       Navigation.navigateToScreen(
-          context: context, screen: const ConfirmCoursesPage());
+          context: context, screen: const AddCoursePage());
       return;
       // }
     }

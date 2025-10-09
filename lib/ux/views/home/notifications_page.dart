@@ -51,7 +51,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Widget build(BuildContext context) {
     return AppPageScaffold(
       title: AppStrings.notifications,
-      hasRefreshIndicator: true,
       body: notifications.isEmpty
           ? const NotificationsPageEmptyState()
           : ListView(

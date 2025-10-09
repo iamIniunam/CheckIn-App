@@ -3,9 +3,14 @@ import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
 import 'package:attendance_app/ux/shared/components/app_buttons.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/components/app_form_fields.dart';
+import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
 import 'package:attendance_app/ux/shared/resources/app_images.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
+import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
+import 'package:attendance_app/ux/views/onboarding/sign_up_page.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -16,10 +21,8 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController idNumberController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool isPasswordVisible = false;
-  String password = '';
 
   final formKey = GlobalKey<FormState>();
 
@@ -29,18 +32,47 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
+  Future<void> handleLogin() async {
+    final formState = formKey.currentState;
+    if (formState == null || !formState.validate()) {
+      return;
+    }
+
+    if (!mounted) return;
+    final viewModel = context.read<AuthViewModel>();
+
+    AppDialogs.showLoadingDialog(context);
+    bool success = false;
+
+    success = await viewModel.login(
+      idNumber: idNumberController.text.trim(),
+      password: passwordController.text.trim(),
+    );
+
+    if (success && mounted) {
+      //TODO: remember to change to navigation host page when you finalize saving of selected courses
+      Navigation.navigateToScreen(
+          context: context, screen: const NavigationHostPage());
+    }
+  }
+
+  @override
+  void dispose() {
+    idNumberController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        FocusManager.instance.primaryFocus
-            ?.unfocus(); //this hides the keyboard anytime the screen is tapped
+        FocusManager.instance.primaryFocus?.unfocus();
       },
       child: AbsorbPointer(
         absorbing: false,
         child: Scaffold(
-          resizeToAvoidBottomInset:
-              false, //this stops the background image from moving anytime the keyboard is initiated
+          resizeToAvoidBottomInset: false,
           body: DecoratedBox(
             decoration: BoxDecoration(
               image: DecorationImage(
@@ -50,101 +82,105 @@ class _LoginPageState extends State<LoginPage> {
                     AppColors.black.withOpacity(0.7), BlendMode.darken),
               ),
             ),
-            child: Padding(
-              padding: const EdgeInsets.only(left: 24, right: 24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 18),
-                    child: Text(
+            child:
+                Consumer<AuthViewModel>(builder: (context, authViewModel, _) {
+              return Center(
+                child: ListView(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.only(left: 24, right: 24),
+                  children: [
+                    const Text(
                       AppStrings.login,
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 45,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.only(
-                        left: 24, top: 30, right: 24, bottom: 40),
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.circular(28),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // const Text(
-                        //   AppStrings.login,
-                        //   style: TextStyle(
-                        //     color: AppColors.defaultColor,
-                        //     fontSize: 30,
-                        //     fontWeight: FontWeight.bold,
-                        //   ),
-                        // ),
-                        // const SizedBox(height: 20),
-                        Form(
-                          key: formKey,
-                          child: Column(
-                            children: [
-                                PrimaryTextFormField(
-                                  labelText: AppStrings.studentIdNumber,
-                                  controller: idNumberController,
-                                  keyboardType: TextInputType.visiblePassword,
-                                  hintText: AppStrings.sampleIdNumber,
-                                  textInputAction: TextInputAction.next,
-                                  textCapitalization: TextCapitalization.characters
+                    const SizedBox(height: 18),
+                    Container(
+                      padding: const EdgeInsets.only(
+                          left: 24, top: 30, right: 24, bottom: 30),
+                      decoration: BoxDecoration(
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(28),
+                      ),
+                      child: Form(
+                        key: formKey,
+                        child: Column(
+                          children: [
+                            PrimaryTextFormField(
+                              labelText: AppStrings.studentIdNumber,
+                              controller: idNumberController,
+                              keyboardType: TextInputType.visiblePassword,
+                              hintText: AppStrings.sampleIdNumber,
+                              textInputAction: TextInputAction.next,
+                              textCapitalization: TextCapitalization.characters,
+                              bottomPadding: 0,
+                            ),
+                            PrimaryTextFormField(
+                              labelText: AppStrings.password,
+                              hintText: AppStrings.enterYourPassword,
+                              controller: passwordController,
+                              keyboardType: TextInputType.visiblePassword,
+                              textInputAction: TextInputAction.done,
+                              obscureText: !isPasswordVisible,
+                              suffixWidget: IconButton(
+                                icon: Icon(
+                                  isPasswordVisible
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                  color: AppColors.defaultColor,
                                 ),
-                              // PrimaryTextFormField(
-                              //   labelText: AppStrings.schoolEmail,
-                              //   controller: emailController,
-                              //   keyboardType: TextInputType.emailAddress,
-                              //   hintText: AppStrings.studentEmailHint,
-                              //   textInputAction: TextInputAction.next,
-                              // ),
-                              PrimaryTextFormField(
-                                labelText: AppStrings.password,
-                                hintText: AppStrings.enterYourPassword,
-                                controller: passwordController,
-                                keyboardType: TextInputType.visiblePassword,
-                                textInputAction: TextInputAction.done,
-                                obscureText: !isPasswordVisible,
-                                onChanged: (value) {
-                                  setState(() {
-                                    password = value;
-                                  });
-                                },
-                                suffixWidget: IconButton(
-                                  icon: Icon(
-                                    isPasswordVisible
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
+                                onPressed: togglePasswordVisibility,
+                              ),
+                              bottomPadding: 0,
+                            ),
+                            const SizedBox(height: 30),
+                            PrimaryButton(
+                              onTap: () {
+                                FocusManager.instance.primaryFocus?.unfocus();
+                                handleLogin();
+                              },
+                              child: const Text(AppStrings.login),
+                            ),
+                            const SizedBox(height: 16),
+                            RichText(
+                              textAlign: TextAlign.center,
+                              text: TextSpan(
+                                text: 'Don’t have an account? ',
+                                style: const TextStyle(
                                     color: AppColors.defaultColor,
+                                    fontFamily: 'Nunito',
+                                    fontSize: 13),
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        Navigation.navigateToScreen(
+                                            context: context,
+                                            screen: const SignUpPage());
+                                      },
+                                    text: AppStrings.signUp,
+                                    style: const TextStyle(
+                                      color: AppColors.defaultColor,
+                                      fontFamily: 'Nunito',
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                  onPressed: togglePasswordVisibility,
-                                ),
+                                ],
                               ),
-                              const SizedBox(height: 20),
-                              PrimaryButton(
-                                onTap: () {
-                                  FocusManager.instance.primaryFocus?.unfocus();
-                                  Navigation.navigateToScreen(
-                                      context: context,
-                                      screen: const NavigationHostPage());
-                                },
-                                child: const Text(AppStrings.login),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
+                  ],
+                ),
+              );
+            }),
           ),
         ),
       ),

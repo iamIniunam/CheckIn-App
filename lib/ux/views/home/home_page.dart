@@ -24,16 +24,18 @@ class _HomePageState extends State<HomePage> {
       headerSubtitle: UiUtils.getGreetingSubtitle(),
       showInformationBanner: true,
       informationBannerText: AppStrings.qrCodeExpirationWarning,
-      hasRefreshIndicator: true,
-      body: ListView(
-        children: const [
-          CurrentClass(),
-          AttendanceThresholdWidget(),
-          SizedBox(height: 10),
-          SemesterCoursesDashboardMetricView(),
-          SizedBox(height: 10),
-          // TodaysClasses(),
-        ],
+      body: RefreshIndicator(
+        onRefresh: () async {},
+        child: ListView(
+          children: const [
+            CurrentClass(),
+            AttendanceThresholdWidget(),
+            SizedBox(height: 10),
+            SemesterCoursesDashboardMetricView(),
+            SizedBox(height: 10),
+            // TodaysClasses(),
+          ],
+        ),
       ),
     );
   }
