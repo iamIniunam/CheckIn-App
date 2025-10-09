@@ -8,7 +8,7 @@ import 'package:attendance_app/ux/views/attendance/components/attendance_type_in
 import 'package:attendance_app/ux/views/attendance/components/face_verification_buttons.dart';
 import 'package:attendance_app/ux/views/attendance/components/step_content.dart';
 import 'package:attendance_app/ux/views/attendance/components/step_indicator_widget.dart';
-import 'package:attendance_app/ux/views/onboarding/confirm_courses_page.dart';
+import 'package:attendance_app/ux/views/onboarding/course_enrollment_page.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
@@ -96,7 +96,7 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
     if (success && mounted) {
       Navigation.navigateToScreenAndClearOnePrevious(
         context: context,
-        screen: const AddCoursePage(),
+        screen: const CourseEnrollmentPage(),
       );
     }
   }

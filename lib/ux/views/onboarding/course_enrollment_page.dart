@@ -20,16 +20,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class AddCoursePage extends StatefulWidget {
-  const AddCoursePage({super.key, this.isEdit = false});
+class CourseEnrollmentPage extends StatefulWidget {
+  const CourseEnrollmentPage({super.key, this.isEdit = false});
 
   final bool isEdit;
 
   @override
-  State<AddCoursePage> createState() => _AddCoursePageState();
+  State<CourseEnrollmentPage> createState() => _CourseEnrollmentPageState();
 }
 
-class _AddCoursePageState extends State<AddCoursePage> {
+class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
   TextEditingController searchController = TextEditingController();
   late CourseViewModel viewModel;
   Timer? _searchDebounce;
@@ -63,13 +63,11 @@ class _AddCoursePageState extends State<AddCoursePage> {
   }
 
   Future<void> onConfirmPressed(CourseViewModel viewModel) async {
-    // Show a modal loading dialog while confirmCourses runs.
     AppDialogs.showLoadingDialog(context);
     bool success = false;
     try {
       success = await viewModel.confirmCourses();
     } finally {
-      // Dismiss the loading dialog if it's still showing.
       if (mounted) {
         try {
           Navigator.of(context, rootNavigator: true).pop();

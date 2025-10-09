@@ -2,7 +2,7 @@ import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/components/dashboard_metric_grid_view.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
-import 'package:attendance_app/ux/views/onboarding/confirm_courses_page.dart';
+import 'package:attendance_app/ux/views/onboarding/course_enrollment_page.dart';
 import 'package:attendance_app/ux/views/profile/profile_page.dart';
 import 'package:attendance_app/ux/views/settings/components/settings_card.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +31,8 @@ class SettingsPage extends StatelessWidget {
             title: 'Add/Drop Courses',
             onTap: () {
               Navigation.navigateToScreen(
-                  context: context, screen: const AddCoursePage(isEdit: true));
+                  context: context,
+                  screen: const CourseEnrollmentPage(isEdit: true));
             },
           ),
         ],

@@ -8,7 +8,7 @@ import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/views/course/course_details_page.dart';
 import 'package:attendance_app/ux/views/home/components/section_header.dart';
 import 'package:attendance_app/ux/views/home/full_course_list_page.dart';
-import 'package:attendance_app/ux/views/onboarding/confirm_courses_page.dart';
+import 'package:attendance_app/ux/views/onboarding/course_enrollment_page.dart';
 import 'package:flutter/material.dart';
 
 class SemesterCoursesDashboardMetricView extends StatelessWidget {
@@ -63,6 +63,8 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
               padding: const EdgeInsets.only(
                   left: 16, top: 10, right: 16, bottom: 16),
               crossAxisCount: 3,
+              // Make tiles slightly wider than tall to reduce vertical space
+              childAspectRatio: 1.3,
               children: courseInfo.length > 9
                   ? courseInfo
                       .take(9)
@@ -95,6 +97,7 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
@@ -138,7 +141,7 @@ class SelectedCoursesEmptyState extends StatelessWidget {
           child: AppMaterial(
             onTap: () {
               Navigation.navigateToScreen(
-                  context: context, screen: const AddCoursePage());
+                  context: context, screen: const CourseEnrollmentPage());
             },
             child: Container(
               width: double.infinity,

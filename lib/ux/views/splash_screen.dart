@@ -1,9 +1,9 @@
 import 'package:attendance_app/ux/navigation/navigation.dart';
+import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_images.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
-import 'package:attendance_app/ux/views/onboarding/confirm_courses_page.dart';
 import 'package:attendance_app/ux/views/onboarding/sign_up_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -32,18 +32,9 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     if (isLoggedIn == true) {
-      // final hasRequiredData = authViewModel.currentStudent?.level != null &&
-      //     (authViewModel.currentStudent?.level ?? '').isNotEmpty &&
-      //     authViewModel.currentStudent?.semester != null &&
-      //     (authViewModel.currentStudent?.semester ?? 0) > 0;
-
-      // debugPrint('Has required data: $hasRequiredData');
-
-      // if (hasRequiredData) {
       Navigation.navigateToScreen(
-          context: context, screen: const AddCoursePage());
+          context: context, screen: const NavigationHostPage());
       return;
-      // }
     }
     Navigation.navigateToScreen(context: context, screen: const SignUpPage());
   }
@@ -66,11 +57,6 @@ class _SplashScreenState extends State<SplashScreen> {
                 borderRadius: BorderRadius.circular(20),
               ),
             ),
-            // SizedBox(
-            //   height: 120,
-            //   width: 120,
-            //   child: Image(image: AppImages.appLogo),
-            // ),
             const SizedBox(height: 10),
             const Text(
               AppStrings.appName,
@@ -80,12 +66,12 @@ class _SplashScreenState extends State<SplashScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                taglineText(text: 'Scan. '),
-                taglineText(text: 'Verify. '),
-                taglineText(text: 'Done.'),
+                TagLineText(text: 'Scan. '),
+                TagLineText(text: 'Verify. '),
+                TagLineText(text: 'Done.'),
               ],
             )
           ],
@@ -93,8 +79,15 @@ class _SplashScreenState extends State<SplashScreen> {
       ),
     );
   }
+}
 
-  Widget taglineText({required String text}) {
+class TagLineText extends StatelessWidget {
+  const TagLineText({super.key, required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
     return Text(
       text,
       style: const TextStyle(
