@@ -105,7 +105,7 @@ class _SearchTextFormFieldState extends State<SearchTextFormField> {
             child: AppImages.svgSearchIcon,
           ),
           suffixIcon: Visibility(
-            visible: _controller.text.isNotEmpty,
+            visible: widget.controller?.text.isNotEmpty ?? false,
             child: InkWell(
               onTap: widget.onClear,
               child: const Padding(
@@ -121,7 +121,7 @@ class _SearchTextFormFieldState extends State<SearchTextFormField> {
         ),
         inputFormatters: widget.inputFormatters,
         keyboardType: TextInputType.text,
-        controller: _controller,
+        controller: widget.controller,
         onChanged: widget.onChanged,
         onSubmitted: widget.onSubmitted,
         textInputAction: TextInputAction.search,

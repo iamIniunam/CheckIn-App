@@ -42,7 +42,7 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
   String? get courseSchool => courseViewModel.registeredCourses
       .firstWhere((c) => c.courseCode == widget.course.courseCode,
           orElse: () => Course(courseCode: '', courseTitle: ''))
-      .school; //TODO: check this
+      .school;
 
   @override
   Widget build(BuildContext context) {
@@ -110,8 +110,7 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
                         Consumer<AttendanceRecordsViewModel>(
                           builder: (context, viewModel, _) {
                             if (viewModel.isLoading || viewModel.isRefreshing) {
-                              return const Center(
-                                  child: CircularProgressIndicator());
+                              return const PageLoadingIndicator();
                             }
 
                             if (viewModel.hasError) {

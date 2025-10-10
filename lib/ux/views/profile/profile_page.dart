@@ -4,7 +4,7 @@ import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_images.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
-import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/course_search_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/user_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/components/app_buttons.dart';
@@ -24,13 +24,13 @@ class _ProfilePageState extends State<ProfilePage> {
   String? newPhoneNumber;
 
   late UserViewModel userViewModel;
-  late CourseViewModel courseViewModel;
+  late CourseSearchViewModel searchViewModel;
 
   @override
   void initState() {
     super.initState();
     userViewModel = context.read<UserViewModel>();
-    courseViewModel = context.read<CourseViewModel>();
+    searchViewModel = context.read<CourseSearchViewModel>();
   }
 
   String getUserSchool() {
@@ -40,7 +40,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     String calculatedSchool =
-        userViewModel.getUserPrimarySchool(courseViewModel.chosenSchools);
+        userViewModel.getUserPrimarySchool(searchViewModel.chosenSchools);
     return calculatedSchool;
   }
 

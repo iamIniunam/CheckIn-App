@@ -12,6 +12,8 @@ class EmptyStateWidget extends StatelessWidget {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             icon ?? Icons.error_outline_rounded,
@@ -24,7 +26,6 @@ class EmptyStateWidget extends StatelessWidget {
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: AppColors.defaultColor,
-              fontWeight: FontWeight.w600,
             ),
           ),
         ],

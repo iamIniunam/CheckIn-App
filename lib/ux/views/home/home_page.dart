@@ -50,7 +50,7 @@ class _HomePageState extends State<HomePage> {
 
     if (studentId != null) {
       // Reload all data when user pulls to refresh
-      await context.read<CourseViewModel>().loadRegisteredCourses(studentId);
+      await context.read<CourseViewModel>().reloadRegisteredCourses(studentId);
 
       // Reload other data if needed
       // await context.read<AttendanceViewModel>().loadData(studentId);

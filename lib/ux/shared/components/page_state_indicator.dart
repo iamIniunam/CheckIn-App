@@ -24,23 +24,26 @@ class PageErrorIndicator extends StatelessWidget {
       padding: EdgeInsets.only(
         top: useTopPadding ? MediaQuery.sizeOf(context).height * 0.18 : 0,
       ),
-      child: Column(
-        mainAxisAlignment:
-            useTopPadding ? MainAxisAlignment.start : MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.error_outline_rounded,
-            color: AppColors.defaultColor,
-            size: 30,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            text ?? 'Failed to load data',
-            style: const TextStyle(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: useTopPadding
+              ? MainAxisAlignment.start
+              : MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline_rounded,
               color: AppColors.defaultColor,
+              size: 30,
             ),
-          ),
-        ],
+            const SizedBox(height: 6),
+            Text(
+              text ?? 'Failed to load data',
+              style: const TextStyle(
+                color: AppColors.defaultColor,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

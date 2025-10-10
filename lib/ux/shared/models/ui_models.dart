@@ -141,22 +141,6 @@ class Course {
   int get hashCode => id.hashCode;
 }
 
-// class Session {
-//   final int weekNumber;
-//   final String date;
-//   final String status;
-
-//   String get session => 'Week $weekNumber';
-
-//   Color get getStatusColor => statusColor(status);
-
-//   Session({
-//     required this.weekNumber,
-//     required this.date,
-//     required this.status,
-//   });
-// }
-
 class AttendanceClass {
   final int id;
   final String name;
