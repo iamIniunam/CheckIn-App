@@ -1,5 +1,5 @@
 import 'package:attendance_app/ux/shared/enums.dart';
-import 'package:attendance_app/ux/shared/view_models/face_verification_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/attendance_verification_view_model.dart';
 import 'package:attendance_app/ux/views/attendance/components/completion_content.dart';
 import 'package:attendance_app/ux/views/attendance/components/face_verification_content.dart';
 import 'package:attendance_app/ux/views/attendance/components/location_content.dart';
@@ -15,7 +15,7 @@ class StepContent extends StatelessWidget {
     required this.isCameraInitialized,
   });
 
-  final FaceVerificationViewModel viewModel;
+  final AttendanceVerificationViewModel viewModel;
   final CameraController? cameraController;
   final bool isCameraInitialized;
 

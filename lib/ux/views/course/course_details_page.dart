@@ -1,13 +1,12 @@
-import 'package:attendance_app/platform/services/selected_courses_service.dart';
 import 'package:attendance_app/ux/shared/components/empty_state_widget.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
-import 'package:attendance_app/ux/shared/view_models/attendance_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/attendance_records_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/user_view_model.dart';
 import 'package:attendance_app/ux/views/course/components/session_history.dart';
-import 'package:attendance_app/ux/views/course/components/summary_card.dart';
+import 'package:attendance_app/ux/views/course/components/attendance_summary_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -30,14 +29,14 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.course.id != null && userViewModel.idNumber.isNotEmpty) {
-        context.read<AttendanceViewModel>().loadAttendanceRecords(
+        context.read<AttendanceRecordsViewModel>().loadAttendanceRecords(
             widget.course.id ?? 0, userViewModel.idNumber);
       }
     });
   }
 
-  String? get courseStream =>
-      SelectedCourseService().getStreamForCourse(widget.course.courseCode);
+  // String? get courseStream =>
+  //     SelectedCourseService().getStreamForCourse(widget.course.courseCode);
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +46,7 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
       informationBannerText: AppStrings.sampleEligibilityText,
       body: RefreshIndicator(
         onRefresh: () async {
-          context.read<AttendanceViewModel>().refresh();
+          context.read<AttendanceRecordsViewModel>().refresh();
         },
         child: Column(
           children: [
@@ -92,7 +91,8 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
                                 ),
                               ),
                               child: Text(
-                                courseStream ?? '',
+                                // courseStream ?? '',
+                                '',
                                 style: const TextStyle(
                                   color: AppColors.defaultColor,
                                   fontSize: 11,
@@ -102,7 +102,7 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
                             ),
                           ],
                         ),
-                        Consumer<AttendanceViewModel>(
+                        Consumer<AttendanceRecordsViewModel>(
                           builder: (context, viewModel, _) {
                             if (viewModel.isLoading || viewModel.isRefreshing) {
                               return const Center(
@@ -149,7 +149,7 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                SummaryCard(viewModel: viewModel),
+                                AttendanceSummaryCard(viewModel: viewModel),
                                 const Text(
                                   AppStrings.history,
                                   style: TextStyle(

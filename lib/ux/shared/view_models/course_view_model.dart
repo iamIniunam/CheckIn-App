@@ -1,27 +1,24 @@
 import 'package:attendance_app/platform/course_search_helper.dart';
 import 'package:attendance_app/platform/repositories/course_repository.dart';
-import 'package:attendance_app/platform/services/selected_courses_service.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:flutter/material.dart';
 
 class CourseViewModel extends ChangeNotifier {
   final CourseRepository _repository;
-  final SelectedCourseService _selectedCoursesService;
 
-  CourseViewModel({
-    CourseRepository? repository,
-    SelectedCourseService? selectedCoursesService,
-  })  : _repository = repository ?? CourseRepository(),
-        _selectedCoursesService =
-            selectedCoursesService ?? SelectedCourseService();
+  CourseViewModel({CourseRepository? repository})
+      : _repository = repository ?? CourseRepository();
 
   // All courses from API
   List<Course> _allCourses = [];
   List<Course> _filteredCourses = [];
+  List<Course> _registeredCourses = [];
   String _searchQuery = '';
   bool _isLoadingCourses = false;
+  bool _isLoadingRegisteredCourses = false;
   String? _loadError;
+  String? _registeredCoursesError;
 
   //Filter state
   int? _selectedLevel;
@@ -46,11 +43,15 @@ class CourseViewModel extends ChangeNotifier {
 
   // Getters for all courses
   List<Course> get allCourses => List.unmodifiable(_allCourses);
+  List<Course> get registeredCourses => List.unmodifiable(_registeredCourses);
   String get searchQuery => _searchQuery;
   bool get isSearching => _searchQuery.isNotEmpty;
   bool get isLoadingCourses => _isLoadingCourses;
+  bool get isLoadingRegisteredCourses => _isLoadingRegisteredCourses;
   String? get loadError => _loadError;
+  String? get registeredCoursesError => _registeredCoursesError;
   bool get hasLoadError => _loadError != null;
+  bool get hasRegisteredCoursesError => _registeredCoursesError != null;
 
   //Filter getters
   int? get selectedLevel => _selectedLevel;
@@ -150,35 +151,30 @@ class CourseViewModel extends ChangeNotifier {
     }
   }
 
-  // Future<void> loadCoursesForLevels(String level, int semester) async {
-  //   setLoadingState(null, true);
+  Future<void> loadRegisteredCourses(String studentId) async {
+    _isLoadingRegisteredCourses = true;
+    _registeredCoursesError = null;
+    notifyListeners();
 
-  //   try {
-  //     final response = await _repository.fetchCoursesForLevelAndSemester(
-  //       level,
-  //       semester,
-  //     );
+    try {
+      final response = await _repository.fetchRegisteredCourses(studentId);
 
-  //     if (response.data != null) {
-  //       _availableCourses = response.data ?? [];
-  //       _loadError = null;
-  //     } else {
-  //       _loadError = response.message ?? 'Failed to load courses';
-  //       _availableCourses = [];
-  //     }
-  //   } catch (e) {
-  //     _loadError = 'An unexpected error occurred: ${e.toString()}';
-  //     _availableCourses = [];
-  //   } finally {
-  //     _isLoadingCourses = false;
-  //     notifyListeners();
-  //   }
-  // }
-
-  // Retry loading courses
-  // Future<void> reloadCoursesForLevels(String level, int semester) async {
-  //   return loadCoursesForLevels(level, semester);
-  // }
+      if (response.data != null) {
+        _registeredCourses = response.data ?? [];
+        _registeredCoursesError = null;
+      } else {
+        _registeredCoursesError =
+            response.message ?? 'Failed to load registered courses';
+        _registeredCourses = [];
+      }
+    } catch (e) {
+      _registeredCoursesError = 'An unexpected error occurred: ${e.toString()}';
+      _registeredCourses = [];
+    } finally {
+      _isLoadingRegisteredCourses = false;
+      notifyListeners();
+    }
+  }
 
   void setLoadingState(String? message, bool loading) {
     _loadError = message;
@@ -224,8 +220,6 @@ class CourseViewModel extends ChangeNotifier {
     try {
       // TODO: Add API call to save selected courses to backend
       await Future.delayed(const Duration(seconds: 1));
-      _selectedCoursesService.updateSelectedCourses(
-          _selectedCourses.toList(), _chosenSchools);
 
       _isConfirming = false;
       notifyListeners();

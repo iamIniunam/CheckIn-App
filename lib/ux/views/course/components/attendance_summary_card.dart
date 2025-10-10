@@ -1,11 +1,11 @@
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
-import 'package:attendance_app/ux/shared/view_models/attendance_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/attendance_records_view_model.dart';
 import 'package:flutter/material.dart';
 
-class SummaryCard extends StatelessWidget {
-  const SummaryCard({super.key, required this.viewModel});
+class AttendanceSummaryCard extends StatelessWidget {
+  const AttendanceSummaryCard({super.key, required this.viewModel});
 
-  final AttendanceViewModel viewModel;
+  final AttendanceRecordsViewModel viewModel;
 
   @override
   Widget build(BuildContext context) {

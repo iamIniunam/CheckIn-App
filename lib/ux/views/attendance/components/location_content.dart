@@ -1,12 +1,12 @@
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
-import 'package:attendance_app/ux/shared/view_models/face_verification_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/attendance_verification_view_model.dart';
 import 'package:attendance_app/ux/views/attendance/components/error_message.dart';
 import 'package:flutter/material.dart';
 
 class LocationCheckContent extends StatelessWidget {
   const LocationCheckContent({super.key, required this.viewModel});
 
-  final FaceVerificationViewModel viewModel;
+  final AttendanceVerificationViewModel viewModel;
 
   @override
   Widget build(BuildContext context) {

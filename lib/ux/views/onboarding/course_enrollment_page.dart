@@ -13,7 +13,7 @@ import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
 import 'package:attendance_app/ux/shared/resources/app_images.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
-import 'package:attendance_app/ux/views/onboarding/confirm_course_card.dart';
+import 'package:attendance_app/ux/views/onboarding/components/course_enrollment_card.dart';
 import 'package:attendance_app/ux/views/onboarding/course_registration_info_bottom_sheet.dart';
 import 'package:attendance_app/ux/views/onboarding/filter_courses_bottom_page.dart';
 import 'dart:async';
@@ -231,7 +231,7 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
 
                           return Padding(
                             padding: const EdgeInsets.only(top: 12),
-                            child: ConfirmCourseCard(
+                            child: CourseEnrollmentCard(
                               semesterCourse: course,
                               selectedSchool: selectedSchool,
                               onTapSchool: (school) {

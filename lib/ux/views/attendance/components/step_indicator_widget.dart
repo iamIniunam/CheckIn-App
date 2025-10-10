@@ -1,12 +1,12 @@
 import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
-import 'package:attendance_app/ux/shared/view_models/face_verification_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/attendance_verification_view_model.dart';
 import 'package:flutter/material.dart';
 
 class StepIndicatorWidget extends StatelessWidget {
   const StepIndicatorWidget({super.key, required this.viewModel});
 
-  final FaceVerificationViewModel viewModel;
+  final AttendanceVerificationViewModel viewModel;
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +35,9 @@ class StepIndicatorWidget extends StatelessWidget {
               icon: Icons.face,
               isActive: viewModel.verificationState.currentStep.index >=
                   VerificationStep.faceVerification.index,
-              isLoading:
-                  viewModel.verificationState.currentStep == VerificationStep.faceVerification &&
-                      viewModel.verificationState.isLoading,
+              isLoading: viewModel.verificationState.currentStep ==
+                      VerificationStep.faceVerification &&
+                  viewModel.verificationState.isLoading,
             ),
             StepConnector(
               isActive: viewModel.verificationState.currentStep.index >
@@ -49,9 +49,9 @@ class StepIndicatorWidget extends StatelessWidget {
                 icon: Icons.location_on,
                 isActive: viewModel.verificationState.currentStep.index >=
                     VerificationStep.locationCheck.index,
-                isLoading:
-                    viewModel.verificationState.currentStep == VerificationStep.locationCheck &&
-                        viewModel.verificationState.isLoading,
+                isLoading: viewModel.verificationState.currentStep ==
+                        VerificationStep.locationCheck &&
+                    viewModel.verificationState.isLoading,
               ),
               StepConnector(
                 isActive: viewModel.verificationState.currentStep.index >

@@ -1,5 +1,5 @@
 import 'package:attendance_app/ux/shared/enums.dart';
-import 'package:attendance_app/ux/views/attendance/face_verification_page.dart';
+import 'package:attendance_app/ux/views/attendance/verification_page.dart';
 import 'package:attendance_app/ux/views/home/home_page.dart';
 import 'package:flutter/material.dart';
 
@@ -40,7 +40,7 @@ class Navigation {
         (route) => false);
   }
 
-  static void navigateToFaceVerification({
+  static void navigateToVerification({
     required BuildContext context,
     FaceVerificationMode mode = FaceVerificationMode.signUp,
     AttendanceType? attendanceType,
@@ -48,7 +48,7 @@ class Navigation {
   }) {
     Navigation.navigateToScreen(
       context: context,
-      screen: FaceVerificationPage(
+      screen: VerificationPage(
         mode: mode,
         onExit: onExit,
       ),
@@ -59,7 +59,7 @@ class Navigation {
     required BuildContext context,
     void Function()? onExit,
   }) {
-    navigateToFaceVerification(
+    navigateToVerification(
       context: context,
       mode: FaceVerificationMode.attendanceInPerson,
       attendanceType: AttendanceType.inPerson,
@@ -71,7 +71,7 @@ class Navigation {
     required BuildContext context,
     void Function()? onExit,
   }) {
-    navigateToFaceVerification(
+    navigateToVerification(
       context: context,
       mode: FaceVerificationMode.attendanceOnline,
       attendanceType: AttendanceType.online,

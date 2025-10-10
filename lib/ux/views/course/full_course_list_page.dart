@@ -2,18 +2,15 @@ import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
-import 'package:attendance_app/ux/views/home/components/full_course_list_course_detail.dart';
+import 'package:attendance_app/ux/views/course/components/full_course_list_course_detail.dart';
 import 'package:flutter/material.dart';
 
 class FullCourseListPage extends StatefulWidget {
   final List<Course> courses;
-  final Map<String, String>? courseStreams;
+  final Map<String, String>? courseSchools;
 
-  const FullCourseListPage({
-    super.key,
-    required this.courses,
-    this.courseStreams,
-  });
+  const FullCourseListPage(
+      {super.key, required this.courses, this.courseSchools});
 
   @override
   State<FullCourseListPage> createState() => _FullCourseListPageState();
@@ -33,7 +30,7 @@ class _FullCourseListPageState extends State<FullCourseListPage> {
               itemCount: widget.courses.length,
               itemBuilder: (context, index) {
                 final course = widget.courses[index];
-                final stream = widget.courseStreams?[course.courseCode];
+                final school = widget.courseSchools?[course.courseCode];
                 final isExpanded = expandedIndex == index;
 
                 return Column(
@@ -55,7 +52,7 @@ class _FullCourseListPageState extends State<FullCourseListPage> {
                               ),
                             ),
                           ),
-                          if (stream != null) ...[
+                          if (school != null) ...[
                             Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 4),
@@ -67,7 +64,7 @@ class _FullCourseListPageState extends State<FullCourseListPage> {
                                 ),
                               ),
                               child: Text(
-                                stream,
+                                school,
                                 style: const TextStyle(
                                   color: AppColors.defaultColor,
                                   fontSize: 11,

@@ -1,12 +1,12 @@
-import 'package:attendance_app/platform/repositories/course_repository.dart';
+import 'package:attendance_app/platform/repositories/attendance_repository.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:flutter/material.dart';
 
-class AttendanceViewModel extends ChangeNotifier {
-  final CourseRepository _courseRepository;
+class AttendanceRecordsViewModel extends ChangeNotifier {
+  final AttendanceRepository _attendanceRepository;
 
-  AttendanceViewModel({CourseRepository? courseRepository})
-      : _courseRepository = courseRepository ?? CourseRepository();
+  AttendanceRecordsViewModel({AttendanceRepository? attendanceRepository})
+      : _attendanceRepository = attendanceRepository ?? AttendanceRepository();
 
   List<CourseAttendanceRecord> _attendanceRecords = [];
   bool _isLoading = false;
@@ -39,7 +39,7 @@ class AttendanceViewModel extends ChangeNotifier {
     _lastStudentId = studentId;
 
     try {
-      final response = await _courseRepository.fetchCourseAttendanceRecord(
+      final response = await _attendanceRepository.fetchCourseAttendanceRecord(
           courseId, studentId);
 
       if (response.success && response.data != null) {
@@ -72,7 +72,7 @@ class AttendanceViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _courseRepository.fetchCourseAttendanceRecord(
+      final response = await _attendanceRepository.fetchCourseAttendanceRecord(
           _lastCourseId!, _lastStudentId!);
 
       if (response.success && response.data != null) {

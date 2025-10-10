@@ -1,7 +1,7 @@
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/views/course/components/course_card.dart';
-import 'package:attendance_app/ux/views/home/components/section_header.dart';
+import 'package:attendance_app/ux/shared/components/section_header.dart';
 import 'package:flutter/material.dart';
 
 class TodaysClasses extends StatelessWidget {

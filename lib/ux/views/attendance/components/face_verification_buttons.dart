@@ -2,7 +2,7 @@ import 'package:attendance_app/ux/shared/components/app_buttons.dart';
 import 'package:attendance_app/ux/shared/components/app_material.dart';
 import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
-import 'package:attendance_app/ux/shared/view_models/face_verification_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/attendance_verification_view_model.dart';
 import 'package:flutter/material.dart';
 
 class ExitButton extends StatelessWidget {
@@ -14,7 +14,7 @@ class ExitButton extends StatelessWidget {
   });
 
   final FaceVerificationMode mode;
-  final FaceVerificationViewModel viewModel;
+  final AttendanceVerificationViewModel viewModel;
   final VoidCallback onExit;
 
   bool isAttendanceMode() {
@@ -73,7 +73,7 @@ class VerificationButton extends StatelessWidget {
   });
 
   final FaceVerificationMode mode;
-  final FaceVerificationViewModel viewModel;
+  final AttendanceVerificationViewModel viewModel;
   final VoidCallback onVerify;
 
   @override

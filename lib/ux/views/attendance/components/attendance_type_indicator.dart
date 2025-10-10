@@ -7,7 +7,6 @@ class AttendanceTypeIndicator extends StatelessWidget {
   const AttendanceTypeIndicator({super.key, required this.attendanceType});
 
   final AttendanceType attendanceType;
-  // final FaceVerificationViewModel viewModel;
 
   static final VerificationMessageProvider messageProvider =
       DefaultVerificationMessageProvider();

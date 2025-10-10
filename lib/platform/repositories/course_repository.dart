@@ -17,8 +17,18 @@ class CourseRepository {
     return await _courseApi.getCoursesForLevelAndSemester(level, semester);
   }
 
-  Future<ApiResponse<List<CourseAttendanceRecord>>> fetchCourseAttendanceRecord(
-      int courseId, String studentId) async {
-    return await _courseApi.getCourseAttendanceRecord(courseId, studentId);
+  // Future<ApiResponse<Map<String, dynamic>>> registerCourses({
+  //   required String studentId,
+  //   required List<Map<String, dynamic>> courses,
+  // }) async {
+  //   return await _courseApi.registerCourses(
+  //     studentId: studentId,
+  //     courses: courses,
+  //   );
+  // }
+
+  Future<ApiResponse<List<Course>>> fetchRegisteredCourses(
+      String studentId) async {
+    return await _courseApi.getRegisteredCourses(studentId);
   }
 }

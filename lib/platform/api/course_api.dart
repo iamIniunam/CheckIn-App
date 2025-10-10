@@ -8,7 +8,8 @@ import 'package:http/http.dart' as http;
 class CourseApi {
   final _courseBasePath = '/courses/getAllCourses';
   final _coursesForLevelBasePath = '/courses/getCoursesForLevelAndSemester';
-  final _courseAttendanceBasePath = '/student/getCourseAttendanceRecord';
+  // final _registereCoursesBasePath = '/student/getRegisteredCourses';
+  final _registeredCoursesBasePath = '/student/getRegisteredCourses';
 
   Future<ApiResponse<List<Course>>> getAllCourses() async {
     try {
@@ -83,36 +84,71 @@ class CourseApi {
     }
   }
 
-  Future<ApiResponse<List<CourseAttendanceRecord>>> getCourseAttendanceRecord(
-      int courseId, String studentId) async {
-    try {
-      final path = '$_courseAttendanceBasePath/$courseId/$studentId';
+  // Future<ApiResponse<Map<String, dynamic>>> registerCourses({
+  //   required String studentId,
+  //   required List<Map<String, dynamic>> courses,
+  // }) async {
+  //   try {
+  //     final networkHelper = NetworkHelper(
+  //       url: AppConstants.apiBaseUrl,
+  //       method: HttpMethod.post,
+  //       path: _registereCoursesBasePath,
+  //       queryParams: {
+  //         'studentId': studentId,
+  //         'courses': courses,
+  //       },
+  //       errorMessage: 'Failed to register courses',
+  //     );
 
+  //     final response = await networkHelper.getData();
+  //     debugPrint('Register Courses Response: $response');
+
+  //     if (response != null) {
+  //       if (response['data'] != null) {
+  //         return ApiResponse.success(
+  //           response['data'] ?? {},
+  //           message: response['message'] ?? 'Courses registered successfully',
+  //         );
+  //       } else {
+  //         return ApiResponse.error(
+  //             response['message'] ?? 'Failed to register courses');
+  //       }
+  //     } else {
+  //       return ApiResponse.error('Network error. Please try again');
+  //     }
+  //   } on http.ClientException {
+  //     return ApiResponse.error('Network error. Please check your connection.');
+  //   } on FormatException {
+  //     return ApiResponse.error('Invalid response from server');
+  //   } catch (e) {
+  //     return ApiResponse.error('An unexpected error occured: ${e.toString()}');
+  //   }
+  // }
+
+  Future<ApiResponse<List<Course>>> getRegisteredCourses(
+      String studentId) async {
+    try {
       final networkHelper = NetworkHelper(
         url: AppConstants.apiBaseUrl,
         method: HttpMethod.get,
-        path: path,
-        errorMessage: 'Failed to get attendance',
+        path: '$_registeredCoursesBasePath/$studentId',
+        errorMessage: 'Failed to get registered courses',
       );
-      debugPrint(
-          'Url: ${AppConstants.apiBaseUrl}$_courseAttendanceBasePath/$courseId/$studentId');
 
       final response = await networkHelper.getData();
-      debugPrint('Attendance Record Response: $response');
+      debugPrint('Registered Courses Response: $response');
 
       if (response != null) {
         if (response['data'] != null) {
-          final List<dynamic> attendanceJson =
-              response['data'] as List<dynamic>;
-          final List<CourseAttendanceRecord> attendanceRecords = attendanceJson
-              .map((json) =>
-                  CourseAttendanceRecord.fromJson(json as Map<String, dynamic>))
+          final List<dynamic> coursesJson = response['data'] as List<dynamic>;
+          final List<Course> courses = coursesJson
+              .map((json) => Course.fromJson(json as Map<String, dynamic>))
               .toList();
 
-          return ApiResponse.success(attendanceRecords);
+          return ApiResponse.success(courses);
         } else {
           return ApiResponse.error(
-              response['message'] ?? 'Failed to get attendance record');
+              response['message'] ?? 'Failed to get registered courses');
         }
       } else {
         return ApiResponse.error('Network error. Please try again');
@@ -122,10 +158,7 @@ class CourseApi {
     } on FormatException {
       return ApiResponse.error('Invalid response from server');
     } catch (e) {
-      debugPrint('Exception in getCourseAttendanceRecord: $e');
       return ApiResponse.error('An unexpected error occured: ${e.toString()}');
     }
   }
 }
-
-// php artisan serve --host=ipaddress

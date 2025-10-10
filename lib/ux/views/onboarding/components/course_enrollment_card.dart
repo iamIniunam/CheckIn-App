@@ -5,8 +5,8 @@ import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:attendance_app/ux/views/attendance/components/padded_column.dart';
 import 'package:flutter/material.dart';
 
-class ConfirmCourseCard extends StatelessWidget {
-  const ConfirmCourseCard(
+class CourseEnrollmentCard extends StatelessWidget {
+  const CourseEnrollmentCard(
       {super.key,
       required this.semesterCourse,
       required this.selectedSchool,
