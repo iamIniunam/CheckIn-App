@@ -138,6 +138,10 @@ class CourseApi {
       final response = await networkHelper.getData();
       debugPrint('Registered Courses Response: $response');
 
+      if (response == null) {
+        debugPrint('Registered Courses Error: No response received');
+      }
+
       if (response != null) {
         if (response['data'] != null) {
           final List<dynamic> coursesJson = response['data'] as List<dynamic>;

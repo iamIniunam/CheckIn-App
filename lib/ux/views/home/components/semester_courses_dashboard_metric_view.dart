@@ -1,106 +1,115 @@
 import 'package:attendance_app/ux/shared/components/app_material.dart';
 import 'package:attendance_app/ux/shared/components/dashboard_metric_grid_view.dart';
-import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
+import 'package:attendance_app/ux/shared/components/page_state_indicator.dart';
+import 'package:attendance_app/ux/shared/components/shimmer_widget.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
-import 'package:attendance_app/ux/views/course/course_details_page.dart';
 import 'package:attendance_app/ux/shared/components/section_header.dart';
 import 'package:attendance_app/ux/views/course/full_course_list_page.dart';
+import 'package:attendance_app/ux/views/home/components/single_course_card.dart';
 import 'package:attendance_app/ux/views/onboarding/course_enrollment_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SemesterCoursesDashboardMetricView extends StatelessWidget {
   const SemesterCoursesDashboardMetricView({super.key});
 
-  List<Course> get courseInfo => CourseViewModel().registeredCourses;
+  static final List<ShimmerBox> shimmerBoxes = List.generate(
+    9,
+    (index) => ShimmerBox(
+      height: 0,
+      borderRadius: BorderRadius.circular(12),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SectionHeader(
-          period: AppStrings.semesterCourses,
-          hasAction: courseInfo.length > 9,
-          onTap: () {
-            if (courseInfo.length > 9) {
-              Navigation.navigateToScreen(
-                context: context,
-                screen: FullCourseListPage(
-                  courses: courseInfo,
-                  // courseStreams: selectedStreams,
-                ),
-              );
-            }
-          },
-        ),
-        DashboardMetricGridView(
-          padding:
-              const EdgeInsets.only(left: 16, top: 10, right: 16, bottom: 16),
-          crossAxisCount: 3,
-          // Make tiles slightly wider than tall to reduce vertical space
-          childAspectRatio: 1.3,
-          children: courseInfo.length > 9
-              ? courseInfo
-                  .take(9)
-                  .map((course) =>
-                      singleCourse(context: context, course: course))
-                  .toList()
-              : courseInfo
-                  .map((course) =>
-                      singleCourse(context: context, course: course))
-                  .toList(),
-        ),
-      ],
-    );
+    return Consumer<CourseViewModel>(builder: (context, courseViewModel, _) {
+      if (courseViewModel.isLoadingRegisteredCourses) {
+        return Column(
+          children: [
+            const SectionHeader(
+              period: AppStrings.semesterCourses,
+              hasAction: false,
+            ),
+            Shimmer(
+              child: DashboardMetricGridView(
+                padding: const EdgeInsets.only(
+                    left: 16, top: 10, right: 16, bottom: 0),
+                crossAxisCount: 3,
+                childAspectRatio: 1.3,
+                children: [
+                  ...shimmerBoxes,
+                ],
+              ),
+            )
+          ],
+        );
+      }
+
+      if (courseViewModel.hasRegisteredCoursesError) {
+        return Column(
+          children: [
+            const SectionHeader(
+              period: AppStrings.semesterCourses,
+              hasAction: false,
+            ),
+            PageErrorIndicator(
+              text: courseViewModel.registeredCoursesError ??
+                  'Error loading courses',
+              useTopPadding: true,
+            ),
+          ],
+        );
+      }
+
+      final courseInfo = courseViewModel.registeredCourses;
+
+      if (courseInfo.isEmpty) {
+        return const EnrolledCoursesEmptyState();
+      }
+
+      return Column(
+        children: [
+          SectionHeader(
+            period: AppStrings.semesterCourses,
+            hasAction: courseInfo.length > 9,
+            onTap: () {
+              if (courseInfo.length > 9) {
+                Navigation.navigateToScreen(
+                  context: context,
+                  screen: FullCourseListPage(
+                    courses: courseInfo,
+                  ),
+                );
+              }
+            },
+          ),
+          DashboardMetricGridView(
+            padding:
+                const EdgeInsets.only(left: 16, top: 10, right: 16, bottom: 16),
+            crossAxisCount: 3,
+            // Make tiles slightly wider than tall to reduce vertical space
+            childAspectRatio: 1.3,
+            children: courseInfo.length > 9
+                ? courseInfo
+                    .take(9)
+                    .map((course) => SingleCourseCard(course: course))
+                    .toList()
+                : courseInfo
+                    .map((course) => SingleCourseCard(course: course))
+                    .toList(),
+          ),
+        ],
+      );
+    });
   }
 }
 
-Widget singleCourse({required BuildContext context, required Course course}) {
-  return AppMaterial(
-    color: course.color,
-    borderRadius: BorderRadius.circular(15),
-    inkwellBorderRadius: BorderRadius.circular(15),
-    elevation: 1,
-    onTap: () {
-      Navigation.navigateToScreen(
-        context: context,
-        screen: CourseDetailsPage(course: course),
-      );
-    },
-    child: Padding(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            course.creditHours.toString(),
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppColors.defaultColor,
-              fontSize: 32,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          Text(
-            course.courseCode,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppColors.defaultColor,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-class SelectedCoursesEmptyState extends StatelessWidget {
-  const SelectedCoursesEmptyState({super.key});
+class EnrolledCoursesEmptyState extends StatelessWidget {
+  const EnrolledCoursesEmptyState({super.key});
 
   @override
   Widget build(BuildContext context) {

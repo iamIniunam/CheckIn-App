@@ -236,6 +236,11 @@ class CourseViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clearRegisteredCoursesError() {
+    _registeredCoursesError = null;
+    notifyListeners();
+  }
+
   void clearError() {
     if (_errorMessage != null) {
       _errorMessage = null;

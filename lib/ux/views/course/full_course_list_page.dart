@@ -30,7 +30,7 @@ class _FullCourseListPageState extends State<FullCourseListPage> {
               itemCount: widget.courses.length,
               itemBuilder: (context, index) {
                 final course = widget.courses[index];
-                final school = widget.courseSchools?[course.courseCode];
+                // final school = widget.courseSchools?[course.courseCode];
                 final isExpanded = expandedIndex == index;
 
                 return Column(
@@ -52,7 +52,8 @@ class _FullCourseListPageState extends State<FullCourseListPage> {
                               ),
                             ),
                           ),
-                          if (school != null) ...[
+                          if (course.school != null) ...[
+                            //TODO: check this
                             Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 4),
@@ -64,7 +65,7 @@ class _FullCourseListPageState extends State<FullCourseListPage> {
                                 ),
                               ),
                               child: Text(
-                                school,
+                                course.school ?? '',
                                 style: const TextStyle(
                                   color: AppColors.defaultColor,
                                   fontSize: 11,
@@ -99,10 +100,6 @@ class _FullCourseListPageState extends State<FullCourseListPage> {
                             FullCourseListCourseDetail(
                               detail: '${course.creditHours} Credit Hour(s)',
                             ),
-                            // if (stream != null)
-                            //   FullCourseListCourseDetail(
-                            //     detail: 'Stream: $stream',
-                            //   ),
                           ],
                         ),
                       ),

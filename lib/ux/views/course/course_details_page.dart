@@ -1,9 +1,11 @@
 import 'package:attendance_app/ux/shared/components/empty_state_widget.dart';
+import 'package:attendance_app/ux/shared/components/page_state_indicator.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance_records_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/user_view_model.dart';
 import 'package:attendance_app/ux/views/course/components/session_history.dart';
 import 'package:attendance_app/ux/views/course/components/attendance_summary_card.dart';
@@ -21,11 +23,13 @@ class CourseDetailsPage extends StatefulWidget {
 
 class _CourseDetailsPageState extends State<CourseDetailsPage> {
   late UserViewModel userViewModel;
+  late CourseViewModel courseViewModel;
 
   @override
   void initState() {
     super.initState();
     userViewModel = context.read<UserViewModel>();
+    courseViewModel = context.read<CourseViewModel>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.course.id != null && userViewModel.idNumber.isNotEmpty) {
@@ -35,8 +39,10 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
     });
   }
 
-  // String? get courseStream =>
-  //     SelectedCourseService().getStreamForCourse(widget.course.courseCode);
+  String? get courseSchool => courseViewModel.registeredCourses
+      .firstWhere((c) => c.courseCode == widget.course.courseCode,
+          orElse: () => Course(courseCode: '', courseTitle: ''))
+      .school; //TODO: check this
 
   @override
   Widget build(BuildContext context) {
@@ -91,8 +97,7 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
                                 ),
                               ),
                               child: Text(
-                                // courseStream ?? '',
-                                '',
+                                courseSchool ?? '',
                                 style: const TextStyle(
                                   color: AppColors.defaultColor,
                                   fontSize: 11,
@@ -110,34 +115,10 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
                             }
 
                             if (viewModel.hasError) {
-                              return Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(Icons.error_outline,
-                                        size: 48, color: Colors.red),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      viewModel.errorMessage ??
-                                          'An error occurred',
-                                      style: const TextStyle(color: Colors.red),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    const SizedBox(height: 16),
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        if (widget.course.id != null) {
-                                          viewModel.loadAttendanceRecords(
-                                            widget.course.id ?? 0,
-                                            userViewModel.idNumber,
-                                          );
-                                        }
-                                      },
-                                      icon: const Icon(Icons.refresh),
-                                      label: const Text('Retry'),
-                                    ),
-                                  ],
-                                ),
+                              return PageErrorIndicator(
+                                text: viewModel.errorMessage ??
+                                    'Error loading attendance records',
+                                useTopPadding: true,
                               );
                             }
 

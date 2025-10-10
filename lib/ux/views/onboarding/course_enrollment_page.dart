@@ -6,7 +6,7 @@ import 'package:attendance_app/ux/shared/components/app_form_fields.dart';
 import 'package:attendance_app/ux/shared/components/app_material.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/components/empty_state_widget.dart';
-import 'package:attendance_app/ux/shared/components/page_loading_indicator.dart';
+import 'package:attendance_app/ux/shared/components/page_state_indicator.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
@@ -183,7 +183,15 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
           Consumer<CourseViewModel>(
             builder: (context, courseViewModel, _) {
               if (courseViewModel.isLoadingCourses) {
-                return const PageLoadingIndicator();
+                return const Expanded(child: PageLoadingIndicator());
+              }
+
+              if (courseViewModel.hasLoadError) {
+                return Expanded(
+                  child: PageErrorIndicator(
+                    text: courseViewModel.loadError ?? 'Error loading courses',
+                  ),
+                );
               }
 
               final courses = courseViewModel.displayedCourses;

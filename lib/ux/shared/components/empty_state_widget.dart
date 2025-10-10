@@ -9,41 +9,26 @@ class EmptyStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      // If the parent provides a bounded height, use it. Otherwise fall back
-      // to the viewport height so the widget can still be centered on screen
-      // (useful when placed inside scrollable content).
-      final availableHeight = constraints.maxHeight.isFinite
-          ? constraints.maxHeight
-          : MediaQuery.of(context).size.height -
-              MediaQuery.of(context).padding.vertical -
-              kToolbarHeight;
-
-      return SizedBox(
-        width: double.infinity,
-        height: availableHeight,
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon ?? Icons.error_outline_rounded,
-                color: AppColors.defaultColor,
-                size: 30,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                message,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: AppColors.defaultColor,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon ?? Icons.error_outline_rounded,
+            color: AppColors.defaultColor,
+            size: 30,
           ),
-        ),
-      );
-    });
+          const SizedBox(height: 8),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: AppColors.defaultColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
