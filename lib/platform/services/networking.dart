@@ -2,178 +2,175 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:attendance_app/platform/api/network_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-enum HttpMethod { get, post, put, patch, delete, head, options }
+enum HttpMethod { get, post, put, delete, patch }
 
 class NetworkHelper {
   final String url;
   final String path;
   final Map<String, dynamic>? headers;
   final Map<String, dynamic>? queryParams;
+  final dynamic body;
   final String errorMessage;
   final HttpMethod method;
-  final dynamic body;
-  final Encoding? encoding;
+  final Duration timeout;
 
   NetworkHelper({
     required this.url,
     required this.path,
     this.headers,
     this.queryParams,
+    this.body,
     required this.errorMessage,
     this.method = HttpMethod.get,
-    this.body,
-    this.encoding,
+    this.timeout = const Duration(seconds: 30),
   });
 
-  /// Public entry point that performs the request and returns the decoded body
-  /// (or null on error).
-  Future<dynamic> getData() async {
+  Future<Map<String, dynamic>?> getData() async {
     try {
       final uri = buildUri();
-      final response = await makeHttpRequest(uri);
-      return processResponse(response);
+      final defaultHeaders = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
+
+      http.Response response;
+
+      switch (method) {
+        case HttpMethod.get:
+          response = await http.get(uri, headers: defaultHeaders).timeout(
+                timeout,
+                onTimeout: () => throw TimeoutException(
+                  NetworkStrings.connectionTimeOut,
+                ),
+              );
+          break;
+        case HttpMethod.post:
+          response = await http
+              .post(uri,
+                  headers: defaultHeaders,
+                  body: body != null ? jsonEncode(body) : null)
+              .timeout(
+                timeout,
+                onTimeout: () => throw TimeoutException(
+                  NetworkStrings.connectionTimeOut,
+                ),
+              );
+          break;
+        case HttpMethod.put:
+          response = await http
+              .put(uri,
+                  headers: defaultHeaders,
+                  body: body != null ? jsonEncode(body) : null)
+              .timeout(
+                timeout,
+                onTimeout: () => throw TimeoutException(
+                  NetworkStrings.connectionTimeOut,
+                ),
+              );
+          break;
+        case HttpMethod.delete:
+          response = await http
+              .delete(uri,
+                  headers: defaultHeaders,
+                  body: body != null ? jsonEncode(body) : null)
+              .timeout(
+                timeout,
+                onTimeout: () => throw TimeoutException(
+                  NetworkStrings.connectionTimeOut,
+                ),
+              );
+          break;
+        case HttpMethod.patch:
+          response = await http
+              .patch(uri,
+                  headers: defaultHeaders,
+                  body: body != null ? jsonEncode(body) : null)
+              .timeout(
+                timeout,
+                onTimeout: () => throw TimeoutException(
+                  NetworkStrings.connectionTimeOut,
+                ),
+              );
+          break;
+      }
+
+      return handleResponse(response);
+    } on SocketException {
+      throw NetworkException(NetworkStrings.internetError);
+    } on TimeoutException {
+      throw NetworkException(NetworkStrings.connectionTimeOut);
+    } on HandshakeException {
+      throw NetworkException(NetworkStrings.handShakeError);
+    } on CertificateException {
+      throw NetworkException(NetworkStrings.certificateError);
+    } on http.ClientException {
+      throw NetworkException(NetworkStrings.internetError);
+    } on FormatException {
+      throw NetworkException(NetworkStrings.formatError);
     } catch (e) {
-      return handleError(e);
+      debugPrint('Network error: $e');
+      throw NetworkException(NetworkStrings.somethingWentWrong);
     }
   }
 
   Uri buildUri() {
-    final base = Uri.parse('$url$path');
-    if (queryParams == null) return base;
-    final qp = queryParams?.map((k, v) => MapEntry(k, v?.toString() ?? ''));
-    return base.replace(queryParameters: qp);
-  }
-
-  Future<http.Response> makeHttpRequest(Uri uri) async {
-    final stringHeaders = convertHeadersToString();
-
-    switch (method) {
-      case HttpMethod.get:
-        return await http.get(uri, headers: stringHeaders);
-      case HttpMethod.post:
-        return await http.post(uri,
-            headers: stringHeaders, body: prepareBody(), encoding: encoding);
-      case HttpMethod.put:
-        return await http.put(uri,
-            headers: stringHeaders, body: prepareBody(), encoding: encoding);
-      case HttpMethod.patch:
-        return await http.patch(uri,
-            headers: stringHeaders, body: prepareBody(), encoding: encoding);
-      case HttpMethod.delete:
-        // http.delete supports a body in the newer http package versions
-        return await http.delete(uri,
-            headers: stringHeaders, body: prepareBody(), encoding: encoding);
-      case HttpMethod.head:
-        return await http.head(uri, headers: stringHeaders);
-      case HttpMethod.options:
-        // The http package does not expose an options() helper. Use a generic
-        // Request via the Client to support arbitrary verbs.
-        return await _sendGenericRequest('OPTIONS', uri, stringHeaders);
-    }
-  }
-
-  /// Convert provided headers to a Map<String,String>. Also ensures the
-  /// content-type is set when a JSON body is provided and no content-type
-  /// exists already.
-  Map<String, String>? convertHeadersToString() {
-    final map = headers?.map((k, v) => MapEntry(k, v?.toString() ?? ''));
-    if (map == null) return null;
-    // If there's a body that's a Map and no content-type provided, default to JSON
-    if (body != null &&
-        body is Map &&
-        !map.keys.any((k) => k.toLowerCase() == 'content-type')) {
-      map['content-type'] = 'application/json';
-    }
-    return Map<String, String>.from(map);
-  }
-
-  /// Prepare the body for http.* helpers. If it's a Map or Iterable, encode
-  /// to JSON. Otherwise return as-is (String, List<int>, etc.).
-  dynamic prepareBody() {
-    if (body == null) return null;
-    if (body is String || body is List<int> || body is List<int>?) return body;
-    try {
-      return jsonEncode(body);
-    } catch (_) {
-      return body.toString();
-    }
-  }
-
-  /// Generic request sender for HTTP verbs not directly exposed by the
-  /// high-level helpers (or as a fallback).
-  Future<http.Response> _sendGenericRequest(
-      String verb, Uri uri, Map<String, String>? stringHeaders) async {
-    final client = http.Client();
-    try {
-      final req = http.Request(verb.toUpperCase(), uri);
-      if (stringHeaders != null) req.headers.addAll(stringHeaders);
-      final prepared = prepareBody();
-      if (prepared != null) {
-        if (prepared is String) {
-          req.body = prepared;
-        } else if (prepared is List<int>) {
-          req.bodyBytes = prepared;
-        } else {
-          req.body = prepared.toString();
-        }
-      }
-
-      final streamed = await client.send(req);
-      return await http.Response.fromStream(streamed);
-    } finally {
-      client.close();
-    }
-  }
-
-  dynamic processResponse(http.Response response) {
-    if (isSuccessfulResponse(response)) {
-      return parseResponseBody(response.body);
-    }
-
-    throw createHttpException(response);
-  }
-
-  bool isSuccessfulResponse(http.Response response) {
-    return response.statusCode >= 200 && response.statusCode < 300;
-  }
-
-  dynamic parseResponseBody(String responseBody) {
-    if (responseBody.isEmpty) return null;
-    try {
-      return jsonDecode(responseBody);
-    } catch (e) {
-      throw FormatException('Failed to parse JSON response: $e');
-    }
-  }
-
-  Exception createHttpException(http.Response response) {
-    // Include body for easier debugging
-    final bodySnippet =
-        response.body.isNotEmpty ? '\nBody: ${response.body}' : '';
-    return HttpException(
-      '$errorMessage: HTTP ${response.statusCode}$bodySnippet',
-      uri: response.request?.url,
+    final baseUri = Uri.parse(url);
+    return Uri(
+      scheme: baseUri.scheme,
+      host: baseUri.host,
+      port: baseUri.port,
+      path: '${baseUri.path}$path',
+      queryParameters: queryParams,
     );
   }
 
-  dynamic handleError(dynamic error) {
-    logError(error);
-    return null;
-  }
+  Map<String, dynamic>? handleResponse(http.Response response) {
+    debugPrint('Response Status: ${response.statusCode}');
+    debugPrint('Response Body: ${response.body}');
 
-  void logError(dynamic error) {
-    final errorType = getErrorType(error);
-    debugPrint('Network Error [$errorType]: $error');
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (response.body.isEmpty) {
+        return {'success': true};
+      }
+      try {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      } catch (e) {
+        throw NetworkException(NetworkStrings.formatError);
+      }
+    } else if (response.statusCode == 400) {
+      throw NetworkException(NetworkStrings.badRequest);
+    } else if (response.statusCode == 401) {
+      throw NetworkException(NetworkStrings.unauthorized);
+    } else if (response.statusCode == 403) {
+      throw NetworkException(NetworkStrings.forbidden);
+    } else if (response.statusCode == 404) {
+      throw NetworkException(NetworkStrings.notFound);
+    } else if (response.statusCode == 429) {
+      throw NetworkException(NetworkStrings.tooManyRequests);
+    } else if (response.statusCode >= 500 && response.statusCode < 600) {
+      throw NetworkException(NetworkStrings.serverError);
+    } else {
+      try {
+        final errorData = jsonDecode(response.body) as Map<String, dynamic>;
+        final message = errorData['message'] ?? errorData['error'];
+        if (message != null) {
+          throw NetworkException(message.toString());
+        }
+      } catch (_) {}
+      throw NetworkException('$errorMessage: HTTP ${response.statusCode}');
+    }
   }
+}
 
-  String getErrorType(dynamic error) {
-    if (error is SocketException) return 'Connection';
-    if (error is HttpException) return 'HTTP';
-    if (error is FormatException) return 'Parsing';
-    if (error is TimeoutException) return 'Timeout';
-    return 'Unknown';
-  }
+class NetworkException implements Exception {
+  final String message;
+
+  NetworkException(this.message);
+
+  @override
+  String toString() => message;
 }

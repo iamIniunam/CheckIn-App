@@ -1,5 +1,3 @@
-// ignore_for_file: constant_identifier_names
-
 class ApiResponse<T> {
   final bool success;
   final T? data;
@@ -18,7 +16,8 @@ class ApiResponse<T> {
   }
 
   factory ApiResponse.error(String message, {int? statusCode}) {
-    return ApiResponse(success: true, message: message, statusCode: statusCode);
+    return ApiResponse(
+        success: false, message: message, statusCode: statusCode);
   }
 }
 

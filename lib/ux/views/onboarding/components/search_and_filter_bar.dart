@@ -33,7 +33,7 @@ class SearchAndFilterBar extends StatelessWidget {
             child: SearchTextFormField(
               controller: searchController,
               onClear: onClearSearch,
-              hintText: AppStrings.searchCourses,
+              hintText: AppStrings.searchByCourseCodeOrTitle,
               onSubmitted: onSearchSubmitted,
               onChanged: onChanged,
             ),

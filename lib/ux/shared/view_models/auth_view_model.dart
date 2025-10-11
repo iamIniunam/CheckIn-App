@@ -12,11 +12,11 @@ class AuthViewModel extends ChangeNotifier {
   AuthViewModel({AuthRepository? authRepository})
       : _authRepository = authRepository ?? AuthRepository();
   bool _isLoading = false;
-  String? _errorMessage;
+  String? _loginError;
   Student? _currentStudent;
 
   bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
+  String? get loginError => _loginError;
   Student? get currentStudent => _currentStudent;
 
   bool get isLoggedIn => _currentStudent != null;
@@ -118,7 +118,7 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   void setLoadingState(String? message, bool loading) {
-    _errorMessage = message;
+    _loginError = message;
     _isLoading = loading;
     notifyListeners();
   }
@@ -126,12 +126,12 @@ class AuthViewModel extends ChangeNotifier {
   Future<void> logout() async {
     await setIsUserLoggedIn(false);
     _currentStudent = null;
-    _errorMessage = null;
+    _loginError = null;
     notifyListeners();
   }
 
   void clearError() {
-    _errorMessage = null;
+    _loginError = null;
     notifyListeners();
   }
 }

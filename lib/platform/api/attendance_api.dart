@@ -1,9 +1,9 @@
 import 'package:attendance_app/platform/api/api_response.dart';
+import 'package:attendance_app/platform/api/network_strings.dart';
 import 'package:attendance_app/platform/services/networking.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 class AttendanceApi {
   final _courseAttendanceBasePath = '/student/getCourseAttendanceRecord';
@@ -40,15 +40,13 @@ class AttendanceApi {
               response['message'] ?? 'Failed to get attendance record');
         }
       } else {
-        return ApiResponse.error('Network error. Please try again');
+        return ApiResponse.error(NetworkStrings.noResponse);
       }
-    } on http.ClientException {
-      return ApiResponse.error('Network error. Please check your connection.');
-    } on FormatException {
-      return ApiResponse.error('Invalid response from server');
+    } on NetworkException catch (e) {
+      return ApiResponse.error(e.message);
     } catch (e) {
-      debugPrint('Exception in getCourseAttendanceRecord: $e');
-      return ApiResponse.error('An unexpected error occured: ${e.toString()}');
+      debugPrint('Unexpected error in getting course attendance record: $e');
+      return ApiResponse.error(NetworkStrings.somethingWentWrong);
     }
   }
 }

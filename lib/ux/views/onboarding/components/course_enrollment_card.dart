@@ -18,64 +18,60 @@ class CourseEnrollmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Container(
-        decoration: BoxDecoration(
+    return Container(
+      decoration: BoxDecoration(
+        color:
+            (selectedSchool != null) ? AppColors.primaryTeal : AppColors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
           color: (selectedSchool != null)
-              ? AppColors.primaryTeal
-              : AppColors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: (selectedSchool != null)
-                ? AppColors.defaultColor
-                : AppColors.grey,
-          ),
+              ? AppColors.defaultColor
+              : AppColors.grey,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            PaddedColumn(
-              padding: const EdgeInsets.only(left: 8, top: 8, right: 8),
-              children: [
-                Text(
-                  '${semesterCourse.courseCode} (${(semesterCourse.creditHours).toString()})',
-                  style: const TextStyle(
-                    color: AppColors.defaultColor,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          PaddedColumn(
+            padding: const EdgeInsets.only(left: 8, top: 8, right: 8),
+            children: [
+              Text(
+                '${semesterCourse.courseCode} (${(semesterCourse.creditHours).toString()})',
+                style: const TextStyle(
+                  color: AppColors.defaultColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
-                Text(
-                  semesterCourse.courseTitle ?? '',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppColors.defaultColor,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-            const Divider(thickness: 1),
-            Padding(
-              padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
-              child: Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: AppConstants.schools
-                    .map(
-                      (school) => SingleSchool(
-                        school: school,
-                        selected: selectedSchool == school,
-                        onTap: onTapSchool,
-                      ),
-                    )
-                    .toList(),
               ),
+              Text(
+                semesterCourse.courseTitle ?? '',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: AppColors.defaultColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          const Divider(thickness: 1),
+          Padding(
+            padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+            child: Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: AppConstants.schools
+                  .map(
+                    (school) => SingleSchool(
+                      school: school,
+                      selected: selectedSchool == school,
+                      onTap: onTapSchool,
+                    ),
+                  )
+                  .toList(),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -1,8 +1,8 @@
 import 'package:attendance_app/platform/api/api_response.dart';
+import 'package:attendance_app/platform/api/network_strings.dart';
 import 'package:attendance_app/platform/services/networking.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 class AuthApi {
   final _basePath = '/student/login';
@@ -14,35 +14,33 @@ class AuthApi {
         method: HttpMethod.post,
         url: AppConstants.apiBaseUrl,
         path: _basePath,
-        // headers: {
-        //   'Content-Type': 'application/json',
-        //   'Accept': 'application/json',
-        // },
         queryParams: {
           'idnumber': idNumber,
           'password': password,
         },
         errorMessage: 'Failed to login',
+        timeout: const Duration(seconds: 20),
       );
 
       final response = await networkHelper.getData();
-      debugPrint('Response: $response');
+      debugPrint('Login Response: $response');
 
       if (response != null) {
         if (response['data'] != null) {
           return ApiResponse.success(response['data']);
         } else {
-          return ApiResponse.error(response['message'] ?? 'Login failed');
+          return ApiResponse.error(
+              response['message'] ?? 'Login failed. Please try again.');
         }
       } else {
-        return ApiResponse.error('Network error. Please try again.');
+        return ApiResponse.error(NetworkStrings.noResponse);
       }
-    } on http.ClientException {
-      return ApiResponse.error('Network error. Please check your connection.');
-    } on FormatException {
-      return ApiResponse.error('Invalid reponse from server');
+    } on NetworkException catch (e) {
+      // NetworkException already has user-friendly messages from NetworkStrings
+      return ApiResponse.error(e.message);
     } catch (e) {
-      return ApiResponse.error('An unexpected error occured: ${e.toString()}');
+      debugPrint('Unexpected error in login: $e');
+      return ApiResponse.error(NetworkStrings.somethingWentWrong);
     }
   }
 }

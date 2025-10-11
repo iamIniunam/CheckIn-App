@@ -9,6 +9,7 @@ import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_search_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
+import 'package:attendance_app/ux/views/onboarding/components/course_search_bottom_widgets.dart';
 import 'package:attendance_app/ux/views/onboarding/components/course_search_state_widgets.dart';
 import 'package:attendance_app/ux/views/onboarding/components/search_and_filter_bar.dart';
 import 'package:attendance_app/ux/views/onboarding/course_registration_info_bottom_sheet.dart';
@@ -47,6 +48,10 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
     super.didChangeDependencies();
     searchViewModel = context.read<CourseSearchViewModel>();
     courseViewModel = context.read<CourseViewModel>();
+  }
+
+  Future<void> refreshAllCourses() async {
+    searchViewModel.reloadAllCourses();
   }
 
   void onSearchChanged(String value) {
@@ -181,44 +186,57 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
           ),
         ),
       ],
-      body: Column(
-        children: [
-          SearchAndFilterBar(
-            searchController: searchController,
-            onClearSearch: clearSearch,
-            onChanged: onSearchChanged,
-            onSearchSubmitted: (value) {
-              searchViewModel.searchCourses(value.trim());
-              FocusScope.of(context).unfocus();
-            },
-            onFilterTap: () {
-              showAppBottomSheet(
-                context: context,
-                title: 'Filter Courses',
-                child: FilterCoursesBottomSheet(
-                  initialLevel: searchViewModel.selectedLevel,
-                  initialSemester: searchViewModel.selectedSemester,
-                  onApply: (level, semester) {
-                    searchViewModel.applyFilter(level, semester);
-                    Navigation.back(context: context);
-                  },
-                  onReset: () {
-                    searchViewModel.clearFilter();
-                    Navigation.back(context: context);
-                  },
-                ),
-              );
-            },
-          ),
-          Consumer<CourseSearchViewModel>(
-            builder: (context, searchViewModel, _) {
-              return CourseListContent(
-                viewModel: searchViewModel,
-                onConfirmPressed: onConfirmPressed,
-              );
-            },
-          ),
-        ],
+      body: RefreshIndicator(
+        onRefresh: refreshAllCourses,
+        child: Column(
+          children: [
+            SearchAndFilterBar(
+              searchController: searchController,
+              onClearSearch: clearSearch,
+              onChanged: onSearchChanged,
+              onSearchSubmitted: (value) {
+                searchViewModel.searchCourses(value.trim());
+                FocusScope.of(context).unfocus();
+              },
+              onFilterTap: () {
+                showAppBottomSheet(
+                  context: context,
+                  title: 'Filter Courses',
+                  child: FilterCoursesBottomSheet(
+                    initialLevel: searchViewModel.selectedLevel,
+                    initialSemester: searchViewModel.selectedSemester,
+                    onApply: (level, semester) {
+                      searchViewModel.applyFilter(level, semester);
+                      Navigation.back(context: context);
+                    },
+                    onReset: () {
+                      searchViewModel.clearFilter();
+                      Navigation.back(context: context);
+                    },
+                  ),
+                );
+              },
+            ),
+            Consumer<CourseSearchViewModel>(
+              builder: (context, searchViewModel, _) {
+                return Expanded(
+                  child: Column(
+                    children: [
+                      CourseListContent(
+                        viewModel: searchViewModel,
+                        onConfirmPressed: onConfirmPressed,
+                      ),
+                      ConfirmationSection(
+                        totalCreditHours: searchViewModel.totalCreditHours,
+                        onConfirmPressed: onConfirmPressed,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

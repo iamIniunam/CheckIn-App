@@ -145,6 +145,10 @@ class CourseSearchViewModel extends ChangeNotifier {
     }
   }
 
+  Future<void> reloadAllCourses() async {
+    return loadAllCourses();
+  }
+
   bool isCourseSelected(Course course) {
     return _chosenSchools[course] != null;
   }

@@ -20,11 +20,20 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController idNumberController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  bool isPasswordVisible = false;
+  late final TextEditingController idNumberController;
+  late final TextEditingController passwordController;
+  late final GlobalKey<FormState> formKey;
 
-  final formKey = GlobalKey<FormState>();
+  bool isPasswordVisible = false;
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    idNumberController = TextEditingController();
+    passwordController = TextEditingController();
+    formKey = GlobalKey<FormState>();
+  }
 
   void togglePasswordVisibility() {
     setState(() {
@@ -33,27 +42,79 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> handleLogin() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    if (!validateForm()) return;
+
+    if (isLoading) return;
+
+    setState(() => isLoading = true);
+
+    try {
+      final viewModel = context.read<AuthViewModel>();
+
+      if (mounted) {
+        AppDialogs.showLoadingDialog(context);
+      }
+
+      final success = await viewModel.login(
+        idNumber: idNumberController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      if (!mounted) return;
+
+      dismissLoadingDialog();
+
+      if (success) {
+        handleLoginSuccess();
+      } else {
+        handleLoginError(viewModel);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      dismissLoadingDialog();
+      showErrorDialog('An unexpected error occurred. Please try again.');
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
+    }
+  }
+
+  bool validateForm() {
     final formState = formKey.currentState;
     if (formState == null || !formState.validate()) {
-      return;
+      return false;
     }
+    return true;
+  }
 
-    if (!mounted) return;
-    final viewModel = context.read<AuthViewModel>();
+  void dismissLoadingDialog() {
+    try {
+      Navigator.of(context, rootNavigator: true).pop();
+    } catch (_) {}
+  }
 
-    AppDialogs.showLoadingDialog(context);
-    bool success = false;
-
-    success = await viewModel.login(
-      idNumber: idNumberController.text.trim(),
-      password: passwordController.text.trim(),
+  void handleLoginSuccess() {
+    Navigation.navigateToScreen(
+      context: context,
+      screen: const NavigationHostPage(),
     );
+  }
 
-    if (success && mounted) {
-      //TODO: remember to change to navigation host page when you finalize saving of selected courses
-      Navigation.navigateToScreen(
-          context: context, screen: const NavigationHostPage());
-    }
+  void handleLoginError(AuthViewModel viewModel) {
+    final errorMessage = viewModel.loginError ??
+        'Login failed. Please check your credentials and try again.';
+
+    showErrorDialog(errorMessage);
+  }
+
+  void showErrorDialog(String message) {
+    AppDialogs.showErrorDialog(
+      context: context,
+      message: message,
+    );
   }
 
   @override
@@ -82,105 +143,104 @@ class _LoginPageState extends State<LoginPage> {
                     AppColors.black.withOpacity(0.7), BlendMode.darken),
               ),
             ),
-            child:
-                Consumer<AuthViewModel>(builder: (context, authViewModel, _) {
-              return Center(
-                child: ListView(
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.only(left: 24, right: 24),
-                  children: [
-                    const Text(
-                      AppStrings.login,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 45,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    Container(
-                      padding: const EdgeInsets.only(
-                          left: 24, top: 30, right: 24, bottom: 30),
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.circular(28),
-                      ),
-                      child: Form(
-                        key: formKey,
-                        child: Column(
-                          children: [
-                            PrimaryTextFormField(
-                              labelText: AppStrings.studentIdNumber,
-                              controller: idNumberController,
-                              keyboardType: TextInputType.visiblePassword,
-                              hintText: AppStrings.sampleIdNumber,
-                              textInputAction: TextInputAction.next,
-                              textCapitalization: TextCapitalization.characters,
-                              bottomPadding: 0,
-                            ),
-                            PrimaryTextFormField(
-                              labelText: AppStrings.password,
-                              hintText: AppStrings.enterYourPassword,
-                              controller: passwordController,
-                              keyboardType: TextInputType.visiblePassword,
-                              textInputAction: TextInputAction.done,
-                              obscureText: !isPasswordVisible,
-                              suffixWidget: IconButton(
-                                icon: Icon(
-                                  isPasswordVisible
-                                      ? Icons.visibility
-                                      : Icons.visibility_off,
-                                  color: AppColors.defaultColor,
-                                ),
-                                onPressed: togglePasswordVisibility,
-                              ),
-                              bottomPadding: 0,
-                            ),
-                            const SizedBox(height: 30),
-                            PrimaryButton(
-                              onTap: () {
-                                FocusManager.instance.primaryFocus?.unfocus();
-                                handleLogin();
-                              },
-                              child: const Text(AppStrings.login),
-                            ),
-                            const SizedBox(height: 16),
-                            RichText(
-                              textAlign: TextAlign.center,
-                              text: TextSpan(
-                                text: 'Don’t have an account? ',
-                                style: const TextStyle(
-                                    color: AppColors.defaultColor,
-                                    fontFamily: 'Nunito',
-                                    fontSize: 13),
-                                children: <TextSpan>[
-                                  TextSpan(
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () {
-                                        Navigation.navigateToScreen(
-                                            context: context,
-                                            screen: const SignUpPage());
-                                      },
-                                    text: AppStrings.signUp,
-                                    style: const TextStyle(
-                                      color: AppColors.defaultColor,
-                                      fontFamily: 'Nunito',
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+            child: Consumer<AuthViewModel>(
+              builder: (context, authViewModel, _) {
+                return Center(
+                  child: ListView(
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.only(left: 24, right: 24),
+                    children: [
+                      const Text(
+                        AppStrings.login,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 45,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              );
-            }),
+                      const SizedBox(height: 18),
+                      Container(
+                        padding: const EdgeInsets.only(
+                            left: 24, top: 30, right: 24, bottom: 30),
+                        decoration: BoxDecoration(
+                          color: AppColors.white,
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                        child: Form(
+                          key: formKey,
+                          child: Column(
+                            children: [
+                              PrimaryTextFormField(
+                                labelText: AppStrings.studentIdNumber,
+                                controller: idNumberController,
+                                keyboardType: TextInputType.visiblePassword,
+                                hintText: AppStrings.sampleIdNumber,
+                                textInputAction: TextInputAction.next,
+                                textCapitalization:
+                                    TextCapitalization.characters,
+                                bottomPadding: 0,
+                              ),
+                              PrimaryTextFormField(
+                                labelText: AppStrings.password,
+                                hintText: AppStrings.enterYourPassword,
+                                controller: passwordController,
+                                keyboardType: TextInputType.visiblePassword,
+                                textInputAction: TextInputAction.done,
+                                obscureText: !isPasswordVisible,
+                                suffixWidget: IconButton(
+                                  icon: Icon(
+                                    isPasswordVisible
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                    color: AppColors.defaultColor,
+                                  ),
+                                  onPressed: togglePasswordVisibility,
+                                ),
+                                bottomPadding: 0,
+                              ),
+                              const SizedBox(height: 30),
+                              PrimaryButton(
+                                onTap: handleLogin,
+                                child: const Text(AppStrings.login),
+                              ),
+                              const SizedBox(height: 16),
+                              RichText(
+                                textAlign: TextAlign.center,
+                                text: TextSpan(
+                                  text: 'Don’t have an account? ',
+                                  style: const TextStyle(
+                                      color: AppColors.defaultColor,
+                                      fontFamily: 'Nunito',
+                                      fontSize: 13),
+                                  children: <TextSpan>[
+                                    TextSpan(
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () {
+                                          Navigation.navigateToScreen(
+                                              context: context,
+                                              screen: const SignUpPage());
+                                        },
+                                      text: AppStrings.signUp,
+                                      style: const TextStyle(
+                                        color: AppColors.defaultColor,
+                                        fontFamily: 'Nunito',
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ),

@@ -1,9 +1,9 @@
 import 'package:attendance_app/platform/api/api_response.dart';
+import 'package:attendance_app/platform/api/network_strings.dart';
 import 'package:attendance_app/platform/services/networking.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 class CourseApi {
   final _courseBasePath = '/courses/getAllCourses';
@@ -36,14 +36,13 @@ class CourseApi {
               response['message'] ?? 'Failed to get courses');
         }
       } else {
-        return ApiResponse.error('Network error. Please try again');
+        return ApiResponse.error(NetworkStrings.noResponse);
       }
-    } on http.ClientException {
-      return ApiResponse.error('Network error. Please check your connection.');
-    } on FormatException {
-      return ApiResponse.error('Invalid response from server');
+    } on NetworkException catch (e) {
+      return ApiResponse.error(e.message);
     } catch (e) {
-      return ApiResponse.error('An unexpected error occured: ${e.toString()}');
+      debugPrint('Unexpected error in getting all courses: $e');
+      return ApiResponse.error(NetworkStrings.somethingWentWrong);
     }
   }
 
@@ -73,14 +72,14 @@ class CourseApi {
               response['message'] ?? 'Failed to get courses');
         }
       } else {
-        return ApiResponse.error('Network error. Please try again');
+        return ApiResponse.error(NetworkStrings.noResponse);
       }
-    } on http.ClientException {
-      return ApiResponse.error('Network error. Please check your connection.');
-    } on FormatException {
-      return ApiResponse.error('Invalid response from server');
+    } on NetworkException catch (e) {
+      return ApiResponse.error(e.message);
     } catch (e) {
-      return ApiResponse.error('An unexpected error occured: ${e.toString()}');
+      debugPrint(
+          'Unexpected error in getting courses for level and semester: $e');
+      return ApiResponse.error(NetworkStrings.somethingWentWrong);
     }
   }
 
@@ -114,14 +113,13 @@ class CourseApi {
   //             response['message'] ?? 'Failed to register courses');
   //       }
   //     } else {
-  //       return ApiResponse.error('Network error. Please try again');
+  //       return ApiResponse.error(NetworkStrings.noResponse);
   //     }
-  //   } on http.ClientException {
-  //     return ApiResponse.error('Network error. Please check your connection.');
-  //   } on FormatException {
-  //     return ApiResponse.error('Invalid response from server');
+  //   } on NetworkException catch (e) {
+  //     return ApiResponse.error(e.message);
   //   } catch (e) {
-  //     return ApiResponse.error('An unexpected error occured: ${e.toString()}');
+  //     debugPrint('Unexpected error in getting registered courses: $e');
+  //     return ApiResponse.error(NetworkStrings.somethingWentWrong);
   //   }
   // }
 
@@ -155,14 +153,13 @@ class CourseApi {
               response['message'] ?? 'Failed to get registered courses');
         }
       } else {
-        return ApiResponse.error('Network error. Please try again');
+        return ApiResponse.error(NetworkStrings.noResponse);
       }
-    } on http.ClientException {
-      return ApiResponse.error('Network error. Please check your connection.');
-    } on FormatException {
-      return ApiResponse.error('Invalid response from server');
+    } on NetworkException catch (e) {
+      return ApiResponse.error(e.message);
     } catch (e) {
-      return ApiResponse.error('An unexpected error occured: ${e.toString()}');
+      debugPrint('Unexpected error in getting registered courses: $e');
+      return ApiResponse.error(NetworkStrings.somethingWentWrong);
     }
   }
 }

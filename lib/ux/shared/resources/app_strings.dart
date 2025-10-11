@@ -143,7 +143,7 @@ class AppStrings {
   static const confirm = 'Confirm';
   static const selectAll = 'Select all';
   static const addCourseCaps = 'Add Course';
-  static const searchCourses = 'Search courses';
+  static const searchByCourseCodeOrTitle = 'Search by course code or title';
 
   //Attendance type
   static const selectAttendanceType = 'Attendance Mode';
