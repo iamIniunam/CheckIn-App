@@ -22,7 +22,9 @@ class PageErrorIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
+        left: 16,
         top: useTopPadding ? MediaQuery.sizeOf(context).height * 0.18 : 0,
+        right: 16,
       ),
       child: Center(
         child: Column(
@@ -38,6 +40,7 @@ class PageErrorIndicator extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               text ?? 'Failed to load data',
+              textAlign: TextAlign.center,
               style: const TextStyle(
                 color: AppColors.defaultColor,
               ),

@@ -18,6 +18,7 @@ class AttendanceApi {
         method: HttpMethod.get,
         path: path,
         errorMessage: 'Failed to get attendance',
+        timeout: const Duration(seconds: 10),
       );
       debugPrint(
           'Url: ${AppConstants.apiBaseUrl}$_courseAttendanceBasePath/$courseId/$studentId');

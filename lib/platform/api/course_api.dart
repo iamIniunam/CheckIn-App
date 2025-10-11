@@ -18,6 +18,7 @@ class CourseApi {
         path: _courseBasePath,
         method: HttpMethod.get,
         errorMessage: 'Failed to get courses',
+        timeout: const Duration(seconds: 10),
       );
 
       final response = await networkHelper.getData();
@@ -54,6 +55,7 @@ class CourseApi {
         method: HttpMethod.get,
         path: '$_coursesForLevelBasePath/$level/$semester',
         errorMessage: 'Failed to get courses',
+        timeout: const Duration(seconds: 10),
       );
 
       final response = await networkHelper.getData();
@@ -131,6 +133,7 @@ class CourseApi {
         method: HttpMethod.get,
         path: '$_registeredCoursesBasePath/$studentId',
         errorMessage: 'Failed to get registered courses',
+        timeout: const Duration(seconds: 10),
       );
 
       final response = await networkHelper.getData();
