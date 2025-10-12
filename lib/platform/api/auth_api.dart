@@ -1,6 +1,6 @@
 import 'package:attendance_app/platform/api/api_response.dart';
 import 'package:attendance_app/platform/api/network_strings.dart';
-import 'package:attendance_app/platform/services/networking.dart';
+import 'package:attendance_app/platform/api/networking.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:flutter/material.dart';
 

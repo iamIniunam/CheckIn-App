@@ -1,5 +1,5 @@
 import 'package:attendance_app/ux/shared/enums.dart';
-import 'package:attendance_app/ux/shared/message_providers.dart';
+import 'package:attendance_app/platform/services/message_providers/message_providers.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 

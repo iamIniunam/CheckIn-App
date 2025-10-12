@@ -10,6 +10,9 @@ class AppConstants {
   static const userSchoolKey = 'user.school';
   static const appUserKey = 'app.user';
 
+  static const similarittyThreshold = 0.70;
+  static int embeddingSize = 128;
+
   static const double houseLat = 5.5328015;
   static const double houseLong = -0.3264844;
 
