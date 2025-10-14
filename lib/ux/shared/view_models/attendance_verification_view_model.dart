@@ -158,7 +158,7 @@
 // }
 
 import 'package:attendance_app/platform/services/attendance_service.dart';
-import 'package:attendance_app/platform/services/face_verification_service.dart';
+import 'package:attendance_app/platform/services/face_service.dart';
 import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/platform/services/message_providers/message_providers.dart';
 import 'package:attendance_app/ux/shared/models/models.dart';
@@ -169,12 +169,12 @@ import 'package:flutter/material.dart';
 class AttendanceVerificationViewModel extends ChangeNotifier {
   VerificationState _verificationState = const VerificationState();
   final LocationVerificationViewModel _locationViewModel;
-  final FaceVerificationService _faceService;
+  final FaceService _faceService;
   final AttendanceService _attendanceService;
   final VerificationMessageProvider _messageProvider;
 
   AttendanceVerificationViewModel({
-    FaceVerificationService? faceService,
+    FaceService? faceService,
     AttendanceService? attendanceService,
     VerificationMessageProvider? messageProvider,
     LocationVerificationViewModel? locationViewModel,

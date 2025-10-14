@@ -215,13 +215,12 @@ class _SignUpPageState extends State<SignUpPage> {
                                 bottomPadding: 0,
                               ),
                               const SizedBox(height: 30),
-                              const PrimaryButton(
+                              PrimaryButton(
                                 // enabled: viewModel.enableButton,
-                                onTap:
-                                    // authViewModel.isLoading
-                                    //     ?
-                                    null,
-                                // : handleSignUp,
+                                onTap: () {
+                                  Navigation.navigateToVerification(
+                                      context: context);
+                                },
                                 child: Text(AppStrings.signUp),
                               ),
 

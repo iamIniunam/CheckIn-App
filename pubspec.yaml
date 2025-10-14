@@ -35,21 +35,21 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
-  qr_flutter: ^4.1.0
-  firebase_auth: ^4.17.8
-  firebase_core: ^2.27.0
-  modal_progress_hud_nsn: ^0.5.1
+  # qr_flutter: ^4.1.0
+  # firebase_auth: ^4.17.8
+  # firebase_core: ^2.27.0
+  # modal_progress_hud_nsn: ^0.5.1
   intl: ^0.19.0
   rflutter_alert: ^2.0.7
   shared_preferences: ^2.2.3
   iconsax: ^0.0.8
   flutter_svg: ^2.0.10+1
   camera: ^0.11.0+1
-  image_picker: ^1.0.8
-  image_cropper: ^5.0.1
+  # image_picker: ^1.0.8
+  # image_cropper: ^5.0.1
   permission_handler: ^11.3.1
   # fluttertoast: ^8.2.5
-  cached_network_image: ^3.3.1
+  # cached_network_image: ^3.3.1
   provider: ^6.1.5
   geolocator:
   geolocator_android: 4.6.1
@@ -61,6 +61,12 @@ dependencies:
   flutter_secure_storage: ^9.2.4
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  tflite_flutter: ^0.10.4
+  image: ^4.5.4
+  path_provider: ^2.1.4
+  encrypt: ^5.0.3
+  crypto: ^3.0.3
+  collection: ^1.18.0
 
 
 
@@ -103,6 +109,7 @@ flutter:
     - assets/images/
     - assets/fonts/
     - assets/svgs/
+    - assets/models/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
