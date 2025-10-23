@@ -1,5 +1,3 @@
-import 'package:attendance_app/ux/shared/enums.dart';
-import 'package:attendance_app/ux/views/attendance/verification_page.dart';
 import 'package:attendance_app/ux/views/home/home_page.dart';
 import 'package:flutter/material.dart';
 
@@ -39,43 +37,4 @@ class Navigation {
         MaterialPageRoute(builder: (BuildContext context) => const HomePage()),
         (route) => false);
   }
-
-  // static void navigateToVerification({
-  //   required BuildContext context,
-  //   FaceVerificationMode mode = FaceVerificationMode.signUp,
-  //   AttendanceType? attendanceType,
-  //   void Function()? onExit,
-  // }) {
-  //   Navigation.navigateToScreen(
-  //     context: context,
-  //     screen: VerificationPage(
-  //       mode: mode,
-  //       onExit: onExit,
-  //     ),
-  //   );
-  // }
-
-  // static void navigateToInPersonAttendance({
-  //   required BuildContext context,
-  //   void Function()? onExit,
-  // }) {
-  //   navigateToVerification(
-  //     context: context,
-  //     mode: FaceVerificationMode.attendanceInPerson,
-  //     attendanceType: AttendanceType.inPerson,
-  //     onExit: onExit,
-  //   );
-  // }
-
-  // static void navigateToOnlineAttendance({
-  //   required BuildContext context,
-  //   void Function()? onExit,
-  // }) {
-  //   navigateToVerification(
-  //     context: context,
-  //     mode: FaceVerificationMode.attendanceOnline,
-  //     attendanceType: AttendanceType.online,
-  //     onExit: onExit,
-  //   );
-  // }
 }
