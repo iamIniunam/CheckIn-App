@@ -1,9 +1,9 @@
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
+import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/views/attendance/components/attendance_mode.dart';
-import 'package:attendance_app/ux/views/attendance/online_attendance_code_entry_page.dart';
-import 'package:attendance_app/ux/views/attendance/scan_page.dart';
+import 'package:attendance_app/ux/views/attendance/face_veification_page.dart';
 import 'package:flutter/material.dart';
 
 class SelectAttendanceModePage extends StatelessWidget {
@@ -20,16 +20,28 @@ class SelectAttendanceModePage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            AttendanceMode(mode: 'In-person', onTap: () {
-                Navigation.navigateToScreen(
-                    context: context, screen: const ScanPage());
-              }),
-            const SizedBox(height: 20),
-            AttendanceMode(mode: 'Online', onTap: () {
-                Navigation.navigateToScreen(
+            AttendanceMode(
+                mode: 'In-person',
+                onTap: () {
+                  Navigation.navigateToScreen(
                     context: context,
-                    screen: const OnlineAttendanceCodeEntryPage());
-              }),
+                    screen: const FaceVerificationPage(
+                      mode: FaceVerificationMode.attendanceInPerson,
+                    ),
+                  );
+                }),
+            const SizedBox(height: 20),
+            AttendanceMode(
+              mode: 'Online',
+              onTap: () {
+                Navigation.navigateToScreen(
+                  context: context,
+                  screen: const FaceVerificationPage(
+                    mode: FaceVerificationMode.attendanceOnline,
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),

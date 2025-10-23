@@ -32,16 +32,27 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     if (isLoggedIn == true) {
-      Navigation.navigateToScreen(
+      Navigation.navigateToScreenAndClearAllPrevious(
           context: context, screen: const NavigationHostPage());
       return;
     }
-    Navigation.navigateToScreen(context: context, screen: const SignUpPage());
+    Navigation.navigateToScreenAndClearAllPrevious(
+      context: context,
+      screen: const SignUpPage(),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    return
+        // Container(
+        //   height: double.infinity,
+        //   width: double.infinity,
+        //   decoration: BoxDecoration(
+        //     image: DecorationImage(image: AppImages.splashBackground, fit: BoxFit.cover),
+        //   ),
+        // );
+        Material(
       child: Container(
         height: double.infinity,
         width: double.infinity,

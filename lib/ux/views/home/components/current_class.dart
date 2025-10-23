@@ -1,8 +1,8 @@
 import 'package:attendance_app/ux/navigation/navigation.dart';
+import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
 import 'package:attendance_app/ux/shared/components/app_buttons.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
-import 'package:attendance_app/ux/views/attendance/scan_page.dart';
 import 'package:flutter/material.dart';
 
 class CurrentClass extends StatelessWidget {
@@ -52,7 +52,9 @@ class CurrentClass extends StatelessWidget {
             PrimaryButton(
               onTap: () {
                 Navigation.navigateToScreen(
-                    context: context, screen: const ScanPage());
+                  context: context,
+                  screen: const NavigationHostPage(index: 1),
+                );
               },
               backgroundColor: AppColors.defaultColor,
               foregroundColor: AppColors.white,

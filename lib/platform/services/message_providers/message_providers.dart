@@ -5,7 +5,7 @@ import 'package:attendance_app/ux/shared/models/models.dart';
 abstract class VerificationMessageProvider {
   String getStepDescription(
       VerificationStep step, AttendanceType? attendanceType, bool isLoading);
-  String getButtonText(FaceVerificationMode mode, VerificationStep step,
+  String getButtonText(VerificationStep step,
       {LocationVerificationStatus? locationStatus});
   String getLocationStatusHeaderMessage(LocationVerificationStatus status);
   String getLocationStatusMessage(LocationVerificationStatus status);
@@ -22,8 +22,10 @@ class DefaultVerificationMessageProvider
   String getStepDescription(
       VerificationStep step, AttendanceType? attendanceType, bool isLoading) {
     switch (step) {
-      case VerificationStep.faceVerification:
-        return 'Position your face in the circle and tap verify';
+      case VerificationStep.qrCodeScan:
+        return '';
+      case VerificationStep.onlineCodeEntry:
+        return 'Please enter the online attendance code provided by your instructor.';
       case VerificationStep.locationCheck:
         if (attendanceType == AttendanceType.inPerson) {
           return isLoading
@@ -41,7 +43,7 @@ class DefaultVerificationMessageProvider
   }
 
   @override
-  String getButtonText(FaceVerificationMode mode, VerificationStep step,
+  String getButtonText(VerificationStep step,
       {LocationVerificationStatus? locationStatus}) {
     if (step == VerificationStep.locationCheck) {
       switch (locationStatus) {
@@ -56,15 +58,7 @@ class DefaultVerificationMessageProvider
     if (step == VerificationStep.completed) {
       return 'Done';
     }
-    switch (mode) {
-      case FaceVerificationMode.signUp:
-        return 'Register Face';
-      case FaceVerificationMode.attendanceInPerson:
-      case FaceVerificationMode.attendanceOnline:
-        return step == VerificationStep.faceVerification
-            ? 'Verify Face'
-            : 'Processing...';
-    }
+    return 'Verify';
   }
 
   @override

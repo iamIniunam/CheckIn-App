@@ -1,9 +1,11 @@
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/components/app_buttons.dart';
+import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/components/app_form_fields.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
+import 'package:attendance_app/ux/views/attendance/verification_page.dart';
 import 'package:flutter/material.dart';
 
 class OnlineAttendanceCodeEntryPage extends StatefulWidget {
@@ -49,7 +51,12 @@ class _OnlineAttendanceCodeEntryPageState
           PrimaryButton(
             enabled: codeController.text.isNotEmpty,
             onTap: () {
-              Navigation.navigateToOnlineAttendance(context: context);
+              Navigation.navigateToScreen(
+                context: context,
+                screen: const VerificationPage(
+                  attendanceType: AttendanceType.online,
+                ),
+              );
             },
             child: const Text(AppStrings.submit),
           ),

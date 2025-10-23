@@ -2,6 +2,8 @@ import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
 import 'package:attendance_app/ux/shared/bottom_sheets/show_app_bottom_sheet.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
+import 'package:attendance_app/ux/shared/components/dashboard_metric_grid_view.dart';
+import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
@@ -9,6 +11,7 @@ import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_search_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
+import 'package:attendance_app/ux/views/onboarding/components/course_enrollment_card.dart';
 import 'package:attendance_app/ux/views/onboarding/components/course_search_bottom_widgets.dart';
 import 'package:attendance_app/ux/views/onboarding/components/course_search_state_widgets.dart';
 import 'package:attendance_app/ux/views/onboarding/components/search_and_filter_bar.dart';
@@ -29,6 +32,12 @@ class CourseEnrollmentPage extends StatefulWidget {
 }
 
 class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
+  final Course semesterCourse = Course(
+    courseCode: 'CS101',
+    courseTitle: 'Introduction to Computer Science',
+    creditHours: 3,
+  );
+
   late final TextEditingController searchController;
   late final CourseSearchViewModel searchViewModel;
   late final CourseViewModel courseViewModel;
@@ -205,8 +214,9 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
                   child: FilterCoursesBottomSheet(
                     initialLevel: searchViewModel.selectedLevel,
                     initialSemester: searchViewModel.selectedSemester,
-                    onApply: (level, semester) {
-                      searchViewModel.applyFilter(level, semester);
+                    initialSchool: searchViewModel.selectedSchool,
+                    onApply: (level, semester, school) {
+                      searchViewModel.applyFilter(level, semester, school);
                       Navigation.back(context: context);
                     },
                     onReset: () {
@@ -235,6 +245,29 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
                 );
               },
             ),
+            // DashboardMetricGridView(
+            //   crossAxisCount: 2,
+            //   padding: const EdgeInsets.all(16),
+            //   childAspectRatio: 2,
+            //   mainAxisSpacing: 10,
+            //   children: [
+            //     CourseEnrollmentCard(
+            //       semesterCourse: semesterCourse,
+            //       selectedSchool: 'selectedSchool',
+            //       onTapSchool: (v) {},
+            //     ),
+            //     CourseEnrollmentCard(
+            //       semesterCourse: semesterCourse,
+            //       selectedSchool: 'selectedSchool',
+            //       onTapSchool: (v) {},
+            //     ),
+            //     CourseEnrollmentCard(
+            //       semesterCourse: semesterCourse,
+            //       selectedSchool: null,
+            //       onTapSchool: (v) {},
+            //     ),
+            //   ],
+            // ),
           ],
         ),
       ),

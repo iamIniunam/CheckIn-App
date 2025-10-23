@@ -106,8 +106,8 @@ class CourseViewModel extends ChangeNotifier {
       });
 
       // Simulate adding to registered courses
-      // _registeredCourses.addAll(courses);
-      // _hasLoadedRegisteredCourses = true;
+      _registeredCourses.addAll(courses);
+      _hasLoadedRegisteredCourses = true;
 
       _isRegisteringCourses = false;
       notifyListeners();

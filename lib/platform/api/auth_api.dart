@@ -19,7 +19,7 @@ class AuthApi {
           'password': password,
         },
         errorMessage: 'Failed to login',
-        timeout: const Duration(seconds: 20),
+        timeout: const Duration(seconds: 10),
       );
 
       final response = await networkHelper.getData();

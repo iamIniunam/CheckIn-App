@@ -9,7 +9,7 @@ class VerificationState {
   final AttendanceType? attendanceType;
 
   const VerificationState({
-    this.currentStep = VerificationStep.faceVerification,
+    this.currentStep = VerificationStep.qrCodeScan,
     this.isLoading = false,
     this.errorMessage,
     this.faceVerificationPassed = false,

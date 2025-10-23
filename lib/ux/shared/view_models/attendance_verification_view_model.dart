@@ -169,7 +169,7 @@ import 'package:flutter/material.dart';
 class AttendanceVerificationViewModel extends ChangeNotifier {
   VerificationState _verificationState = const VerificationState();
   final LocationVerificationViewModel _locationViewModel;
-  final FaceService _faceService;
+  // final FaceService _faceService;
   final AttendanceService _attendanceService;
   final VerificationMessageProvider _messageProvider;
 
@@ -178,8 +178,7 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
     AttendanceService? attendanceService,
     VerificationMessageProvider? messageProvider,
     LocationVerificationViewModel? locationViewModel,
-  })  : _faceService = faceService ?? MockFaceVerificationService(),
-        _attendanceService = attendanceService ?? MockAttendanceService(),
+  })  : _attendanceService = attendanceService ?? MockAttendanceService(),
         _messageProvider =
             messageProvider ?? DefaultVerificationMessageProvider(),
         _locationViewModel =
@@ -190,8 +189,8 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
 
   bool get requiresLocationCheck =>
       _verificationState.attendanceType == AttendanceType.inPerson;
-  bool get isFaceVerifying =>
-      _verificationState.currentStep == VerificationStep.faceVerification &&
+  bool get isQrScanning =>
+      _verificationState.currentStep == VerificationStep.qrCodeScan &&
       _verificationState.isLoading;
   bool get isLocationChecking =>
       _verificationState.currentStep == VerificationStep.locationCheck &&
@@ -203,7 +202,7 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
   bool shouldEnableButton() {
     return !_verificationState.isLoading &&
             _verificationState.currentStep ==
-                VerificationStep.faceVerification ||
+                VerificationStep.onlineCodeEntry ||
         _locationViewModel.state.verificationStatus ==
             LocationVerificationStatus.outOfRange ||
         _locationViewModel.state.verificationStatus ==
@@ -211,10 +210,8 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
         _verificationState.currentStep == VerificationStep.completed;
   }
 
-  bool shouldShowButton(FaceVerificationMode mode) {
-    if (mode == FaceVerificationMode.signUp) return true;
-    return _verificationState.currentStep ==
-            VerificationStep.faceVerification ||
+  bool shouldShowButton() {
+    return _verificationState.currentStep == VerificationStep.onlineCodeEntry ||
         _locationViewModel.state.verificationStatus ==
             LocationVerificationStatus.outOfRange ||
         _locationViewModel.state.verificationStatus ==
@@ -230,8 +227,8 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
         requiresLocationCheck;
   }
 
-  String getButtonText(FaceVerificationMode mode) =>
-      _messageProvider.getButtonText(mode, _verificationState.currentStep,
+  String getButtonText() =>
+      _messageProvider.getButtonText(_verificationState.currentStep,
           locationStatus: _locationViewModel.state.verificationStatus);
 
   String locationStatusHeaderMessage() {
@@ -262,7 +259,17 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
   }
 
   void setAttendanceType(AttendanceType type) {
-    updateState(_verificationState.copyWith(attendanceType: type));
+    // Set the attendance type and update the starting step according to
+    // the selected mode: online starts at onlineCodeEntry, in-person at qrCodeScan.
+    VerificationStep startStep = VerificationStep.qrCodeScan;
+    if (type == AttendanceType.online)
+      startStep = VerificationStep.onlineCodeEntry;
+
+    updateState(_verificationState.copyWith(
+      attendanceType: type,
+      currentStep: startStep,
+      clearError: true,
+    ));
   }
 
   Future<bool> startVerificationFlow({AttendanceType? attendanceType}) async {
@@ -270,9 +277,9 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
       setAttendanceType(attendanceType);
     }
 
-    if (_verificationState.currentStep == VerificationStep.faceVerification) {
-      bool faceSuccess = await verifyFace();
-      if (!faceSuccess) return false;
+    if (_verificationState.currentStep == VerificationStep.qrCodeScan) {
+      // bool qrSuccess = await verifyQrCode();
+      // if (!qrSuccess) return false;
 
       moveToNextStep();
       return await proceedWithAutomaticFlow();
@@ -319,24 +326,24 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> verifyFace() async {
-    updateState(_verificationState.copyWith(isLoading: true, clearError: true));
+  // Future<bool> verifyFace() async {
+  //   updateState(_verificationState.copyWith(isLoading: true, clearError: true));
 
-    try {
-      bool success = await _faceService.verifyFace();
-      if (success) {
-        updateState(_verificationState.copyWith(faceVerificationPassed: true));
-      } else {
-        updateState(_verificationState.copyWith(
-          errorMessage: _messageProvider
-              .getErrorMessage(VerificationError.faceVerificationFailed),
-        ));
-      }
-      return success;
-    } finally {
-      updateState(_verificationState.copyWith(isLoading: false));
-    }
-  }
+  //   try {
+  //     bool success = await _faceService.verifyFace();
+  //     if (success) {
+  //       updateState(_verificationState.copyWith(faceVerificationPassed: true));
+  //     } else {
+  //       updateState(_verificationState.copyWith(
+  //         errorMessage: _messageProvider
+  //             .getErrorMessage(VerificationError.faceVerificationFailed),
+  //       ));
+  //     }
+  //     return success;
+  //   } finally {
+  //     updateState(_verificationState.copyWith(isLoading: false));
+  //   }
+  // }
 
   Future<bool> checkLocation() async {
     if (!requiresLocationCheck) return true;
@@ -435,12 +442,16 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
 
   void moveToNextStep() {
     VerificationStep nextStep;
+    AttendanceType? stepAttendanceType;
 
     switch (_verificationState.currentStep) {
-      case VerificationStep.faceVerification:
-        nextStep = requiresLocationCheck
-            ? VerificationStep.locationCheck
-            : VerificationStep.attendanceSubmission;
+      case VerificationStep.qrCodeScan:
+        stepAttendanceType = AttendanceType.inPerson;
+        nextStep = VerificationStep.locationCheck;
+        break;
+      case VerificationStep.onlineCodeEntry:
+        stepAttendanceType = AttendanceType.online;
+        nextStep = VerificationStep.attendanceSubmission;
         break;
       case VerificationStep.locationCheck:
         nextStep = VerificationStep.attendanceSubmission;
@@ -451,7 +462,12 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
       case VerificationStep.completed:
         return;
     }
-    updateState(_verificationState.copyWith(currentStep: nextStep));
+    if (stepAttendanceType != null) {
+      updateState(_verificationState.copyWith(
+          currentStep: nextStep, attendanceType: stepAttendanceType));
+    } else {
+      updateState(_verificationState.copyWith(currentStep: nextStep));
+    }
   }
 
   void updateState(VerificationState newState) {
@@ -468,7 +484,7 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
 
   List<VerificationStep> getRequiredSteps() {
     List<VerificationStep> steps = [
-      VerificationStep.faceVerification,
+      VerificationStep.qrCodeScan,
       VerificationStep.attendanceSubmission,
       VerificationStep.completed,
     ];

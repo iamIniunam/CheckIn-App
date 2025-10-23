@@ -20,6 +20,8 @@ class AppImages {
       const AssetImage('assets/images/default_profile_image_teal.png');
   static AssetImage placeholderImage =
       const AssetImage('assets/images/placeholder.png');
+  static AssetImage splashBackground =
+      const AssetImage('assets/images/splash_background.png');
 
   //Svgs
   static SvgPicture svgCloseBottomSheetIcon =
@@ -38,4 +40,6 @@ class AppImages {
   static SvgPicture svgFilterIcon =
       SvgPicture.asset('assets/svgs/filter_icon.svg');
   static SvgPicture svgLine = SvgPicture.asset('assets/svgs/line.svg');
+  static SvgPicture svgSplashScreen =
+      SvgPicture.asset('assets/svgs/splash_screen.svg');
 }

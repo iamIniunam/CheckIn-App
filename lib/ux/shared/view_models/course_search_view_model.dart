@@ -19,6 +19,7 @@ class CourseSearchViewModel extends ChangeNotifier {
   //Filter state
   int? _selectedLevel;
   int? _selectedSemester;
+  String? _selectedSchool;
   bool _hasActiveFilter = false;
 
   //Selected courses state (for adding courses)
@@ -48,10 +49,16 @@ class CourseSearchViewModel extends ChangeNotifier {
   //Filter getters
   int? get selectedLevel => _selectedLevel;
   int? get selectedSemester => _selectedSemester;
+  String? get selectedSchool => _selectedSchool;
   bool get hasActiveFilter => _hasActiveFilter;
   String get filterSummary {
     if (!_hasActiveFilter) return 'No Filter';
-    return 'Level: ${_selectedLevel ?? ''}, Semester: ${_selectedSemester ?? ''}';
+    List<String> parts = [];
+    if (_selectedLevel != null) parts.add('Level: $_selectedLevel');
+    if (_selectedSemester != null) parts.add('Semester: $_selectedSemester');
+    if (_selectedSchool != null) parts.add('School: $_selectedSchool');
+
+    return parts.isNotEmpty ? parts.join(', ') : 'No Filter';
   }
 
   //Selected courses getters
@@ -77,14 +84,17 @@ class CourseSearchViewModel extends ChangeNotifier {
   }
 
   // Filter functionality
-  Future<void> applyFilter(int? level, int? semester) async {
-    if (level == null || semester == null) {
+  Future<void> applyFilter(int? level, int? semester, String? school) async {
+    final hasAnyFilter = level == null || semester == null || school == null;
+
+    if (!hasAnyFilter) {
       clearFilter();
       return;
     }
 
     _selectedLevel = level;
     _selectedSemester = semester;
+    _selectedSchool = school;
     _hasActiveFilter = true;
 
     _isLoadingCourses = true;
@@ -92,16 +102,42 @@ class CourseSearchViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _repository.fetchCoursesForLevelAndSemester(
-          level.toString(), semester);
+      List<Course> coursesToFilter;
 
-      if (response.data != null) {
-        _filteredCourses = response.data ?? [];
-        _loadError = null;
+      if (level != null && semester != null) {
+        final response = await _repository.fetchCoursesForLevelAndSemester(
+            level.toString(), semester);
+
+        if (response.data != null) {
+          coursesToFilter = response.data ?? [];
+          _loadError = null;
+        } else {
+          _loadError = response.message ?? 'Failed to load filtered courses';
+          _filteredCourses = [];
+          return;
+        }
+        if (school != null) {
+          _filteredCourses = coursesToFilter.where((course) {
+            return course.school == school;
+          }).toList();
+        } else {
+          _filteredCourses = coursesToFilter;
+        }
       } else {
-        _loadError = response.message ?? 'Failed to load filtered courses';
-        _filteredCourses = [];
+        if (_allCourses.isEmpty) {
+          await loadAllCourses();
+        }
+        coursesToFilter = _allCourses;
       }
+
+      _filteredCourses = applyClientSideFilters(
+        coursesToFilter,
+        level: level,
+        semester: semester,
+        school: school,
+      );
+
+      _loadError = null;
     } catch (e) {
       _loadError = 'An unexpected error occurred: ${e.toString()}';
       _filteredCourses = [];
@@ -111,9 +147,30 @@ class CourseSearchViewModel extends ChangeNotifier {
     }
   }
 
+  List<Course> applyClientSideFilters(
+    List<Course> courses, {
+    int? level,
+    int? semester,
+    String? school,
+  }) {
+    return courses.where((course) {
+      if (level != null && course.level != level.toString()) {
+        return false;
+      }
+      if (semester != null && course.semester != semester) {
+        return false;
+      }
+      if (school != null && course.school != school) {
+        return false;
+      }
+      return true;
+    }).toList();
+  }
+
   void clearFilter() {
     _selectedLevel = null;
     _selectedSemester = null;
+    _selectedSchool = null;
     _hasActiveFilter = false;
     _filteredCourses = [];
     _loadError = null;

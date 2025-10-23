@@ -26,85 +26,83 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CourseViewModel>(builder: (context, courseViewModel, _) {
-      if (courseViewModel.isLoadingRegisteredCourses) {
-        return Column(
-          children: [
-            const SectionHeader(
-              period: AppStrings.semesterCourses,
-              hasAction: false,
-            ),
-            Shimmer(
-              child: DashboardMetricGridView(
-                padding: const EdgeInsets.only(
-                    left: 16, top: 10, right: 16, bottom: 0),
-                crossAxisCount: 3,
-                childAspectRatio: 1.3,
-                children: [
-                  ...shimmerBoxes,
-                ],
+    return Consumer<CourseViewModel>(
+      builder: (context, courseViewModel, _) {
+        if (courseViewModel.isLoadingRegisteredCourses) {
+          return Column(
+            children: [
+              const SectionHeader(
+                  period: AppStrings.semesterCourses, hasAction: false),
+              Shimmer(
+                child: DashboardMetricGridView(
+                  padding: const EdgeInsets.only(
+                      left: 16, top: 10, right: 16, bottom: 0),
+                  crossAxisCount: 3,
+                  childAspectRatio: 1.3,
+                  children: [...shimmerBoxes],
+                ),
               ),
-            )
-          ],
-        );
-      }
+            ],
+          );
+        }
 
-      if (courseViewModel.hasRegisteredCoursesError) {
+        if (courseViewModel.hasRegisteredCoursesError) {
+          return Column(
+            children: [
+              const SectionHeader(
+                period: AppStrings.semesterCourses,
+                hasAction: false,
+              ),
+              PageErrorIndicator(
+                text: courseViewModel.registeredCoursesError ??
+                    'Error loading courses',
+                useTopPadding: true,
+              ),
+            ],
+          );
+        }
+
+        final courseInfo = courseViewModel.registeredCourses;
+
+        if (courseInfo.isEmpty) {
+          return const EnrolledCoursesEmptyState();
+        }
+
         return Column(
           children: [
-            const SectionHeader(
+            SectionHeader(
               period: AppStrings.semesterCourses,
-              hasAction: false,
+              hasAction: courseInfo.length > 9,
+              onTap: () {
+                if (courseInfo.length > 9) {
+                  Navigation.navigateToScreen(
+                    context: context,
+                    screen: FullCourseListPage(
+                      courses: courseInfo,
+                    ),
+                  );
+                }
+              },
             ),
-            PageErrorIndicator(
-              text: courseViewModel.registeredCoursesError ??
-                  'Error loading courses',
-              useTopPadding: true,
+            DashboardMetricGridView(
+              padding: const EdgeInsets.only(
+                  left: 16, top: 10, right: 16, bottom: 16),
+              crossAxisCount: 3,
+              // Make tiles slightly wider than tall to reduce vertical space
+              childAspectRatio: 1.3,
+              children: courseInfo.length > 9
+                  ? courseInfo
+                      .take(9)
+                      .map((course) => SingleCourseCard(course: course))
+                      .toList()
+                  : courseInfo
+                      .map((course) => SingleCourseCard(course: course))
+                      .toList(),
             ),
           ],
         );
-      }
-
-      final courseInfo = courseViewModel.registeredCourses;
-
-      if (courseInfo.isEmpty) {
-        return const EnrolledCoursesEmptyState();
-      }
-
-      return Column(
-        children: [
-          SectionHeader(
-            period: AppStrings.semesterCourses,
-            hasAction: courseInfo.length > 9,
-            onTap: () {
-              if (courseInfo.length > 9) {
-                Navigation.navigateToScreen(
-                  context: context,
-                  screen: FullCourseListPage(
-                    courses: courseInfo,
-                  ),
-                );
-              }
-            },
-          ),
-          DashboardMetricGridView(
-            padding:
-                const EdgeInsets.only(left: 16, top: 10, right: 16, bottom: 16),
-            crossAxisCount: 3,
-            // Make tiles slightly wider than tall to reduce vertical space
-            childAspectRatio: 1.3,
-            children: courseInfo.length > 9
-                ? courseInfo
-                    .take(9)
-                    .map((course) => SingleCourseCard(course: course))
-                    .toList()
-                : courseInfo
-                    .map((course) => SingleCourseCard(course: course))
-                    .toList(),
-          ),
-        ],
-      );
-    });
+      },
+    );
   }
 }
 
@@ -122,6 +120,7 @@ class EnrolledCoursesEmptyState extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(16),
           child: AppMaterial(
+            inkwellBorderRadius: BorderRadius.circular(15),
             onTap: () {
               Navigation.navigateToScreen(
                   context: context,

@@ -10,13 +10,15 @@ class FilterCoursesBottomSheet extends StatefulWidget {
     super.key,
     this.initialLevel,
     this.initialSemester,
+    this.initialSchool,
     required this.onApply,
     required this.onReset,
   });
 
   final int? initialLevel;
   final int? initialSemester;
-  final Function(int? level, int? semester) onApply;
+  final String? initialSchool;
+  final Function(int? level, int? semester, String? school) onApply;
   final VoidCallback onReset;
 
   @override
@@ -27,12 +29,14 @@ class FilterCoursesBottomSheet extends StatefulWidget {
 class _FilterCoursesBottomSheetState extends State<FilterCoursesBottomSheet> {
   int? selectedLevel;
   int? selectedSemester;
+  String? selectedSchool;
 
   @override
   void initState() {
     super.initState();
     selectedLevel = widget.initialLevel;
     selectedSemester = widget.initialSemester;
+    selectedSchool = widget.initialSchool;
   }
 
   @override
@@ -108,14 +112,58 @@ class _FilterCoursesBottomSheetState extends State<FilterCoursesBottomSheet> {
             ],
           ),
         ),
+        const SizedBox(height: 16),
+        headerText('Schools'),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            // crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              singleCategory(
+                category: 'All',
+                selected: selectedSchool == null,
+                onTap: () {
+                  setState(() {
+                    selectedSchool = null;
+                  });
+                },
+              ),
+              const SizedBox(width: 6),
+              AppImages.svgLine,
+              const SizedBox(width: 10),
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    // runSpacing: 6,
+                    // crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      ...AppConstants.schools.map(
+                        (school) => singleCategory(
+                          category: school,
+                          selected: selectedSchool == school,
+                          onTap: () {
+                            setState(() {
+                              selectedSchool = school;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
         const SizedBox(height: 8),
         BackAndNextButtonRow(
-          enableNextButton: enableApplyButton(),
+          // enableNextButton: enableApplyButton(),
           firstText: 'Reset Filters',
           secondText: 'Apply',
           onTapFirstButton: widget.onReset,
           onTapNextButton: () {
-            widget.onApply(selectedLevel, selectedSemester);
+            widget.onApply(selectedLevel, selectedSemester, selectedSchool);
           },
         )
       ],

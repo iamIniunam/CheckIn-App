@@ -1,5 +1,6 @@
 enum VerificationStep {
-  faceVerification,
+  qrCodeScan,
+  onlineCodeEntry,
   locationCheck,
   attendanceSubmission,
   completed

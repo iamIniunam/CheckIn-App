@@ -1,5 +1,6 @@
 import 'package:attendance_app/ux/shared/components/app_buttons.dart';
 import 'package:attendance_app/ux/shared/components/app_dropdown_field.dart';
+import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/components/app_form_fields.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
@@ -7,6 +8,7 @@ import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:attendance_app/ux/shared/resources/app_images.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
+import 'package:attendance_app/ux/views/attendance/face_veification_page.dart';
 import 'package:attendance_app/ux/views/onboarding/login_page.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -132,6 +134,22 @@ class _SignUpPageState extends State<SignUpPage> {
                                 //     ? 'Invalid ID number format'
                                 //     : null,
                               ),
+                              const PrimaryTextFormField(
+                                labelText: 'Full Name',
+                                hintText: 'e.g John Doe',
+                                bottomPadding: 0,
+                                keyboardType: TextInputType.name,
+                                textCapitalization: TextCapitalization.words,
+                                textInputAction: TextInputAction.next,
+                              ),
+                              // const PrimaryTextFormField(
+                              //   labelText: 'Last Name',
+                              //   hintText: 'e.g Doe',
+                              //   bottomPadding: 0,
+                              //   keyboardType: TextInputType.name,
+                              //   textCapitalization: TextCapitalization.words,
+                              //   textInputAction: TextInputAction.next,
+                              // ),
                               CustomSearchTextFormField(
                                 labelText: 'Programs',
                                 hintText: 'e.g BEng. Computer Engineering',
@@ -218,10 +236,14 @@ class _SignUpPageState extends State<SignUpPage> {
                               PrimaryButton(
                                 // enabled: viewModel.enableButton,
                                 onTap: () {
-                                  Navigation.navigateToVerification(
-                                      context: context);
+                                  Navigation.navigateToScreen(
+                                    context: context,
+                                    screen: const FaceVerificationPage(
+                                      mode: FaceVerificationMode.signUp,
+                                    ),
+                                  );
                                 },
-                                child: Text(AppStrings.signUp),
+                                child: const Text(AppStrings.signUp),
                               ),
 
                               const SizedBox(height: 16),
@@ -238,9 +260,11 @@ class _SignUpPageState extends State<SignUpPage> {
                                     TextSpan(
                                       recognizer: TapGestureRecognizer()
                                         ..onTap = () {
-                                          Navigation.navigateToScreen(
-                                              context: context,
-                                              screen: const LoginPage());
+                                          Navigation
+                                              .navigateToScreenAndClearOnePrevious(
+                                            context: context,
+                                            screen: const LoginPage(),
+                                          );
                                         },
                                       text: AppStrings.login,
                                       style: const TextStyle(

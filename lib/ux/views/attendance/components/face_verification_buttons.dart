@@ -8,25 +8,25 @@ import 'package:flutter/material.dart';
 class ExitButton extends StatelessWidget {
   const ExitButton({
     super.key,
-    required this.mode,
+    required this.attendanceType,
     required this.viewModel,
     required this.onExit,
   });
 
-  final FaceVerificationMode mode;
+  final AttendanceType attendanceType;
   final AttendanceVerificationViewModel viewModel;
   final VoidCallback onExit;
 
   bool isAttendanceMode() {
-    return mode == FaceVerificationMode.attendanceInPerson ||
-        mode == FaceVerificationMode.attendanceOnline;
+    return attendanceType == AttendanceType.inPerson ||
+        attendanceType == AttendanceType.online;
   }
 
   @override
   Widget build(BuildContext context) {
     if (isAttendanceMode() &&
         viewModel.verificationState.currentStep !=
-            VerificationStep.faceVerification) {
+            VerificationStep.qrCodeScan) {
       return const SizedBox.shrink();
     }
 
@@ -67,18 +67,16 @@ class ExitButton extends StatelessWidget {
 class VerificationButton extends StatelessWidget {
   const VerificationButton({
     super.key,
-    required this.mode,
     required this.viewModel,
     required this.onVerify,
   });
 
-  final FaceVerificationMode mode;
   final AttendanceVerificationViewModel viewModel;
   final VoidCallback onVerify;
 
   @override
   Widget build(BuildContext context) {
-    if (!viewModel.shouldShowButton(mode)) {
+    if (!viewModel.shouldShowButton()) {
       return const SizedBox.shrink();
     }
 
@@ -89,7 +87,7 @@ class VerificationButton extends StatelessWidget {
       child: PrimaryButton(
         enabled: viewModel.shouldEnableButton(),
         onTap: onVerify,
-        child: Text(viewModel.getButtonText(mode)),
+        child: Text(viewModel.getButtonText()),
       ),
     );
   }

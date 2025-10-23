@@ -14,11 +14,11 @@ class CourseSearchHelper {
   static bool matchesCourse(Course course, String searchQuery) {
     final codeMatch = course.courseCode.toLowerCase();
     final nameMatch = (course.courseTitle ?? '').toLowerCase();
-    // final schoolMatch = (course.school ?? '').toLowerCase();
+    final schoolMatch = (course.school ?? '').toLowerCase();
 
     return codeMatch.contains(searchQuery) ||
-        nameMatch.contains(searchQuery);
-        // schoolMatch.contains(searchQuery);
+        nameMatch.contains(searchQuery) ||
+        schoolMatch.contains(searchQuery);
   }
 
   static int getResultCount(List<Course> allCourses, String query) {

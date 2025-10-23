@@ -61,11 +61,11 @@ class LocationCheckContent extends StatelessWidget {
             if (viewModel.verificationState.errorMessage != null)
               ErrorMessage(
                   message: viewModel.verificationState.errorMessage ?? ''),
-            const SizedBox(height: 16),
-            Text(
-                'Current Latitude: ${viewModel.locationState.currentPosition?.latitude}'),
-            Text(
-                'Current Longitude: ${viewModel.locationState.currentPosition?.longitude}'),
+            // const SizedBox(height: 16),
+            // Text(
+            //     'Current Latitude: ${viewModel.locationState.currentPosition?.latitude}'),
+            // Text(
+            //     'Current Longitude: ${viewModel.locationState.currentPosition?.longitude}'),
           ],
         ),
       ),

@@ -40,42 +40,42 @@ class Navigation {
         (route) => false);
   }
 
-  static void navigateToVerification({
-    required BuildContext context,
-    FaceVerificationMode mode = FaceVerificationMode.signUp,
-    AttendanceType? attendanceType,
-    void Function()? onExit,
-  }) {
-    Navigation.navigateToScreen(
-      context: context,
-      screen: VerificationPage(
-        mode: mode,
-        onExit: onExit,
-      ),
-    );
-  }
+  // static void navigateToVerification({
+  //   required BuildContext context,
+  //   FaceVerificationMode mode = FaceVerificationMode.signUp,
+  //   AttendanceType? attendanceType,
+  //   void Function()? onExit,
+  // }) {
+  //   Navigation.navigateToScreen(
+  //     context: context,
+  //     screen: VerificationPage(
+  //       mode: mode,
+  //       onExit: onExit,
+  //     ),
+  //   );
+  // }
 
-  static void navigateToInPersonAttendance({
-    required BuildContext context,
-    void Function()? onExit,
-  }) {
-    navigateToVerification(
-      context: context,
-      mode: FaceVerificationMode.attendanceInPerson,
-      attendanceType: AttendanceType.inPerson,
-      onExit: onExit,
-    );
-  }
+  // static void navigateToInPersonAttendance({
+  //   required BuildContext context,
+  //   void Function()? onExit,
+  // }) {
+  //   navigateToVerification(
+  //     context: context,
+  //     mode: FaceVerificationMode.attendanceInPerson,
+  //     attendanceType: AttendanceType.inPerson,
+  //     onExit: onExit,
+  //   );
+  // }
 
-  static void navigateToOnlineAttendance({
-    required BuildContext context,
-    void Function()? onExit,
-  }) {
-    navigateToVerification(
-      context: context,
-      mode: FaceVerificationMode.attendanceOnline,
-      attendanceType: AttendanceType.online,
-      onExit: onExit,
-    );
-  }
+  // static void navigateToOnlineAttendance({
+  //   required BuildContext context,
+  //   void Function()? onExit,
+  // }) {
+  //   navigateToVerification(
+  //     context: context,
+  //     mode: FaceVerificationMode.attendanceOnline,
+  //     attendanceType: AttendanceType.online,
+  //     onExit: onExit,
+  //   );
+  // }
 }

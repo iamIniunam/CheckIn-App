@@ -1,3 +1,4 @@
+import 'package:attendance_app/ux/shared/components/dashboard_metric_grid_view.dart';
 import 'package:attendance_app/ux/shared/view_models/course_search_view_model.dart';
 import 'package:attendance_app/ux/views/onboarding/components/course_enrollment_card.dart';
 import 'package:flutter/material.dart';
@@ -14,24 +15,30 @@ class CourseListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      itemCount: courses.length,
-      itemBuilder: (context, index) {
-        final course = courses[index];
-        final selectedSchool = viewModel.getChosenSchoolForCourse(course);
+    // return ListView.builder(
+    //   padding: const EdgeInsets.symmetric(horizontal: 12),
+    //   itemCount: courses.length,
+    //   itemBuilder: (context, index) {
+    //     final course = courses[index];
+    //     final selectedSchool = viewModel.getChosenSchoolForCourse(course);
 
-        return Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: CourseEnrollmentCard(
-            semesterCourse: course,
-            selectedSchool: selectedSchool,
-            onTapSchool: (school) {
-              viewModel.updateChosenSchool(course, school);
-            },
-          ),
+    return DashboardMetricGridView(
+      padding: const EdgeInsets.only(left: 16, top: 12, right: 16),
+      crossAxisCount: 2,
+      childAspectRatio: 2.4,
+      mainAxisSpacing: 10,
+      children: courses.map((course) {
+        final selectedSchool = viewModel.getChosenSchoolForCourse(course);
+        return CourseEnrollmentCard(
+          semesterCourse: course,
+          selectedSchool: selectedSchool,
+          onTapSchool: (school) {
+            viewModel.updateChosenSchool(course, school);
+          },
         );
-      },
+      }).toList(),
     );
+    //   },
+    // );
   }
 }

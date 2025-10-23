@@ -8,7 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
 class NavigationHostPage extends StatefulWidget {
-  const NavigationHostPage({super.key});
+  const NavigationHostPage({super.key, this.index});
+
+  final int? index;
 
   @override
   State<NavigationHostPage> createState() => _NavigationHostPageState();
@@ -22,10 +24,11 @@ class _NavigationHostPageState extends State<NavigationHostPage> {
   @override
   void initState() {
     super.initState();
+    currentPageIndex = widget.index ?? 0;
     pages = [
       const HomePage(),
       const SelectAttendanceModePage(),
-      const AttendanceHistoryPage()
+      const AttendanceHistoryPage(),
     ];
   }
 
@@ -39,21 +42,20 @@ class _NavigationHostPageState extends State<NavigationHostPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: pages[currentPageIndex],
-      bottomNavigationBar:
-          // currentPageIndex == 1
-          //     ? null
-          //     :
-          BottomAppBar(
+      bottomNavigationBar: BottomAppBar(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(
             bottomNavItems.length,
             (index) {
               return BottomNavIcon(
-                  icon: bottomNavItems[index]['icon'],
-                  text: bottomNavItems[index]['text'],
-                  isSelected: currentPageIndex == index,
-                  onTap: () => setState(() => currentPageIndex = index));
+                icon: bottomNavItems[index]['icon'],
+                text: bottomNavItems[index]['text'],
+                isSelected: currentPageIndex == index,
+                onTap: () => setState(
+                  () => currentPageIndex = index,
+                ),
+              );
             },
           ),
         ),

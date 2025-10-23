@@ -30,20 +30,45 @@ class StepIndicatorWidget extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            StepIndicatorItem(
-              label: 'Face',
-              icon: Icons.face,
-              isActive: viewModel.verificationState.currentStep.index >=
-                  VerificationStep.faceVerification.index,
-              isLoading: viewModel.verificationState.currentStep ==
-                      VerificationStep.faceVerification &&
-                  viewModel.verificationState.isLoading,
-            ),
-            StepConnector(
-              isActive: viewModel.verificationState.currentStep.index >
-                  VerificationStep.faceVerification.index,
-            ),
-            if (viewModel.requiresLocationCheck) ...[
+            // Show QR scan step when attendance type is in-person or not set yet
+            if (viewModel.verificationState.attendanceType == null ||
+                viewModel.verificationState.attendanceType ==
+                    AttendanceType.inPerson) ...[
+              StepIndicatorItem(
+                label: 'QR Scan',
+                icon: Icons.qr_code_2_rounded,
+                isActive: viewModel.verificationState.currentStep.index >=
+                    VerificationStep.qrCodeScan.index,
+                isLoading: viewModel.verificationState.currentStep ==
+                        VerificationStep.qrCodeScan &&
+                    viewModel.verificationState.isLoading,
+              ),
+              StepConnector(
+                isActive: viewModel.verificationState.currentStep.index >
+                    VerificationStep.qrCodeScan.index,
+              ),
+            ],
+
+            if (viewModel.verificationState.attendanceType ==
+                AttendanceType.online) ...[
+              StepIndicatorItem(
+                label: 'Online Code',
+                icon: Icons.keyboard_alt_rounded,
+                isActive: viewModel.verificationState.currentStep.index >=
+                    VerificationStep.onlineCodeEntry.index,
+                isLoading: viewModel.verificationState.currentStep ==
+                        VerificationStep.onlineCodeEntry &&
+                    viewModel.verificationState.isLoading,
+              ),
+              StepConnector(
+                isActive: viewModel.verificationState.currentStep.index >
+                    VerificationStep.onlineCodeEntry.index,
+              ),
+            ],
+
+            // Show Location step only for in-person attendance
+            if (viewModel.verificationState.attendanceType ==
+                AttendanceType.inPerson) ...[
               StepIndicatorItem(
                 label: 'Location',
                 icon: Icons.location_on,
@@ -58,6 +83,7 @@ class StepIndicatorWidget extends StatelessWidget {
                     VerificationStep.locationCheck.index,
               ),
             ],
+
             StepIndicatorItem(
               label: 'Submit',
               icon: Icons.check_circle,

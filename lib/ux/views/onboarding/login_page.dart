@@ -97,7 +97,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void handleLoginSuccess() {
-    Navigation.navigateToScreen(
+    Navigation.navigateToScreenAndClearOnePrevious(
       context: context,
       screen: const NavigationHostPage(),
     );
@@ -217,9 +217,11 @@ class _LoginPageState extends State<LoginPage> {
                                     TextSpan(
                                       recognizer: TapGestureRecognizer()
                                         ..onTap = () {
-                                          Navigation.navigateToScreen(
-                                              context: context,
-                                              screen: const SignUpPage());
+                                          Navigation
+                                              .navigateToScreenAndClearOnePrevious(
+                                            context: context,
+                                            screen: const SignUpPage(),
+                                          );
                                         },
                                       text: AppStrings.signUp,
                                       style: const TextStyle(

@@ -1,7 +1,7 @@
 class AppConstants {
   AppConstants._();
 
-  static const apiBaseUrl = 'http://10.61.33.161:8000/api';
+  static const apiBaseUrl = 'http://192.168.100.14:8000/api';
 
   static const loggedInKey = 'logged.in';
   static const levelKey = 'level';

@@ -1,6 +1,6 @@
 import 'package:attendance_app/platform/utils/permission_utils.dart';
 import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
-import 'package:attendance_app/ux/shared/components/blurred_loading_overlay.dart';
+import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance_verification_view_model.dart';
 import 'package:attendance_app/ux/views/attendance/alert_dialogs/cancel_dialog.dart';
@@ -8,7 +8,6 @@ import 'package:attendance_app/ux/views/attendance/components/attendance_type_in
 import 'package:attendance_app/ux/views/attendance/components/face_verification_buttons.dart';
 import 'package:attendance_app/ux/views/attendance/components/step_content.dart';
 import 'package:attendance_app/ux/views/attendance/components/step_indicator_widget.dart';
-import 'package:attendance_app/ux/views/onboarding/course_enrollment_page.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
@@ -16,11 +15,10 @@ import 'package:provider/provider.dart';
 
 class VerificationPage extends StatefulWidget {
   const VerificationPage(
-      {super.key, this.onExit, required this.mode, this.attendanceType});
+      {super.key, this.onExit, required this.attendanceType});
 
   final void Function()? onExit;
-  final FaceVerificationMode mode;
-  final AttendanceType? attendanceType;
+  final AttendanceType attendanceType;
 
   @override
   State<VerificationPage> createState() => _VerificationPageState();
@@ -36,11 +34,7 @@ class _VerificationPageState extends State<VerificationPage> {
   void initState() {
     super.initState();
     viewModel = AttendanceVerificationViewModel();
-
-    if (widget.attendanceType != null) {
-      viewModel
-          .setAttendanceType(widget.attendanceType ?? AttendanceType.inPerson);
-    }
+    viewModel.setAttendanceType(widget.attendanceType);
 
     initializeCamera();
   }
@@ -78,27 +72,10 @@ class _VerificationPageState extends State<VerificationPage> {
   }
 
   Future<void> handleVerification() async {
-    switch (widget.mode) {
-      case FaceVerificationMode.signUp:
-        await handleSignUpVerification();
-        break;
-      case FaceVerificationMode.attendanceInPerson:
-        await handleAttendanceVerification(AttendanceType.inPerson);
-        break;
-      case FaceVerificationMode.attendanceOnline:
-        await handleAttendanceVerification(AttendanceType.online);
-        break;
-    }
-  }
+    final attendanceType =
+        viewModel.verificationState.attendanceType ?? widget.attendanceType;
 
-  Future<void> handleSignUpVerification() async {
-    bool success = await viewModel.verifyFace();
-    if (success && mounted) {
-      Navigation.navigateToScreenAndClearOnePrevious(
-        context: context,
-        screen: const CourseEnrollmentPage(),
-      );
-    }
+    await handleAttendanceVerification(attendanceType);
   }
 
   Future<void> handleAttendanceVerification(
@@ -107,20 +84,7 @@ class _VerificationPageState extends State<VerificationPage> {
       viewModel.setAttendanceType(attendanceType);
     }
 
-    // bool success =
     await viewModel.startVerificationFlow(attendanceType: attendanceType);
-
-    // if (!success && mounted) {
-    //   return;
-    // }
-
-    // if (viewModel.verificationState.currentStep == VerificationStep.completed &&
-    //     mounted) {
-    //   Navigation.navigateToScreenAndClearOnePrevious(
-    //     context: context,
-    //     screen: const VerificationSuccessPage(),
-    //   );
-    // }
   }
 
   Future<void> handleCompletion() async {
@@ -137,27 +101,23 @@ class _VerificationPageState extends State<VerificationPage> {
   }
 
   void handleExit() {
-    if (widget.mode == FaceVerificationMode.signUp) {
-      SignUpCancelDialog.show(
-        context: context,
-        cameraController: cameraController,
-      );
-    } else {
-      AttendanceCancelDialog.show(
-        context: context,
-        cameraController: cameraController,
-      );
-    }
+    AttendanceCancelDialog.show(
+      context: context,
+      cameraController: cameraController,
+    );
+    // }
   }
 
   bool shouldShowStepIndicator() {
-    return widget.mode == FaceVerificationMode.attendanceInPerson ||
-        widget.mode == FaceVerificationMode.attendanceOnline;
+    final type =
+        viewModel.verificationState.attendanceType ?? widget.attendanceType;
+    return type == AttendanceType.inPerson || type == AttendanceType.online;
   }
 
   bool isAttendanceMode() {
-    return widget.mode == FaceVerificationMode.attendanceInPerson ||
-        widget.mode == FaceVerificationMode.attendanceOnline;
+    final type =
+        viewModel.verificationState.attendanceType ?? widget.attendanceType;
+    return type == AttendanceType.inPerson || type == AttendanceType.online;
   }
 
   @override
@@ -182,7 +142,8 @@ class _VerificationPageState extends State<VerificationPage> {
       child: PopScope(
         canPop: false,
         onPopInvoked: (_) => handleExit(),
-        child: Scaffold(
+        child: AppPageScaffold(
+          hideAppBar: true,
           body: Consumer<AttendanceVerificationViewModel>(
             builder: (context, verificationViewModel, _) {
               final locationStatus =
@@ -196,35 +157,32 @@ class _VerificationPageState extends State<VerificationPage> {
                   // Main content
                   StepContent(
                     viewModel: verificationViewModel,
-                    cameraController: cameraController,
-                    isCameraInitialized: isCameraInitialized,
                   ),
 
                   // Step indicator for attendance mode
                   if (shouldShowStepIndicator())
                     StepIndicatorWidget(viewModel: verificationViewModel),
 
-                  // Attendance type indicator
+                  // Attendance type indicator - driven by view model's state
                   if (isAttendanceMode() &&
                       verificationViewModel.verificationState.attendanceType !=
                           null)
                     AttendanceTypeIndicator(
-                      attendanceType: verificationViewModel
-                              .verificationState.attendanceType ??
-                          AttendanceType.inPerson,
-                      // viewModel: faceVerificationViewModel,
-                    ),
+                        attendanceType: verificationViewModel
+                                .verificationState.attendanceType ??
+                            widget.attendanceType),
 
-                  // Exit button
+                  // Exit button: prefer VM attendanceType, fallback to widget
                   ExitButton(
-                    mode: widget.mode,
+                    attendanceType: verificationViewModel
+                            .verificationState.attendanceType ??
+                        widget.attendanceType,
                     viewModel: verificationViewModel,
                     onExit: widget.onExit ?? handleExit,
                   ),
 
                   // Verification button
                   VerificationButton(
-                    mode: widget.mode,
                     viewModel: verificationViewModel,
                     onVerify: getOnVerify(
                         locationStatus ??
@@ -234,12 +192,12 @@ class _VerificationPageState extends State<VerificationPage> {
                   ),
 
                   // Loading overlay
-                  Visibility(
-                    visible: verificationViewModel.isFaceVerifying,
-                    child: BlurredLoadingOverlay(
-                        showLoader:
-                            verificationViewModel.verificationState.isLoading),
-                  ),
+                  // Visibility(
+                  //   visible: verificationViewModel.isFaceVerifying,
+                  //   child: BlurredLoadingOverlay(
+                  //       showLoader:
+                  //           verificationViewModel.verificationState.isLoading),
+                  // ),
                 ],
               );
             },
