@@ -32,10 +32,10 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void loadStudent() async {
-    final s = await AuthService().getStudentData();
+    final studentData = await AuthService().getStudentData();
     if (!mounted) return;
     setState(() {
-      student = s;
+      student = studentData;
     });
   }
 
