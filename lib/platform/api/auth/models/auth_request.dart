@@ -1,4 +1,3 @@
-// sign_up_request.dart
 class SignUpRequest {
   final String idNumber;
   final String firstName;
@@ -24,7 +23,6 @@ class SignUpRequest {
     };
   }
 
-  // Validation
   String? validate() {
     if (idNumber.trim().isEmpty) {
       return 'ID number is required';
@@ -48,7 +46,6 @@ class SignUpRequest {
   }
 }
 
-// login_request.dart
 class LoginRequest {
   final String idNumber;
   final String password;

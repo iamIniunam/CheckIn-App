@@ -107,7 +107,8 @@ class _LoginPageState extends State<LoginPage> {
 
   void dismissLoadingDialog() {
     try {
-      Navigator.of(context, rootNavigator: true).pop();
+      // Match the navigator used when showing the dialog (rootNavigator=false)
+      Navigator.of(context, rootNavigator: false).pop();
     } catch (_) {}
   }
 

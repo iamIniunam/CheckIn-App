@@ -100,10 +100,10 @@ class CourseApi {
           'course_id': courseId,
           'idnumber': studentId,
         },
-        body: {
-          'course_id': courseId,
-          'idnumber': studentId,
-        },
+        // body: {
+        //   'course_id': courseId,
+        //   'idnumber': studentId,
+        // },
         errorMessage: 'Failed to register courses',
       );
 

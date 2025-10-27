@@ -1,5 +1,5 @@
 import 'package:attendance_app/platform/api/api_response.dart';
-import 'package:attendance_app/platform/api/course_api.dart';
+import 'package:attendance_app/platform/api/course/course_api.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 
 class CourseRepository {

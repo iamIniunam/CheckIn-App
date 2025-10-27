@@ -1,6 +1,6 @@
 import 'package:attendance_app/platform/api/api_response.dart';
-import 'package:attendance_app/platform/api/auth_api/auth_api.dart';
-import 'package:attendance_app/platform/api/auth_api/models/auth_request.dart';
+import 'package:attendance_app/platform/api/auth/auth_api.dart';
+import 'package:attendance_app/platform/api/auth/models/auth_request.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 
 class AuthRepository {
