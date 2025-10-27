@@ -1,11 +1,7 @@
-import 'dart:convert';
-
-import 'package:attendance_app/platform/models/auth_request.dart';
+import 'package:attendance_app/platform/api/auth_api/models/auth_request.dart';
 import 'package:attendance_app/platform/repositories/auth_repository.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
-import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 enum AuthState { idle, loading, success, error }
 
