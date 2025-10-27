@@ -120,7 +120,7 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await _authService.clearLoginState();
+    await _authService.logOut();
     _currentStudent = null;
     _isLoggedIn = false;
     clearMessages();

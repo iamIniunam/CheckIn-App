@@ -63,6 +63,17 @@ class AuthService {
     }
   }
 
+  Future<bool> logOut() async {
+    await init();
+    try {
+      await _prefs?.setBool(AppConstants.isLoggedInKey, false);
+      return true;
+    } catch (e) {
+      debugPrint('Error signing out: $e');
+      return false;
+    }
+  }
+
   Future<bool> updateStudentData(Student student) async {
     await init();
     try {

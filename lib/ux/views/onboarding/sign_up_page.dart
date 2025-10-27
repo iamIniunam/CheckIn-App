@@ -9,6 +9,7 @@ import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
 import 'package:attendance_app/ux/shared/resources/app_images.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
+import 'package:attendance_app/ux/views/onboarding/login_page.dart';
 import 'package:attendance_app/ux/views/attendance/face_veification_page.dart';
 import 'package:attendance_app/ux/views/onboarding/components/auth_redirection_widget.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,40 @@ class _SignUpPageState extends State<SignUpPage> {
   String? selectedProgram;
 
   bool isPasswordVisible = false;
+  bool alreadyAccountDialogShown = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Post-frame check for existing saved account. We run this once in
+    // initState to keep build() pure and avoid showing dialogs during build.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (alreadyAccountDialogShown) return;
+      final auth = context.read<AuthViewModel>();
+      final saved = auth.currentStudent;
+      if (saved != null &&
+          (saved.idNumber.trim().isNotEmpty) &&
+          !auth.isLoggedIn) {
+        alreadyAccountDialogShown = true;
+        AppDialogs.showAlertDialog(
+          context: context,
+          title: 'Account exists',
+          message:
+              'An account for this device already exists. Please log in instead of signing up.',
+          action: () {
+            try {
+              Navigator.of(context, rootNavigator: true).pop();
+            } catch (_) {}
+            Navigation.navigateToScreen(
+              context: context,
+              screen: const LoginPage(),
+            );
+          },
+        );
+      }
+    });
+  }
 
   void togglePasswordVisibility() {
     setState(() {
@@ -109,6 +144,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    // build remains pure — UI only
     return GestureDetector(
       onTap: () {
         FocusManager.instance.primaryFocus?.unfocus();

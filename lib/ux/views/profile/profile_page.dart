@@ -1,6 +1,7 @@
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
+import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/components/app_buttons.dart';
@@ -37,6 +38,28 @@ class _ProfilePageState extends State<ProfilePage> {
   //       userViewModel.getUserPrimarySchool(searchViewModel.chosenSchools);
   //   return calculatedSchool;
   // }
+
+  Future<void> handleLogout() async {
+    final navigatorState = Navigator.of(context, rootNavigator: false);
+    final authViewModel = context.read<AuthViewModel>();
+
+    AppDialogs.showLoadingDialog(context);
+
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    await authViewModel.logout();
+
+    if (!mounted) return;
+
+    try {
+      navigatorState.pop();
+    } catch (_) {}
+
+    Navigation.navigateToScreen(
+      context: context,
+      screen: const LoginPage(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,12 +152,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 backgroundColor: AppColors.transparent,
                 foregroundColor: AppColors.red500,
                 overlayColor: AppColors.red500.withOpacity(0.05),
-                onTap: () {
-                  context.read<AuthViewModel>().logout();
-                  if (!mounted) return;
-                  Navigation.navigateToScreen(
-                      context: context, screen: const LoginPage());
-                },
+                onTap: handleLogout,
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
