@@ -7,8 +7,7 @@ import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
 import 'package:attendance_app/ux/shared/resources/app_images.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
-import 'package:attendance_app/ux/views/onboarding/sign_up_page.dart';
-import 'package:flutter/gestures.dart';
+import 'package:attendance_app/ux/views/onboarding/components/auth_redirection_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -53,27 +52,43 @@ class _LoginPageState extends State<LoginPage> {
     try {
       final viewModel = context.read<AuthViewModel>();
 
-      if (mounted) {
+      // Show a loading dialog while the login request is in progress.
+      var showedLoading = false;
+      try {
         AppDialogs.showLoadingDialog(context);
-      }
+        showedLoading = true;
 
-      final success = await viewModel.login(
-        idNumber: idNumberController.text.trim(),
-        password: passwordController.text.trim(),
-      );
+        final success = await viewModel.login(
+          idNumber: idNumberController.text.trim(),
+          password: passwordController.text.trim(),
+        );
 
-      if (!mounted) return;
+        if (!mounted) return;
 
-      dismissLoadingDialog();
+        if (showedLoading) {
+          try {
+            dismissLoadingDialog();
+          } catch (_) {}
+        }
 
-      if (success) {
-        handleLoginSuccess();
-      } else {
-        handleLoginError(viewModel);
+        if (success) {
+          handleLoginSuccess();
+        } else {
+          handleLoginError(viewModel);
+        }
+      } finally {
+        // Ensure we don't leave the loading dialog shown on error
+        if (showedLoading) {
+          try {
+            dismissLoadingDialog();
+          } catch (_) {}
+        }
       }
     } catch (e) {
       if (!mounted) return;
-      dismissLoadingDialog();
+      try {
+        dismissLoadingDialog();
+      } catch (_) {}
       showErrorDialog('An unexpected error occurred. Please try again.');
     } finally {
       if (mounted) {
@@ -104,7 +119,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void handleLoginError(AuthViewModel viewModel) {
-    final errorMessage = viewModel.loginError ??
+    final errorMessage = viewModel.errorMessage ??
         'Login failed. Please check your credentials and try again.';
 
     showErrorDialog(errorMessage);
@@ -205,35 +220,7 @@ class _LoginPageState extends State<LoginPage> {
                                 child: const Text(AppStrings.login),
                               ),
                               const SizedBox(height: 16),
-                              RichText(
-                                textAlign: TextAlign.center,
-                                text: TextSpan(
-                                  text: 'Don’t have an account? ',
-                                  style: const TextStyle(
-                                      color: AppColors.defaultColor,
-                                      fontFamily: 'Nunito',
-                                      fontSize: 13),
-                                  children: <TextSpan>[
-                                    TextSpan(
-                                      recognizer: TapGestureRecognizer()
-                                        ..onTap = () {
-                                          Navigation
-                                              .navigateToScreenAndClearOnePrevious(
-                                            context: context,
-                                            screen: const SignUpPage(),
-                                          );
-                                        },
-                                      text: AppStrings.signUp,
-                                      style: const TextStyle(
-                                        color: AppColors.defaultColor,
-                                        fontFamily: 'Nunito',
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                              const AuthRedirectionWidget(isLogin: true),
                             ],
                           ),
                         ),

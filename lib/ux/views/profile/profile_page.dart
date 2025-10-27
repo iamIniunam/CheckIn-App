@@ -143,8 +143,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         backgroundColor: AppColors.transparent,
                         foregroundColor: AppColors.red500,
                         overlayColor: AppColors.red500.withOpacity(0.05),
-                        onTap: () async {
-                          await context.read<AuthViewModel>().logout();
+                        onTap: () {
+                          context.read<AuthViewModel>().logout();
                           if (!mounted) return;
                           Navigation.navigateToScreen(
                               context: context, screen: const LoginPage());

@@ -23,19 +23,19 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> initializeApp() async {
-    final authViewModel = context.read<AuthViewModel>();
+    // final authViewModel = context.read<AuthViewModel>();
 
-    final isLoggedIn = await authViewModel.getIsUserLoggedIn();
+    // final isLoggedIn = await authViewModel.getIsUserLoggedIn();
 
     await Future.delayed(const Duration(seconds: 1));
 
-    if (!mounted) return;
+    // if (!mounted) return;
 
-    if (isLoggedIn == true) {
-      Navigation.navigateToScreenAndClearAllPrevious(
-          context: context, screen: const NavigationHostPage());
-      return;
-    }
+    // if (isLoggedIn == true) {
+    //   Navigation.navigateToScreenAndClearAllPrevious(
+    //       context: context, screen: const NavigationHostPage());
+    //   return;
+    // }
     Navigation.navigateToScreenAndClearAllPrevious(
       context: context,
       screen: const SignUpPage(),

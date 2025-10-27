@@ -5,12 +5,12 @@ import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/components/app_form_fields.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
+import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
 import 'package:attendance_app/ux/shared/resources/app_images.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/views/attendance/face_veification_page.dart';
-import 'package:attendance_app/ux/views/onboarding/login_page.dart';
-import 'package:flutter/gestures.dart';
+import 'package:attendance_app/ux/views/onboarding/components/auth_redirection_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:searchfield/searchfield.dart';
@@ -24,9 +24,9 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   final idNumberController = TextEditingController();
+  final firstNameController = TextEditingController();
+  final lastNameController = TextEditingController();
   final passwordController = TextEditingController();
-  final levelController = TextEditingController();
-  final semesterController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
   bool isPasswordVisible = false;
@@ -37,36 +37,64 @@ class _SignUpPageState extends State<SignUpPage> {
     });
   }
 
-  // Future<void> handleSignUp() async {
-  //   final formState = formKey.currentState;
-  //   if (formState == null || !formState.validate()) {
-  //     return;
-  //   }
+  Future<void> handleSignUp() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    if (!validateForm()) return;
 
-  //   if (!mounted) return;
-  //   final viewModel = context.read<AuthViewModel>();
+    final viewModel = context.read<AuthViewModel>();
 
-  //   AppDialogs.showLoadingDialog(context);
-  //   bool success = false;
+    if (viewModel.isLoading && mounted) {
+      AppDialogs.showLoadingDialog(context);
+    }
 
-  //   success = await viewModel.login(
-  //     idNumber: idNumberController.text.trim(),
-  //     password: passwordController.text.trim(),
-  //     level: levelController.text.trim(),
-  //     semester: int.tryParse(semesterController.text.trim()) ?? 0,
-  //   );
+    final success = await viewModel.signUp(
+      idNumber: idNumberController.text.trim(),
+      firstName: firstNameController.text.trim(),
+      lastName: lastNameController.text.trim(),
+      program: '', //viewModel.selectedProgram,
+      password: passwordController.text,
+    );
 
-  //   if (success && mounted) {
-  //     Navigation.navigateToFaceVerification(context: context);
-  //   }
-  // }
+    if (!mounted) return;
+
+    dismissLoadingDialog();
+
+    if (success) {
+      Navigation.navigateToScreen(
+        context: context,
+        screen: const FaceVerificationPage(
+          mode: FaceVerificationMode.signUp,
+        ),
+      );
+    } else {
+      AppDialogs.showErrorDialog(
+        context: context,
+        title: 'Sign Up Failed',
+        message: viewModel.errorMessage ?? 'An unknown error occurred',
+      );
+    }
+  }
+
+  void dismissLoadingDialog() {
+    try {
+      Navigator.of(context, rootNavigator: true).pop();
+    } catch (_) {}
+  }
+
+  bool validateForm() {
+    final formState = formKey.currentState;
+    if (formState == null || !formState.validate()) {
+      return false;
+    }
+    return true;
+  }
 
   @override
   void dispose() {
     idNumberController.dispose();
+    firstNameController.dispose();
+    lastNameController.dispose();
     passwordController.dispose();
-    levelController.dispose();
-    semesterController.dispose();
     super.dispose();
   }
 
@@ -118,38 +146,33 @@ class _SignUpPageState extends State<SignUpPage> {
                           child: Column(
                             children: [
                               PrimaryTextFormField(
-                                labelText: AppStrings.studentIdNumber,
                                 controller: idNumberController,
+                                labelText: AppStrings.studentIdNumber,
                                 keyboardType: TextInputType.visiblePassword,
                                 hintText: AppStrings.idNumberHintText,
                                 textInputAction: TextInputAction.next,
                                 textCapitalization:
                                     TextCapitalization.characters,
                                 bottomPadding: 0,
-                                // onChanged: (value) {
-                                //   viewModel.updateIDNumber(value);
-                                // },
-                                // errorText: viewModel.idNumber.isNotEmpty &&
-                                //         !viewModel.isIdNumberValid
-                                //     ? 'Invalid ID number format'
-                                //     : null,
                               ),
-                              const PrimaryTextFormField(
-                                labelText: 'Full Name',
-                                hintText: 'e.g John Doe',
+                              PrimaryTextFormField(
+                                controller: firstNameController,
+                                labelText: 'First Name',
+                                hintText: 'e.g John',
                                 bottomPadding: 0,
                                 keyboardType: TextInputType.name,
                                 textCapitalization: TextCapitalization.words,
                                 textInputAction: TextInputAction.next,
                               ),
-                              // const PrimaryTextFormField(
-                              //   labelText: 'Last Name',
-                              //   hintText: 'e.g Doe',
-                              //   bottomPadding: 0,
-                              //   keyboardType: TextInputType.name,
-                              //   textCapitalization: TextCapitalization.words,
-                              //   textInputAction: TextInputAction.next,
-                              // ),
+                              PrimaryTextFormField(
+                                controller: lastNameController,
+                                labelText: 'Last Name',
+                                hintText: 'e.g Doe',
+                                bottomPadding: 0,
+                                keyboardType: TextInputType.name,
+                                textCapitalization: TextCapitalization.words,
+                                textInputAction: TextInputAction.next,
+                              ),
                               CustomSearchTextFormField(
                                 labelText: 'Programs',
                                 hintText: 'e.g BEng. Computer Engineering',
@@ -162,50 +185,10 @@ class _SignUpPageState extends State<SignUpPage> {
                                   // viewModel.updateProgram(selectedProgram);
                                 },
                               ),
-                              // Row(
-                              //   children: [
-                              //     Expanded(
-                              //       child: PrimaryTextFormField(
-                              //         labelText: AppStrings.level,
-                              //         keyboardType: TextInputType.number,
-                              //         controller: levelController,
-                              //         hintText: AppStrings.levelHintText,
-                              //         bottomPadding: 0,
-                              //         textInputAction: TextInputAction.next,
-                              //         // onChanged: (value) {
-                              //         //   viewModel.updateLevel(value);
-                              //         // },
-                              //         // errorText: viewModel.level.isNotEmpty &&
-                              //         //         !viewModel.isLevelValid
-                              //         //     ? 'Between 100 - 400'
-                              //         //     : null,
-                              //       ),
-                              //     ),
-                              //     const SizedBox(width: 10),
-                              //     Expanded(
-                              //       child: PrimaryTextFormField(
-                              //         labelText: AppStrings.semester,
-                              //         keyboardType: TextInputType.number,
-                              //         controller: semesterController,
-                              //         bottomPadding: 0,
-                              //         hintText: AppStrings.semesterHintText,
-                              //         textInputAction: TextInputAction.next,
-                              //         // onChanged: (value) {
-                              //         //   viewModel.updateSemester(
-                              //         //       int.tryParse(value) ?? 0);
-                              //         // },
-                              //         // errorText: viewModel.semester.isNotEmpty &&
-                              //         //         !viewModel.isSemesterValid
-                              //         //     ? 'Enter 1 or 2'
-                              //         //     : null,
-                              //       ),
-                              //     ),
-                              //   ],
-                              // ),
                               PrimaryTextFormField(
+                                controller: passwordController,
                                 labelText: AppStrings.password,
                                 hintText: AppStrings.enterAPassword,
-                                controller: passwordController,
                                 obscureText: !isPasswordVisible,
                                 keyboardType: TextInputType.visiblePassword,
                                 textInputAction: TextInputAction.done,
@@ -218,9 +201,6 @@ class _SignUpPageState extends State<SignUpPage> {
                                   ),
                                   onPressed: togglePasswordVisibility,
                                 ),
-                                // onChanged: (value) {
-                                //   viewModel.updatePassword(value);
-                                // },
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return 'Please enter a password';
@@ -245,38 +225,8 @@ class _SignUpPageState extends State<SignUpPage> {
                                 },
                                 child: const Text(AppStrings.signUp),
                               ),
-
                               const SizedBox(height: 16),
-                              RichText(
-                                textAlign: TextAlign.center,
-                                text: TextSpan(
-                                  text: 'Already have an account? ',
-                                  style: const TextStyle(
-                                    color: AppColors.defaultColor,
-                                    fontFamily: 'Nunito',
-                                    fontSize: 13,
-                                  ),
-                                  children: <TextSpan>[
-                                    TextSpan(
-                                      recognizer: TapGestureRecognizer()
-                                        ..onTap = () {
-                                          Navigation
-                                              .navigateToScreenAndClearOnePrevious(
-                                            context: context,
-                                            screen: const LoginPage(),
-                                          );
-                                        },
-                                      text: AppStrings.login,
-                                      style: const TextStyle(
-                                        color: AppColors.defaultColor,
-                                        fontFamily: 'Nunito',
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                              const AuthRedirectionWidget(isLogin: false),
                             ],
                           ),
                         ),

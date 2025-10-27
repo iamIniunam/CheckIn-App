@@ -7,7 +7,7 @@ class Student {
   final String firstName;
   final String lastName;
   final String program;
-  final String password;
+  final String? password;
   final String? level;
   final int? semester;
 
@@ -16,7 +16,7 @@ class Student {
       required this.firstName,
       required this.lastName,
       required this.program,
-      required this.password,
+      this.password,
       this.level,
       this.semester});
 
