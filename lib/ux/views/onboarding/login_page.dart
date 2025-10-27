@@ -52,38 +52,38 @@ class _LoginPageState extends State<LoginPage> {
     try {
       final viewModel = context.read<AuthViewModel>();
 
+      AppDialogs.showLoadingDialog(context);
       // Show a loading dialog while the login request is in progress.
-      var showedLoading = false;
-      try {
-        AppDialogs.showLoadingDialog(context);
-        showedLoading = true;
+      // var showedLoading = false;
+      // try {
+      // showedLoading = true;
 
-        final success = await viewModel.login(
-          idNumber: idNumberController.text.trim(),
-          password: passwordController.text.trim(),
-        );
+      final success = await viewModel.login(
+        idNumber: idNumberController.text.trim(),
+        password: passwordController.text.trim(),
+      );
 
-        if (!mounted) return;
+      if (!mounted) return;
 
-        if (showedLoading) {
-          try {
-            dismissLoadingDialog();
-          } catch (_) {}
-        }
+      // if (showedLoading) {
+      //   try {
+      //     dismissLoadingDialog();
+      //   } catch (_) {}
+      // }
 
-        if (success) {
-          handleLoginSuccess();
-        } else {
-          handleLoginError(viewModel);
-        }
-      } finally {
-        // Ensure we don't leave the loading dialog shown on error
-        if (showedLoading) {
-          try {
-            dismissLoadingDialog();
-          } catch (_) {}
-        }
+      if (success) {
+        handleLoginSuccess();
+      } else {
+        handleLoginError(viewModel);
       }
+      // } finally {
+      //   // Ensure we don't leave the loading dialog shown on error
+      //   // if (showedLoading) {
+      //     try {
+      //       dismissLoadingDialog();
+      //     } catch (_) {}
+      //   // }
+      // }
     } catch (e) {
       if (!mounted) return;
       try {
@@ -108,7 +108,7 @@ class _LoginPageState extends State<LoginPage> {
   void dismissLoadingDialog() {
     try {
       // Match the navigator used when showing the dialog (rootNavigator=false)
-      Navigator.of(context, rootNavigator: false).pop();
+      Navigator.of(context, rootNavigator: true).pop();
     } catch (_) {}
   }
 
