@@ -29,6 +29,8 @@ class _SignUpPageState extends State<SignUpPage> {
   final passwordController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
+  String? selectedProgram;
+
   bool isPasswordVisible = false;
 
   void togglePasswordVisibility() {
@@ -42,8 +44,11 @@ class _SignUpPageState extends State<SignUpPage> {
     if (!validateForm()) return;
 
     final viewModel = context.read<AuthViewModel>();
-
-    if (viewModel.isLoading && mounted) {
+    // Show a loading dialog immediately while the sign-up request runs.
+    // Track whether we showed it so we only dismiss what we displayed.
+    bool showedLoading = false;
+    if (mounted) {
+      showedLoading = true;
       AppDialogs.showLoadingDialog(context);
     }
 
@@ -51,13 +56,17 @@ class _SignUpPageState extends State<SignUpPage> {
       idNumber: idNumberController.text.trim(),
       firstName: firstNameController.text.trim(),
       lastName: lastNameController.text.trim(),
-      program: '', //viewModel.selectedProgram,
+      program: selectedProgram ?? '',
       password: passwordController.text,
     );
 
+    debugPrint(viewModel.currentStudent?.toJson().toString());
+
     if (!mounted) return;
 
-    dismissLoadingDialog();
+    if (showedLoading) {
+      dismissLoadingDialog();
+    }
 
     if (success) {
       Navigation.navigateToScreen(
@@ -181,8 +190,10 @@ class _SignUpPageState extends State<SignUpPage> {
                                         child: Text(e)))
                                     .toList(),
                                 onSuggestionTap: (suggestion) {
-                                  // final selectedProgram = suggestion.searchKey;
-                                  // viewModel.updateProgram(selectedProgram);
+                                  final program = suggestion.searchKey;
+                                  setState(() {
+                                    selectedProgram = program;
+                                  });
                                 },
                               ),
                               PrimaryTextFormField(
@@ -215,14 +226,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               const SizedBox(height: 30),
                               PrimaryButton(
                                 // enabled: viewModel.enableButton,
-                                onTap: () {
-                                  Navigation.navigateToScreen(
-                                    context: context,
-                                    screen: const FaceVerificationPage(
-                                      mode: FaceVerificationMode.signUp,
-                                    ),
-                                  );
-                                },
+                                onTap: handleSignUp,
                                 child: const Text(AppStrings.signUp),
                               ),
                               const SizedBox(height: 16),

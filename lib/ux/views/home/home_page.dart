@@ -28,7 +28,8 @@ class _HomePageState extends State<HomePage> {
       final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
       final studentId = authViewModel.currentStudent?.idNumber;
 
-      if (studentId != null) {
+      // Only attempt to load registered courses when we have a non-empty id
+      if (studentId != null && studentId.isNotEmpty) {
         // Load registered courses
         context.read<CourseViewModel>().loadRegisteredCourses(studentId);
 

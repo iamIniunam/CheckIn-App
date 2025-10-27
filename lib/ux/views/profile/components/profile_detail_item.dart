@@ -2,11 +2,16 @@ import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class ProfileDetailItem extends StatelessWidget {
-  const ProfileDetailItem(
-      {super.key, required this.title, required this.value});
+  const ProfileDetailItem({
+    super.key,
+    required this.title,
+    required this.value,
+    this.textDirection,
+  });
 
   final String title;
   final String value;
+  final TextDirection? textDirection;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +37,7 @@ class ProfileDetailItem extends StatelessWidget {
               child: Text(
                 value,
                 maxLines: 2,
+                textDirection: textDirection ?? TextDirection.ltr,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                     color: AppColors.defaultColor, fontWeight: FontWeight.bold),

@@ -81,7 +81,8 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
 
     if (!validateCourseSelection()) return;
 
-    AppDialogs.showLoadingDialog(context);
+    AppDialogs.showLoadingDialog(context,
+        loadingText: widget.isEdit ? null : 'Registering courses...');
 
     final success = await registerCourses(studentId);
 
@@ -135,7 +136,10 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
       if (courseViewModel.failedCourses.isNotEmpty) {
         showPartialSuccessDialog();
       } else {
-        showSuccessDialog();
+        widget.isEdit
+            ? showSuccessDialog()
+            : Navigation.navigateToScreenAndClearOnePrevious(
+                context: context, screen: const NavigationHostPage());
       }
     } else if (courseViewModel.hasRegistrationError) {
       AppDialogs.showErrorDialog(
@@ -147,19 +151,12 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
   }
 
   void showSuccessDialog() {
-    final message = widget.isEdit
-        ? 'Courses updated successfully'
-        : 'Courses registered successfully';
+    const message = 'Courses updated successfully';
 
     AppDialogs.showSuccessDialog(
       context: context,
       message: message,
-      action: widget.isEdit
-          ? () => Navigation.back(context: context)
-          : () => Navigation.navigateToScreenAndClearOnePrevious(
-                context: context,
-                screen: const NavigationHostPage(),
-              ),
+      action: () => Navigation.back(context: context),
     );
   }
 

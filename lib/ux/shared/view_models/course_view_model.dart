@@ -41,6 +41,16 @@ class CourseViewModel extends ChangeNotifier {
       {bool forceRefresh = false}) async {
     if (_hasLoadedRegisteredCourses && !forceRefresh) return;
 
+    // Defensive: do not attempt network call if studentId is empty.
+    if (studentId.trim().isEmpty) {
+      _registeredCoursesError = 'No student id provided';
+      _registeredCourses = [];
+      _isLoadingRegisteredCourses = false;
+      _hasLoadedRegisteredCourses = false;
+      notifyListeners();
+      return;
+    }
+
     _isLoadingRegisteredCourses = true;
     _registeredCoursesError = null;
     notifyListeners();

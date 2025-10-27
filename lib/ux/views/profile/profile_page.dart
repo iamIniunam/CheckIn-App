@@ -106,8 +106,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       title: AppStrings.idNumber,
                       value: currentStudent?.idNumber ?? 'N/A'),
                   ProfileDetailItem(
-                      title: AppStrings.program,
-                      value: currentStudent?.program ?? 'N/A'),
+                    title: AppStrings.program,
+                    value: currentStudent?.program ?? 'N/A',
+                    textDirection: TextDirection.rtl,
+                  ),
                   // ProfileDetailItem(
                   //     title: AppStrings.studentLevel,
                   //     value: 'Level ${userViewModel.level}'),

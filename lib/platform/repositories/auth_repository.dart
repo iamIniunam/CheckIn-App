@@ -21,8 +21,48 @@ class AuthRepository {
       if (response.success) {
         // Try to parse student data from response
         try {
-          final data = response.data ?? {};
-          final student = Student.fromJson(data);
+          // Try to coerce the response data into a map. If that's not possible
+          // the cast will throw and we will fall back to using the request
+          // values in the catch below.
+          final Map<String, dynamic> dataMap =
+              Map<String, dynamic>.from(response.data ?? {});
+
+          // If the backend returned an effectively empty data map (no id or names),
+          // prefer constructing the Student from the original request values so we
+          // persist what the user entered instead of empty strings.
+          if (dataMap.isEmpty ||
+              (dataMap['idnumber'] == null &&
+                  dataMap['first_name'] == null &&
+                  dataMap['last_name'] == null)) {
+            final student = Student(
+              idNumber: request.idNumber,
+              firstName: request.firstName,
+              lastName: request.lastName,
+              program: request.program,
+            );
+
+            return ApiResponse.success(
+              student,
+              message: response.message ?? 'Sign up successful',
+            );
+          }
+
+          final student = Student.fromJson(dataMap);
+
+          // If parsed student still lacks an id, fall back to the request values.
+          if (student.idNumber.trim().isEmpty) {
+            final fallback = Student(
+              idNumber: request.idNumber,
+              firstName: request.firstName,
+              lastName: request.lastName,
+              program: request.program,
+            );
+
+            return ApiResponse.success(
+              fallback,
+              message: response.message ?? 'Sign up successful',
+            );
+          }
 
           return ApiResponse.success(
             student,
