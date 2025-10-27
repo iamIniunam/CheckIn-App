@@ -47,6 +47,10 @@ class AppStrings {
   static const sampleFullName = 'Jermaine Lamar Cole';
   static const sampleCourse = 'BEng. Computer Engineering';
   static const studentIdNumber = 'Student ID Number';
+  static const firstName = 'First Name';
+  static const lastName = 'Last Name';
+  static const program = 'Program';
+  static const idNumber = 'ID Number';
   static const sampleIdNumber = 'ENG23A00159Y';
   static const studentEmail = 'Student Email';
   static const schoolEmail = 'School Email';

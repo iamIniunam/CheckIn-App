@@ -18,19 +18,20 @@ class ProfileDetailItem extends StatelessWidget {
         ),
       ),
       child: Row(
+        // crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
             style: const TextStyle(
                 color: Colors.grey, fontWeight: FontWeight.w500),
           ),
-          const SizedBox(width: 20),
+          const SizedBox(width: 50),
           Expanded(
             child: Align(
               alignment: Alignment.centerRight,
               child: Text(
                 value,
-                maxLines: 1,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                     color: AppColors.defaultColor, fontWeight: FontWeight.bold),

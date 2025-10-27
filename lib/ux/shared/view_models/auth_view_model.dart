@@ -1,5 +1,6 @@
 import 'package:attendance_app/platform/api/auth/models/auth_request.dart';
 import 'package:attendance_app/platform/repositories/auth_repository.dart';
+import 'package:attendance_app/platform/services/auth_service.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:flutter/material.dart';
 
@@ -7,20 +8,34 @@ enum AuthState { idle, loading, success, error }
 
 class AuthViewModel extends ChangeNotifier {
   final AuthRepository _authRepository;
+  final AuthService _authService;
 
-  AuthViewModel({AuthRepository? authRepository})
-      : _authRepository = authRepository ?? AuthRepository();
+  AuthViewModel({AuthRepository? authRepository, AuthService? authService})
+      : _authRepository = authRepository ?? AuthRepository(),
+        _authService = authService ?? AuthService();
 
   AuthState _state = AuthState.idle;
   String? _errorMessage;
   String? _successMessage;
   Student? _currentStudent;
+  bool _isLoggedIn = false;
 
   AuthState get state => _state;
   String? get errorMessage => _errorMessage;
   String? get successMessage => _successMessage;
   Student? get currentStudent => _currentStudent;
   bool get isLoading => _state == AuthState.loading;
+  bool get isLoggedIn => _isLoggedIn;
+
+  Future<void> checkLoginStatus() async {
+    _isLoggedIn = await _authService.isLoggedIn();
+
+    if (_isLoggedIn) {
+      _currentStudent = await _authService.getStudentData();
+    }
+
+    notifyListeners();
+  }
 
   Future<bool> signUp({
     required String idNumber,
@@ -45,6 +60,10 @@ class AuthViewModel extends ChangeNotifier {
     if (response.success && response.data != null) {
       _currentStudent = response.data;
       _successMessage = response.message ?? 'Sign up successful';
+
+      await _authService.saveLoginState(response.data!);
+      _isLoggedIn = true;
+
       setState(AuthState.success);
       return true;
     } else {
@@ -71,6 +90,10 @@ class AuthViewModel extends ChangeNotifier {
     if (response.success && response.data != null) {
       _currentStudent = response.data;
       _successMessage = response.message ?? 'Login successful!';
+
+      await _authService.saveLoginState(response.data!);
+      _isLoggedIn = true;
+
       setState(AuthState.success);
       return true;
     } else {
@@ -80,8 +103,10 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  void logout() {
+  Future<void> logout() async {
+    await _authService.clearLoginState();
     _currentStudent = null;
+    _isLoggedIn = false;
     clearMessages();
     setState(AuthState.idle);
   }

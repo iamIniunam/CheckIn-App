@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 class AttendanceApi {
   final _courseAttendanceBasePath = '/student/getCourseAttendanceRecord';
+  // final _markAttendanceBasePath = '/student/markAttendance';
 
   Future<ApiResponse<List<CourseAttendanceRecord>>> getCourseAttendanceRecord(
       int courseId, String studentId) async {
