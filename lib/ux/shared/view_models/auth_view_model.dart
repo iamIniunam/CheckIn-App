@@ -103,6 +103,22 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
+  Future<void> loadSavedStudent() async {
+    try {
+      final student = await AuthService().getStudentData();
+      if (student != null) {
+        _currentStudent = student;
+        _successMessage ??= 'Restored session';
+        setState(AuthState.success);
+      } else {
+        setState(AuthState.idle);
+      }
+    } catch (e) {
+      debugPrint('Failed to load saved student: $e');
+      setState(AuthState.error);
+    }
+  }
+
   Future<void> logout() async {
     await _authService.clearLoginState();
     _currentStudent = null;

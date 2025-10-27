@@ -3,18 +3,18 @@ import 'package:attendance_app/ux/shared/view_models/attendance_records_view_mod
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_search_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
-import 'package:attendance_app/ux/shared/view_models/user_view_model.dart';
 import 'package:attendance_app/ux/views/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 
 bool isLoggedIn = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SharedPreferences prefs = await SharedPreferences.getInstance();
+  // SharedPreferences prefs = await SharedPreferences.getInstance();
   final authViewModel = AuthViewModel();
+  await authViewModel.loadSavedStudent();
 
   runApp(
     MultiProvider(
@@ -23,12 +23,12 @@ void main() async {
         ChangeNotifierProvider(create: (_) => CourseViewModel()),
         ChangeNotifierProvider(create: (_) => AttendanceRecordsViewModel()),
         ChangeNotifierProvider(create: (_) => CourseSearchViewModel()),
-        ChangeNotifierProxyProvider<AuthViewModel, UserViewModel>(
-          create: (_) =>
-              UserViewModel(pref: prefs, authViewModel: authViewModel),
-          update: (_, auth, previous) =>
-              previous ?? UserViewModel(pref: prefs, authViewModel: auth),
-        ),
+        // ChangeNotifierProxyProvider<AuthViewModel, UserViewModel>(
+        //   create: (_) =>
+        //       UserViewModel(pref: prefs, authViewModel: authViewModel),
+        //   update: (_, auth, previous) =>
+        //       previous ?? UserViewModel(pref: prefs, authViewModel: auth),
+        // ),
       ],
       child: const MyApp(),
     ),

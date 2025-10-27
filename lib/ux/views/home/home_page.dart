@@ -1,11 +1,8 @@
-// ignore_for_file: avoid_print
-
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/utils/general_ui_utils.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
-import 'package:attendance_app/ux/shared/view_models/user_view_model.dart';
 import 'package:attendance_app/ux/views/home/components/attendance_threshold_widget.dart';
 import 'package:attendance_app/ux/views/home/components/semester_courses_dashboard_metric_view.dart';
 import 'package:attendance_app/ux/views/home/components/current_class.dart';
@@ -20,18 +17,15 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late UserViewModel userViewModel;
-
   @override
   void initState() {
     super.initState();
-    userViewModel = context.read<UserViewModel>();
     loadData();
   }
 
   void loadData() async {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final authViewModel = context.read<AuthViewModel>();
+      final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
       final studentId = authViewModel.currentStudent?.idNumber;
 
       if (studentId != null) {
@@ -45,7 +39,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> refreshData() async {
-    final authViewModel = context.read<AuthViewModel>();
+    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
     final studentId = authViewModel.currentStudent?.idNumber;
 
     if (studentId != null) {
@@ -61,7 +55,8 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return AppPageScaffold(
       hideAppBar: true,
-      headerTitle: UiUtils.getGreetingTitle(userViewModel.firstName),
+      headerTitle: UiUtils.getGreetingTitle(
+          context.watch<AuthViewModel>().currentStudent?.firstName ?? ''),
       headerSubtitle: UiUtils.getGreetingSubtitle(),
       showInformationBanner: true,
       informationBannerText: AppStrings.qrCodeExpirationWarning,

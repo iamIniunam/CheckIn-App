@@ -1,6 +1,4 @@
-import 'package:attendance_app/platform/services/auth_service.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
-import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
@@ -19,25 +17,15 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  Student? student;
   // late UserViewModel userViewModel;
   // late CourseSearchViewModel searchViewModel;
 
-  @override
-  void initState() {
-    super.initState();
-    loadStudent();
-    // userViewModel = context.read<UserViewModel>();
-    // searchViewModel = context.read<CourseSearchViewModel>();
-  }
-
-  void loadStudent() async {
-    final studentData = await AuthService().getStudentData();
-    if (!mounted) return;
-    setState(() {
-      student = studentData;
-    });
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   // userViewModel = context.read<UserViewModel>();
+  //   // searchViewModel = context.read<CourseSearchViewModel>();
+  // }
 
   // String getUserSchool() {
   //   String savedSchool = userViewModel.savedPrimarySchool;
@@ -62,6 +50,8 @@ class _ProfilePageState extends State<ProfilePage> {
     // } else {
     //   semesterText = 'Unknown';
     // }
+
+    final currentStudent = context.watch<AuthViewModel>().currentStudent;
 
     return AppPageScaffold(
       title: AppStrings.studentProfile,
@@ -108,16 +98,16 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   ProfileDetailItem(
                       title: AppStrings.firstName,
-                      value: student?.firstName ?? 'N/A'),
+                      value: currentStudent?.firstName ?? 'N/A'),
                   ProfileDetailItem(
                       title: AppStrings.lastName,
-                      value: student?.lastName ?? 'N/A'),
+                      value: currentStudent?.lastName ?? 'N/A'),
                   ProfileDetailItem(
                       title: AppStrings.idNumber,
-                      value: student?.idNumber ?? 'N/A'),
+                      value: currentStudent?.idNumber ?? 'N/A'),
                   ProfileDetailItem(
                       title: AppStrings.program,
-                      value: student?.program ?? 'N/A'),
+                      value: currentStudent?.program ?? 'N/A'),
                   // ProfileDetailItem(
                   //     title: AppStrings.studentLevel,
                   //     value: 'Level ${userViewModel.level}'),

@@ -5,8 +5,8 @@ import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance_records_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
-import 'package:attendance_app/ux/shared/view_models/user_view_model.dart';
 import 'package:attendance_app/ux/views/course/components/session_history.dart';
 import 'package:attendance_app/ux/views/course/components/attendance_summary_card.dart';
 import 'package:flutter/material.dart';
@@ -22,21 +22,25 @@ class CourseDetailsPage extends StatefulWidget {
 }
 
 class _CourseDetailsPageState extends State<CourseDetailsPage> {
-  late UserViewModel userViewModel;
   late CourseViewModel courseViewModel;
 
   @override
   void initState() {
     super.initState();
-    userViewModel = context.read<UserViewModel>();
     courseViewModel = context.read<CourseViewModel>();
+    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+    final studentId = authViewModel.currentStudent?.idNumber ?? '';
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.course.id != null && userViewModel.idNumber.isNotEmpty) {
-        context.read<AttendanceRecordsViewModel>().loadAttendanceRecords(
-            widget.course.id ?? 0, userViewModel.idNumber);
-      }
-    });
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) async {
+        if (widget.course.id != null && studentId.isNotEmpty) {
+          context.read<AttendanceRecordsViewModel>().loadAttendanceRecords(
+                widget.course.id ?? 0,
+                studentId,
+              );
+        }
+      },
+    );
   }
 
   String? get courseSchool => courseViewModel.registeredCourses
