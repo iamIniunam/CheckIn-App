@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
+import 'package:attendance_app/ux/shared/view_models/attendance_verification_view_model.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -15,6 +17,11 @@ class _ScanViewState extends State<ScanView> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   Barcode? result;
   MobileScannerController controller = MobileScannerController();
+
+  // The ScanView should use the AttendanceVerificationViewModel provided by
+  // the surrounding widget (VerificationPage supplies one via
+  // ChangeNotifierProvider). Creating a local view model here meant moves
+  // didn't affect the app state. We'll obtain the provider at runtime.
 
   @override
   void reassemble() {
@@ -40,7 +47,26 @@ class _ScanViewState extends State<ScanView> {
       });
       controller.stop();
 
+      // Grab the shared VM synchronously before the async gap to avoid using
+      // BuildContext after an await (lint: use_build_context_synchronously).
+      final vm =
+          Provider.of<AttendanceVerificationViewModel>(context, listen: false);
+
       await Future.delayed(const Duration(milliseconds: 500));
+
+      // Move to the next step (location check) and then run the automatic
+      // flow so the location verification starts immediately.
+      vm.moveToNextStep();
+
+      // Run the automatic flow which will perform location checking and
+      // progress to submission if the check succeeds. We await it here so
+      // we can hide the local loading overlay and keep the UX smooth.
+      await vm.proceedWithAutomaticFlow();
+
+      if (!mounted) return;
+      setState(() {
+        isLoading = false;
+      });
     } else {
       controller.stop();
       ScaffoldMessenger.of(context).showSnackBar(

@@ -6,14 +6,9 @@ import 'package:attendance_app/ux/views/onboarding/components/course_list_view.d
 import 'package:flutter/material.dart';
 
 class CourseListContent extends StatelessWidget {
-  const CourseListContent({
-    super.key,
-    required this.viewModel,
-    required this.onConfirmPressed,
-  });
+  const CourseListContent({super.key, required this.viewModel});
 
   final CourseSearchViewModel viewModel;
-  final VoidCallback onConfirmPressed;
 
   @override
   Widget build(BuildContext context) {

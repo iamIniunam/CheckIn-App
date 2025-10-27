@@ -23,14 +23,18 @@ class CurrentClass extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              AppStrings.currentClass,
+              // AppStrings.currentClass,
+              'Ready to check in?',
               style: TextStyle(
-                color: Colors.grey,
+                color: AppColors.grey,
                 fontSize: 16,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const Text(
-              AppStrings.sampleCurrentClass,
+              // AppStrings.sampleCurrentClass,
+              'Tap the button below to mark your attendance for today’s class',
+              maxLines: 2,
               style: TextStyle(
                   color: AppColors.defaultColor,
                   fontSize: 16,
@@ -38,17 +42,17 @@ class CurrentClass extends StatelessWidget {
                   overflow: TextOverflow.ellipsis),
             ),
             const SizedBox(height: 16),
-            const Center(
-              child: Text(
-                AppStrings.sampleCurrentClassTime,
-                style: TextStyle(
-                  color: AppColors.defaultColor,
-                  fontSize: 34,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
+            // const Center(
+            //   child: Text(
+            //     AppStrings.sampleCurrentClassTime,
+            //     style: TextStyle(
+            //       color: AppColors.defaultColor,
+            //       fontSize: 34,
+            //       fontWeight: FontWeight.bold,
+            //     ),
+            //   ),
+            // ),
+            // const SizedBox(height: 12),
             PrimaryButton(
               onTap: () {
                 Navigation.navigateToScreen(

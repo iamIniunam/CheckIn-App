@@ -12,6 +12,13 @@ abstract class AttendanceService {
     bool? isIndoorLocation,
     LocationVerificationStatus? locationStatus,
   });
+
+  Future<bool> submitOnlineAttendance(
+      //   {
+      //   required bool faceVerified,
+      //   String? onlineCode,
+      // }
+      );
 }
 
 class MockAttendanceService implements AttendanceService {
@@ -46,6 +53,26 @@ class MockAttendanceService implements AttendanceService {
     }
 
     debugPrint('Attendance submitted: $attendanceData');
+    return true;
+  }
+
+  @override
+  Future<bool> submitOnlineAttendance(
+      //   {
+      //   // required bool faceVerified,
+      //   // String? onlineCode,
+      // }
+      ) async {
+    await Future.delayed(const Duration(seconds: 5));
+
+    Map<String, dynamic> attendanceData = {
+      'timestamp': DateTime.now().toIso8601String(),
+      // 'faceVerified': faceVerified,
+      'attendanceType': AttendanceType.online.name,
+      // 'onlineCode': onlineCode,
+    };
+
+    debugPrint('Online attendance submitted: $attendanceData');
     return true;
   }
 }

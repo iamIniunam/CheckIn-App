@@ -27,9 +27,9 @@ class AttendanceApi {
       debugPrint('Attendance Record Response: $response');
 
       if (response != null) {
-        if (response['data'] != null) {
-          final List<dynamic> attendanceJson =
-              response['data'] as List<dynamic>;
+        final data = response['data'];
+        if (data != null && data is List) {
+          final List<dynamic> attendanceJson = List<dynamic>.from(data);
           final List<CourseAttendanceRecord> attendanceRecords = attendanceJson
               .map((json) =>
                   CourseAttendanceRecord.fromJson(json as Map<String, dynamic>))

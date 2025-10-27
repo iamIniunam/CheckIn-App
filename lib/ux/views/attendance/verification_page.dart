@@ -212,9 +212,13 @@ class _VerificationPageState extends State<VerificationPage> {
     if (locationStatus == LocationVerificationStatus.outOfRange) {
       return () => handleOutOfRange(locationStatus);
     }
+    // if (verificationStep == VerificationStep.onlineCodeEntry) {
+    //   return () => handleCompletion();
+    // }
     if (verificationStep == VerificationStep.completed) {
       return () => handleCompletion();
     }
+    
     return handleVerification;
   }
 }

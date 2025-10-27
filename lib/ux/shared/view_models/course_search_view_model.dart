@@ -85,13 +85,15 @@ class CourseSearchViewModel extends ChangeNotifier {
 
   // Filter functionality
   Future<void> applyFilter(int? level, int? semester, String? school) async {
-    final hasAnyFilter = level == null || semester == null || school == null;
+    // If no filters were provided, clear any active filters
+    final hasAnyFilter = level != null || semester != null || school != null;
 
     if (!hasAnyFilter) {
       clearFilter();
       return;
     }
 
+    // Save filter selections and mark filter as active
     _selectedLevel = level;
     _selectedSemester = semester;
     _selectedSchool = school;
@@ -104,9 +106,12 @@ class CourseSearchViewModel extends ChangeNotifier {
     try {
       List<Course> coursesToFilter;
 
+      // Use server API when both level and semester are provided
       if (level != null && semester != null) {
         final response = await _repository.fetchCoursesForLevelAndSemester(
-            level.toString(), semester);
+          level.toString(),
+          semester,
+        );
 
         if (response.data != null) {
           coursesToFilter = response.data ?? [];
@@ -116,20 +121,17 @@ class CourseSearchViewModel extends ChangeNotifier {
           _filteredCourses = [];
           return;
         }
-        if (school != null) {
-          _filteredCourses = coursesToFilter.where((course) {
-            return course.school == school;
-          }).toList();
-        } else {
-          _filteredCourses = coursesToFilter;
-        }
       } else {
+        // No dedicated API for the requested filter combination (e.g. school-only)
+        // Fall back to client-side filtering on the full course list
         if (_allCourses.isEmpty) {
           await loadAllCourses();
         }
         coursesToFilter = _allCourses;
       }
 
+      // Always apply client-side filters (this will handle school filtering
+      // even when the API doesn't support it)
       _filteredCourses = applyClientSideFilters(
         coursesToFilter,
         level: level,
@@ -154,10 +156,13 @@ class CourseSearchViewModel extends ChangeNotifier {
     String? school,
   }) {
     return courses.where((course) {
-      if (level != null && course.level != level.toString()) {
+      // Compare using string representations to be robust against differing
+      // types (API may provide level/semester as String or int)
+      if (level != null && course.level?.toString() != level.toString()) {
         return false;
       }
-      if (semester != null && course.semester != semester) {
+      if (semester != null &&
+          course.semester?.toString() != semester.toString()) {
         return false;
       }
       if (school != null && course.school != school) {

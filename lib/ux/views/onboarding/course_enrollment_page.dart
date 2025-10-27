@@ -2,7 +2,6 @@ import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
 import 'package:attendance_app/ux/shared/bottom_sheets/show_app_bottom_sheet.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
-import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
@@ -30,12 +29,6 @@ class CourseEnrollmentPage extends StatefulWidget {
 }
 
 class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
-  final Course semesterCourse = Course(
-    courseCode: 'CS101',
-    courseTitle: 'Introduction to Computer Science',
-    creditHours: 3,
-  );
-
   late final TextEditingController searchController;
   late final CourseSearchViewModel searchViewModel;
   late final CourseViewModel courseViewModel;
@@ -123,7 +116,6 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
       return await courseViewModel.registerCourses(
         studentId: studentId,
         courses: searchViewModel.selectedCourses.toList(),
-        chosenSchools: searchViewModel.chosenSchools,
       );
     } catch (e) {
       return false;
@@ -138,7 +130,13 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
 
   void handleRegistrationResult(bool success) {
     if (success) {
-      showSuccessDialog();
+      searchViewModel.clearSelectedCourses();
+
+      if (courseViewModel.failedCourses.isNotEmpty) {
+        showPartialSuccessDialog();
+      } else {
+        showSuccessDialog();
+      }
     } else if (courseViewModel.hasRegistrationError) {
       AppDialogs.showErrorDialog(
         context: context,
@@ -162,6 +160,50 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
                 context: context,
                 screen: const NavigationHostPage(),
               ),
+    );
+  }
+
+  void showPartialSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Partial Success'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Registered ${courseViewModel.coursesRegistered} of ${courseViewModel.totalCoursesToRegister} courses',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            if (courseViewModel.failedCourses.isNotEmpty) ...[
+              const Text('Failed courses:'),
+              const SizedBox(height: 8),
+              ...courseViewModel.failedCourses.map(
+                (course) => Padding(
+                  padding: const EdgeInsets.only(left: 8, bottom: 4),
+                  child: Text('• $course'),
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              if (!widget.isEdit) {
+                Navigation.navigateToScreenAndClearOnePrevious(
+                  context: context,
+                  screen: const NavigationHostPage(),
+                );
+              }
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -230,10 +272,7 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
                 return Expanded(
                   child: Column(
                     children: [
-                      CourseListContent(
-                        viewModel: searchViewModel,
-                        onConfirmPressed: onConfirmPressed,
-                      ),
+                      CourseListContent(viewModel: searchViewModel),
                       ConfirmationSection(
                         totalCreditHours: searchViewModel.totalCreditHours,
                         onConfirmPressed: onConfirmPressed,

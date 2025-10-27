@@ -67,11 +67,11 @@ class AuthViewModel extends ChangeNotifier {
       final pref = await SharedPreferences.getInstance();
       final studentJson = pref.getString(AppConstants.appUserKey);
 
-      debugPrint('Raw student JSON: $studentJson');
+      // debugPrint('Raw student JSON: $studentJson');
 
       if (studentJson != null && studentJson.isNotEmpty) {
         final decodedJson = jsonDecode(studentJson);
-        debugPrint('Decoded JSON: $decodedJson');
+        // debugPrint('Decoded JSON: $decodedJson');
 
         _currentStudent = Student.fromJson(decodedJson);
 

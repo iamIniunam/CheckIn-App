@@ -32,6 +32,7 @@ class NetworkHelper {
   Future<Map<String, dynamic>?> getData() async {
     try {
       final uri = buildUri();
+      debugPrint('Built URI: $uri');
       final defaultHeaders = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -41,24 +42,34 @@ class NetworkHelper {
 
       switch (method) {
         case HttpMethod.get:
-          response = await http.get(uri, headers: defaultHeaders).timeout(
-                timeout,
-                onTimeout: () => throw TimeoutException(
-                  NetworkStrings.connectionTimeOut,
-                ),
-              );
+          try {
+            response = await http.get(uri, headers: defaultHeaders).timeout(
+                  timeout,
+                  onTimeout: () => throw TimeoutException(
+                    NetworkStrings.connectionTimeOut,
+                  ),
+                );
+          } catch (e) {
+            debugPrint('HTTP GET error: $e');
+            rethrow;
+          }
           break;
         case HttpMethod.post:
-          response = await http
-              .post(uri,
-                  headers: defaultHeaders,
-                  body: body != null ? jsonEncode(body) : null)
-              .timeout(
-                timeout,
-                onTimeout: () => throw TimeoutException(
-                  NetworkStrings.connectionTimeOut,
-                ),
-              );
+          try {
+            response = await http
+                .post(uri,
+                    headers: defaultHeaders,
+                    body: body != null ? jsonEncode(body) : null)
+                .timeout(
+                  timeout,
+                  onTimeout: () => throw TimeoutException(
+                    NetworkStrings.connectionTimeOut,
+                  ),
+                );
+          } catch (e) {
+            debugPrint('HTTP POST error: $e');
+            rethrow;
+          }
           break;
         case HttpMethod.put:
           response = await http
@@ -111,20 +122,31 @@ class NetworkHelper {
       throw NetworkException(NetworkStrings.internetError);
     } on FormatException {
       throw NetworkException(NetworkStrings.formatError);
-    } catch (e) {
+    } catch (e, st) {
       debugPrint('Network error: $e');
+      debugPrint('Stack trace: $st');
       throw NetworkException(NetworkStrings.somethingWentWrong);
     }
   }
 
   Uri buildUri() {
     final baseUri = Uri.parse(url);
+    // Ensure query parameters are all strings (Uri expects String or
+    // Iterable<String> values). Convert any non-null values to their
+    // string representation to avoid runtime type errors when building
+    // the URI (server sometimes sends ints in query params).
+    Map<String, String>? qp;
+    if (queryParams != null) {
+      qp = queryParams!
+          .map((key, value) => MapEntry(key, value?.toString() ?? ''));
+    }
+
     return Uri(
       scheme: baseUri.scheme,
       host: baseUri.host,
       port: baseUri.port,
       path: '${baseUri.path}$path',
-      queryParameters: queryParams,
+      queryParameters: qp,
     );
   }
 
@@ -137,7 +159,17 @@ class NetworkHelper {
         return {'success': true};
       }
       try {
-        return jsonDecode(response.body) as Map<String, dynamic>;
+        final decoded = jsonDecode(response.body);
+
+        // If the server returned a JSON object/map, return it directly.
+        if (decoded is Map<String, dynamic>) {
+          return decoded;
+        }
+
+        // If the server returned any other JSON type (list, number, string),
+        // wrap it in a map under the 'data' key so callers can handle it
+        // consistently (they still must validate the shape of response['data']).
+        return {'data': decoded};
       } catch (e) {
         throw NetworkException(NetworkStrings.formatError);
       }

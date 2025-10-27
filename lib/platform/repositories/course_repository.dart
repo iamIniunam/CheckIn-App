@@ -17,15 +17,15 @@ class CourseRepository {
     return await _courseApi.getCoursesForLevelAndSemester(level, semester);
   }
 
-  // Future<ApiResponse<Map<String, dynamic>>> registerCourses({
-  //   required String studentId,
-  //   required List<Map<String, dynamic>> courses,
-  // }) async {
-  //   return await _courseApi.registerCourses(
-  //     studentId: studentId,
-  //     courses: courses,
-  //   );
-  // }
+  Future<ApiResponse<Map<String, dynamic>>> registerCourse({
+    required int courseId,
+    required String studentId,
+  }) async {
+    return await _courseApi.registerCourse(
+      courseId: courseId,
+      studentId: studentId,
+    );
+  }
 
   Future<ApiResponse<List<Course>>> fetchRegisteredCourses(
       String studentId) async {

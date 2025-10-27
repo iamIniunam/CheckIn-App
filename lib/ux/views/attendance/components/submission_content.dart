@@ -52,11 +52,20 @@ class SubmissionContent extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.defaultColor),
+            Visibility(
+              visible: viewModel.isSubmittingAttendance,
+              child: const Column(
+                children: [
+                  SizedBox(height: 24),
+                  CircularProgressIndicator(
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(AppColors.defaultColor),
+                  ),
+                ],
+              ),
             ),
-            if (viewModel.locationState.distanceFromCampus != null)
+            if (viewModel.requiresLocationCheck &&
+                viewModel.locationState.distanceFromCampus != null)
               LocationVerifiedBadge(
                   distance: viewModel.locationState.distanceFromCampus ?? 0),
             if (viewModel.verificationState.errorMessage != null)

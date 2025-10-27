@@ -277,7 +277,8 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
       setAttendanceType(attendanceType);
     }
 
-    if (_verificationState.currentStep == VerificationStep.qrCodeScan) {
+    if (_verificationState.currentStep == VerificationStep.qrCodeScan ||
+        _verificationState.currentStep == VerificationStep.onlineCodeEntry) {
       // bool qrSuccess = await verifyQrCode();
       // if (!qrSuccess) return false;
 
@@ -296,14 +297,14 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
       bool success;
       if (useNetworkOnly) {
         success = await _locationViewModel.retyrWithNetworkOnly(
-          campusLat: AppConstants.seaviewLat,
-          campusLong: AppConstants.seaviewLong,
+          campusLat: AppConstants.houseLat,
+          campusLong: AppConstants.houseLong,
           maxDistanceMeters: AppConstants.maxDistanceMeters,
         );
       } else {
         success = await _locationViewModel.verifyLocation(
-          campusLat: AppConstants.seaviewLat,
-          campusLong: AppConstants.seaviewLong,
+          campusLat: AppConstants.houseLat,
+          campusLong: AppConstants.houseLong,
           maxDistanceMeters: AppConstants.maxDistanceMeters,
           showSettingsOption: false,
         );
@@ -352,8 +353,8 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
 
     try {
       bool success = await _locationViewModel.verifyLocation(
-        campusLat: AppConstants.seaviewLat,
-        campusLong: AppConstants.seaviewLong,
+        campusLat: AppConstants.houseLat,
+        campusLong: AppConstants.houseLong,
         maxDistanceMeters: AppConstants.maxDistanceMeters,
         showSettingsOption: true,
       );
@@ -377,9 +378,13 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
         throw Exception('Location data not available for in-person attendance');
       }
 
-      if (!_verificationState.faceVerificationPassed) {
-        throw Exception('Face verification not completed');
-      }
+      // Only require face verification for in-person attendance. For online
+      // attendance the demo should allow submission without a prior face
+      // verification step (the face flow is currently commented out).
+      // if (_verificationState.attendanceType == AttendanceType.inPerson &&
+      //     !_verificationState.faceVerificationPassed) {
+      //   throw Exception('Face verification not completed');
+      // }
 
       if (requiresLocationCheck &&
           _locationViewModel.state.verificationStatus !=
@@ -387,6 +392,48 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
         throw Exception(
             'Location verification required for in-person attendance');
       }
+      // Simulate submitting online attendance without validating an online code.
+      if (_verificationState.attendanceType == AttendanceType.online) {
+        bool success = await _attendanceService.submitOnlineAttendance();
+
+        if (!success) {
+          updateState(_verificationState.copyWith(
+            errorMessage: _messageProvider
+                .getErrorMessage(VerificationError.attendanceSubmissionFailed),
+          ));
+        }
+
+        return success;
+      }
+      // (This path bypasses the in-person position requirement above.)
+      // if (_verificationState.attendanceType == AttendanceType.online) {
+      //   final String? code = _verificationState.currentStep == VerificationStep.onlineCodeEntry
+      //       ? _verificationState.onlineCode
+      //       : null;
+      //   if (code == null || code.trim().isEmpty) {
+      //     throw Exception('Online code is required for online attendance');
+      //   }
+
+      //   bool success = await _attendanceService.submitAttendance(
+      //     faceVerified: _verificationState.faceVerificationPassed,
+      //     attendanceType: AttendanceType.online,
+      //     position: _locationViewModel.state.currentPosition,
+      //     distanceFromCampus: _locationViewModel.state.distanceFromCampus,
+      //     locationMethod: getLocationMethod(),
+      //     isIndoorLocation: _locationViewModel.state.isIndoorLocation,
+      //     locationStatus: _locationViewModel.state.verificationStatus,
+      //     onlineCode: code,
+      //   );
+
+      //   if (!success) {
+      //     updateState(_verificationState.copyWith(
+      //       errorMessage: _messageProvider
+      //           .getErrorMessage(VerificationError.attendanceSubmissionFailed),
+      //     ));
+      //   }
+
+      //   return success;
+      // }
 
       bool success = await _attendanceService.submitAttendance(
         faceVerified: _verificationState.faceVerificationPassed,

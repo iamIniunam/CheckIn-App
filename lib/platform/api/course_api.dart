@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 class CourseApi {
   final _courseBasePath = '/courses/getAllCourses';
   final _coursesForLevelBasePath = '/courses/getCoursesForLevelAndSemester';
-  // final _registereCoursesBasePath = '/student/getRegisteredCourses';
+  final _registerCoursesBasePath = '/student/registerCourse';
   final _registeredCoursesBasePath = '/student/getRegisteredCourses';
 
   Future<ApiResponse<List<Course>>> getAllCourses() async {
@@ -22,11 +22,12 @@ class CourseApi {
       );
 
       final response = await networkHelper.getData();
-      debugPrint('All Courses Response: $response');
+      // debugPrint('All Courses Response: $response');
 
       if (response != null) {
-        if (response['data'] != null) {
-          final List<dynamic> coursesJson = response['data'] as List<dynamic>;
+        final data = response['data'];
+        if (data != null && data is List) {
+          final List<dynamic> coursesJson = List<dynamic>.from(data);
           final List<Course> courses = coursesJson
               .map((json) => Course.fromJson(json as Map<String, dynamic>))
               .toList();
@@ -59,11 +60,12 @@ class CourseApi {
       );
 
       final response = await networkHelper.getData();
-      debugPrint('Courses Response: $response');
+      // debugPrint('Courses Response: $response');
 
       if (response != null) {
-        if (response['data'] != null) {
-          final List<dynamic> coursesJson = response['data'] as List<dynamic>;
+        final data = response['data'];
+        if (data != null && data is List) {
+          final List<dynamic> coursesJson = List<dynamic>.from(data);
           final List<Course> courses = coursesJson
               .map((json) => Course.fromJson(json as Map<String, dynamic>))
               .toList();
@@ -85,45 +87,75 @@ class CourseApi {
     }
   }
 
-  // Future<ApiResponse<Map<String, dynamic>>> registerCourses({
-  //   required String studentId,
-  //   required List<Map<String, dynamic>> courses,
-  // }) async {
-  //   try {
-  //     final networkHelper = NetworkHelper(
-  //       url: AppConstants.apiBaseUrl,
-  //       method: HttpMethod.post,
-  //       path: _registereCoursesBasePath,
-  //       queryParams: {
-  //         'studentId': studentId,
-  //         'courses': courses,
-  //       },
-  //       errorMessage: 'Failed to register courses',
-  //     );
+  Future<ApiResponse<Map<String, dynamic>>> registerCourse({
+    required int courseId,
+    required String studentId,
+  }) async {
+    try {
+      final networkHelper = NetworkHelper(
+        url: AppConstants.apiBaseUrl,
+        method: HttpMethod.post,
+        path: _registerCoursesBasePath,
+        queryParams: {
+          'course_id': courseId,
+          'idnumber': studentId,
+        },
+        body: {
+          'course_id': courseId,
+          'idnumber': studentId,
+        },
+        errorMessage: 'Failed to register courses',
+      );
 
-  //     final response = await networkHelper.getData();
-  //     debugPrint('Register Courses Response: $response');
+      final response = await networkHelper.getData();
+      // debugPrint('Register Course Response: $response');
 
-  //     if (response != null) {
-  //       if (response['data'] != null) {
-  //         return ApiResponse.success(
-  //           response['data'] ?? {},
-  //           message: response['message'] ?? 'Courses registered successfully',
-  //         );
-  //       } else {
-  //         return ApiResponse.error(
-  //             response['message'] ?? 'Failed to register courses');
-  //       }
-  //     } else {
-  //       return ApiResponse.error(NetworkStrings.noResponse);
-  //     }
-  //   } on NetworkException catch (e) {
-  //     return ApiResponse.error(e.message);
-  //   } catch (e) {
-  //     debugPrint('Unexpected error in getting registered courses: $e');
-  //     return ApiResponse.error(NetworkStrings.somethingWentWrong);
-  //   }
-  // }
+      if (response != null) {
+        final data = response['data'];
+
+        if (data != null) {
+          // Ensure we return a Map<String, dynamic> as the API expects.
+          if (data is Map<String, dynamic>) {
+            return ApiResponse.success(
+              data,
+              message: response['message'] ?? 'Course registered successfully',
+            );
+          }
+
+          // If the API returned a primitive (e.g. int or string), wrap it.
+          return ApiResponse.success(
+            {'result': data},
+            message: response['message'] ?? 'Course registered successfully',
+          );
+        }
+
+        // Some backends return a success message without a 'data' key.
+        // Treat a response with no data but an explicit success indication
+        // (e.g. error == false or a success message) as a successful registration.
+        final errorFlag = response['error'];
+        final message = response['message'];
+
+        if ((errorFlag != null && errorFlag == false) ||
+            (message != null &&
+                message.toString().toLowerCase().contains('success'))) {
+          return ApiResponse.success(
+            <String, dynamic>{},
+            message: message ?? 'Course registered successfully',
+          );
+        }
+
+        return ApiResponse.error(
+            response['message'] ?? 'Failed to register course');
+      } else {
+        return ApiResponse.error(NetworkStrings.noResponse);
+      }
+    } on NetworkException catch (e) {
+      return ApiResponse.error(e.message);
+    } catch (e) {
+      debugPrint('Unexpected error in getting registered courses: $e');
+      return ApiResponse.error(NetworkStrings.somethingWentWrong);
+    }
+  }
 
   Future<ApiResponse<List<Course>>> getRegisteredCourses(
       String studentId) async {
@@ -137,15 +169,16 @@ class CourseApi {
       );
 
       final response = await networkHelper.getData();
-      debugPrint('Registered Courses Response: $response');
+      // debugPrint('Registered Courses Response: $response');
 
       if (response == null) {
         debugPrint('Registered Courses Error: No response received');
       }
 
       if (response != null) {
-        if (response['data'] != null) {
-          final List<dynamic> coursesJson = response['data'] as List<dynamic>;
+        final data = response['data'];
+        if (data != null && data is List) {
+          final List<dynamic> coursesJson = List<dynamic>.from(data);
           final List<Course> courses = coursesJson
               .map((json) => Course.fromJson(json as Map<String, dynamic>))
               .toList();

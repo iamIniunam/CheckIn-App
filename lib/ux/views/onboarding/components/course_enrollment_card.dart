@@ -49,7 +49,7 @@ class CourseEnrollmentCard extends StatelessWidget {
             ),
             Text(
               semesterCourse.courseTitle ?? '',
-              maxLines: 2,
+              // maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 color: AppColors.defaultColor,

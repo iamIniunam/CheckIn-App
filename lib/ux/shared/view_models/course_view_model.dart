@@ -16,6 +16,10 @@ class CourseViewModel extends ChangeNotifier {
   String? _registrationError;
   bool _hasLoadedRegisteredCourses = false;
 
+  int _totalCoursesToRegister = 0;
+  int _coursesRegistered = 0;
+  List<String> _failedCourses = [];
+
   // Getters
   List<Course> get registeredCourses => List.unmodifiable(_registeredCourses);
   bool get isLoadingRegisteredCourses => _isLoadingRegisteredCourses;
@@ -26,7 +30,13 @@ class CourseViewModel extends ChangeNotifier {
   bool get hasRegistrationError => _registrationError != null;
   bool get hasLoadedRegisteredCourses => _hasLoadedRegisteredCourses;
 
-  // Load registered courses
+  int get totalCoursesToRegister => _totalCoursesToRegister;
+  int get coursesRegistered => _coursesRegistered;
+  double get registrationProgress => _totalCoursesToRegister > 0
+      ? _coursesRegistered / _totalCoursesToRegister
+      : 0.0;
+  List<String> get failedCourses => List.unmodifiable(_failedCourses);
+
   Future<void> loadRegisteredCourses(String studentId,
       {bool forceRefresh = false}) async {
     if (_hasLoadedRegisteredCourses && !forceRefresh) return;
@@ -56,62 +66,74 @@ class CourseViewModel extends ChangeNotifier {
     }
   }
 
-  // Register courses (with simulation for now)
   Future<bool> registerCourses({
     required String studentId,
     required List<Course> courses,
-    required Map<Course, String?> chosenSchools,
   }) async {
     _isRegisteringCourses = true;
     _registrationError = null;
+    _totalCoursesToRegister = courses.length;
+    _coursesRegistered = 0;
+    _failedCourses = [];
     notifyListeners();
 
     try {
-      // Simulate API call (remove this when you have the real endpoint)
-      await Future.delayed(const Duration(seconds: 2));
+      for (final course in courses) {
+        if (course.id == null) {
+          debugPrint('Skipping ${course.courseCode} - no ID');
+          _failedCourses.add('${course.courseCode} (No ID)');
+          continue;
+        }
 
-      // TODO: Replace with actual API call when endpoint is ready
-      // Prepare courses data for API
-      // final coursesData = courses.map((course) {
-      //   return {
-      //     'course_id': course.id,
-      //     'school': chosenSchools[course],
-      //   };
-      // }).toList();
+        try {
+          // debugPrint(
+          //     'Registering course: ${course.courseCode} (ID: ${course.id}) for student: $studentId');
 
-      // final response = await _repository.registerCourses(
-      //   studentId: studentId,
-      //   courses: coursesData,
-      // );
+          final response = await _repository.registerCourse(
+            courseId: course.id ?? 0,
+            studentId: studentId,
+          );
 
-      // if (response.success) {
-      //   // Reload registered courses after successful registration
-      //   await loadRegisteredCourses(studentId, forceRefresh: true);
-      //   _isRegisteringCourses = false;
-      //   notifyListeners();
-      //   return true;
-      // } else {
-      //   _registrationError = response.message ?? 'Failed to register courses';
-      //   _isRegisteringCourses = false;
-      //   notifyListeners();
-      //   return false;
-      // }
+          // debugPrint(
+          //     'Register API response for ${course.courseCode}: success=${response.success}, status=${response.statusCode}, message=${response.message}, data=${response.data}');
 
-      // Simulate success for now
-      debugPrint(
-          'Registering ${courses.length} courses for student: $studentId');
-      courses.forEach((course) {
-        debugPrint(
-            'Course: ${course.courseCode} - School: ${chosenSchools[course]}');
-      });
+          if (response.success) {
+            _coursesRegistered++;
+            debugPrint('Successfully registered ${course.courseCode}');
+          } else {
+            _failedCourses
+                .add('${course.courseCode} (Error: ${response.message})');
+            debugPrint(
+                'Failed to register ${course.courseCode}: ${response.message}');
+          }
+        } catch (e) {
+          _failedCourses.add('${course.courseCode} (Error: $e)');
+          debugPrint('Error registering ${course.courseCode}: $e');
+        }
+        notifyListeners();
+      }
 
-      // Simulate adding to registered courses
-      _registeredCourses.addAll(courses);
-      _hasLoadedRegisteredCourses = true;
+      final allSuccess = _failedCourses.isEmpty;
 
-      _isRegisteringCourses = false;
-      notifyListeners();
-      return true;
+      if (allSuccess) {
+        await loadRegisteredCourses(studentId, forceRefresh: true);
+
+        _isRegisteringCourses = false;
+        notifyListeners();
+        return true;
+      } else {
+        // Some courses failed
+        _registrationError = _failedCourses.length == courses.length
+            ? 'Failed to register all courses'
+            : 'Successfully registered $_coursesRegistered of $_totalCoursesToRegister courses';
+
+        // Still reload to get updated list
+        await loadRegisteredCourses(studentId, forceRefresh: true);
+
+        _isRegisteringCourses = false;
+        notifyListeners();
+        return _coursesRegistered > 0; // Return true if at least one succeeded
+      }
     } catch (e) {
       _registrationError = 'An unexpected error occurred: ${e.toString()}';
       _isRegisteringCourses = false;
