@@ -1,5 +1,5 @@
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
-import 'package:attendance_app/ux/shared/view_models/attendance_records_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/attendance/attendance_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_search_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
@@ -21,7 +21,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider.value(value: authViewModel),
         ChangeNotifierProvider(create: (_) => CourseViewModel()),
-        ChangeNotifierProvider(create: (_) => AttendanceRecordsViewModel()),
+        ChangeNotifierProvider(create: (_) => AttendanceViewModel()),
         ChangeNotifierProvider(create: (_) => CourseSearchViewModel()),
         // ChangeNotifierProxyProvider<AuthViewModel, UserViewModel>(
         //   create: (_) =>

@@ -1,5 +1,6 @@
 import 'package:attendance_app/platform/api/api_response.dart';
 import 'package:attendance_app/platform/api/attendance/attendance_api.dart';
+import 'package:attendance_app/platform/api/attendance/models/attendance_request.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 
 class AttendanceRepository {
@@ -11,5 +12,10 @@ class AttendanceRepository {
   Future<ApiResponse<List<CourseAttendanceRecord>>> fetchCourseAttendanceRecord(
       int courseId, String studentId) async {
     return await _attendanceApi.getCourseAttendanceRecord(courseId, studentId);
+  }
+
+  Future<ApiResponse<Map<String, dynamic>>> markAttendance(
+      MarkAttendanceRequest request) async {
+    return await _attendanceApi.markAttendance(request);
   }
 }

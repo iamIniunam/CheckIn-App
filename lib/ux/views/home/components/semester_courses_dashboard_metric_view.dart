@@ -89,7 +89,7 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
                   left: 16, top: 10, right: 16, bottom: 16),
               crossAxisCount: 3,
               // Make tiles slightly wider than tall to reduce vertical space
-              childAspectRatio: 1.3,
+              childAspectRatio: 1.2,
               children: courseInfo.length > 9
                   ? courseInfo
                       .take(9)

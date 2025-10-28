@@ -1,4 +1,5 @@
 import 'package:attendance_app/platform/api/api_response.dart';
+import 'package:attendance_app/platform/api/attendance/models/attendance_request.dart';
 import 'package:attendance_app/platform/api/network_strings.dart';
 import 'package:attendance_app/platform/api/networking.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
@@ -7,7 +8,7 @@ import 'package:flutter/material.dart';
 
 class AttendanceApi {
   final _courseAttendanceBasePath = '/student/getCourseAttendanceRecord';
-  // final _markAttendanceBasePath = '/student/markAttendance';
+  final _markAttendanceBasePath = '/student/markAttendance';
 
   Future<ApiResponse<List<CourseAttendanceRecord>>> getCourseAttendanceRecord(
       int courseId, String studentId) async {
@@ -43,6 +44,40 @@ class AttendanceApi {
         }
       } else {
         return ApiResponse.error(NetworkStrings.noResponse);
+      }
+    } on NetworkException catch (e) {
+      return ApiResponse.error(e.message);
+    } catch (e) {
+      debugPrint('Unexpected error in getting course attendance record: $e');
+      return ApiResponse.error(NetworkStrings.somethingWentWrong);
+    }
+  }
+
+  Future<ApiResponse<Map<String, dynamic>>> markAttendance(
+      MarkAttendanceRequest request) async {
+    try {
+      final networkHelper = NetworkHelper(
+        url: AppConstants.apiBaseUrl,
+        method: HttpMethod.post,
+        path: _markAttendanceBasePath,
+        body: request.toJson(),
+        errorMessage: 'Failed to mark attendance',
+      );
+      final response = await networkHelper.getData();
+      debugPrint('Mark Attendance Response: $response');
+
+      if (response != null) {
+        if (response['error'] == false || response['message'] == 'Success') {
+          return ApiResponse.success(
+            response,
+            message: response['message'] ?? 'Attendance marked successfully',
+          );
+        } else {
+          return ApiResponse.error(
+              response['message'] ?? 'Failed to mark attendance');
+        }
+      } else {
+        return ApiResponse.error('Network error. Please try again');
       }
     } on NetworkException catch (e) {
       return ApiResponse.error(e.message);

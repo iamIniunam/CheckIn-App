@@ -84,7 +84,7 @@ class _VerificationPageState extends State<VerificationPage> {
       viewModel.setAttendanceType(attendanceType);
     }
 
-    await viewModel.startVerificationFlow(attendanceType: attendanceType);
+    // await viewModel.startVerificationFlow(attendanceType: attendanceType);
   }
 
   Future<void> handleCompletion() async {

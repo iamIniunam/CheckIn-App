@@ -1,10 +1,9 @@
-import 'package:attendance_app/ux/shared/components/empty_state_widget.dart';
 import 'package:attendance_app/ux/shared/components/page_state_indicator.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
-import 'package:attendance_app/ux/shared/view_models/attendance_records_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/attendance/attendance_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
 import 'package:attendance_app/ux/views/course/components/session_history.dart';
@@ -34,7 +33,7 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
     WidgetsBinding.instance.addPostFrameCallback(
       (_) async {
         if (widget.course.id != null && studentId.isNotEmpty) {
-          context.read<AttendanceRecordsViewModel>().loadAttendanceRecords(
+          context.read<AttendanceViewModel>().loadAttendanceRecords(
                 widget.course.id ?? 0,
                 studentId,
               );
@@ -50,13 +49,26 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final semester = widget.course.semester ?? '';
+
+    String? semesterText() {
+      switch (semester) {
+        case 1:
+          return 'st';
+        case 2:
+          return 'nd';
+        default:
+          return '';
+      }
+    }
+
     return AppPageScaffold(
-      title: AppStrings.courseDetails,
-      showInformationBanner: true,
-      informationBannerText: AppStrings.sampleEligibilityText,
+      title: widget.course.courseCode,
+      // showInformationBanner: true,
+      // informationBannerText: AppStrings.sampleEligibilityText,
       body: RefreshIndicator(
         onRefresh: () async {
-          context.read<AttendanceRecordsViewModel>().refresh();
+          context.read<AttendanceViewModel>().refresh();
         },
         child: Column(
           children: [
@@ -71,33 +83,41 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  widget.course.courseCode,
-                                  style: const TextStyle(
-                                      color: AppColors.defaultColor,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                Text(
-                                  widget.course.courseTitle ?? '',
-                                  style: const TextStyle(
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.course.courseTitle ?? '',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        color: AppColors.defaultColor,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    '${widget.course.level ?? ''} level • ${widget.course.semester ?? ''}${semesterText()} • ${widget.course.creditHours ?? ''} credit hours',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
                                       color: Colors.grey,
                                       // fontSize: 16,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
+                            const SizedBox(width: 10),
                             Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: AppColors.primaryTeal.withOpacity(0.2),
+                                color: AppColors.primaryTeal.withOpacity(0.4),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: AppColors.primaryTeal.withOpacity(0.5),
+                                  color: AppColors.primaryTeal.withOpacity(0.7),
                                 ),
                               ),
                               child: Text(
@@ -105,50 +125,64 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
                                 style: const TextStyle(
                                   color: AppColors.defaultColor,
                                   fontSize: 11,
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                        Consumer<AttendanceRecordsViewModel>(
-                          builder: (context, viewModel, _) {
-                            if (viewModel.isLoading || viewModel.isRefreshing) {
-                              return const PageLoadingIndicator();
-                            }
+                        Column(
+                          children: [
+                            Consumer<AttendanceViewModel>(
+                                builder: (context, viewModel, _) {
+                              return AttendanceSummaryCard(
+                                  viewModel:
+                                      viewModel); //TODO: check why this shows the data of the last opened course and try to fix it
+                            }),
+                            Consumer<AttendanceViewModel>(
+                              builder: (context, viewModel, _) {
+                                if (viewModel.isLoading ||
+                                    viewModel.isRefreshing) {
+                                  return const PageLoadingIndicator(
+                                    useTopPadding: true,
+                                  );
+                                }
 
-                            if (viewModel.hasError) {
-                              return PageErrorIndicator(
-                                text: viewModel.errorMessage ??
-                                    'Error loading attendance records',
-                                useTopPadding: true,
-                              );
-                            }
+                                if (viewModel.hasError) {
+                                  return PageErrorIndicator(
+                                    text: viewModel.errorMessage ??
+                                        'Error loading attendance records',
+                                    useTopPadding: true,
+                                  );
+                                }
 
-                            if (viewModel.attendanceRecords.isEmpty) {
-                              return const EmptyStateWidget(
-                                  message: 'No attendance records available');
-                            }
+                                if (viewModel.attendanceRecords.isEmpty) {
+                                  return const PageErrorIndicator(
+                                    text: 'No attendance records found',
+                                    useTopPadding: true,
+                                  );
+                                }
 
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                AttendanceSummaryCard(viewModel: viewModel),
-                                const Text(
-                                  AppStrings.history,
-                                  style: TextStyle(
-                                    color: AppColors.defaultColor,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                ...viewModel.attendanceRecords
-                                    .map((sessionData) =>
-                                        SessionHistory(record: sessionData))
-                                    .toList(),
-                              ],
-                            );
-                          },
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      AppStrings.history,
+                                      style: TextStyle(
+                                        color: AppColors.defaultColor,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    ...viewModel.attendanceRecords
+                                        .map((sessionData) =>
+                                            SessionHistory(record: sessionData))
+                                        .toList(),
+                                  ],
+                                );
+                              },
+                            ),
+                          ],
                         ),
                       ],
                     ),

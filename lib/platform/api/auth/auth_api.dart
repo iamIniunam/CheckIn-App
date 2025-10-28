@@ -56,9 +56,9 @@ class AuthApi {
         method: HttpMethod.post,
         url: AppConstants.apiBaseUrl,
         path: _loginBasePath,
-        queryParams: request.toJson(),
+        body: request.toJson(),
         errorMessage: 'Failed to login',
-        timeout: const Duration(seconds: 10),
+        //timeout: const Duration(seconds: 10),
       );
 
       final response = await networkHelper.getData();

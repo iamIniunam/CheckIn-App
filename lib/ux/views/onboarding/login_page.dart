@@ -74,6 +74,7 @@ class _LoginPageState extends State<LoginPage> {
       if (success) {
         handleLoginSuccess();
       } else {
+        Navigation.back(context: context);
         handleLoginError(viewModel);
       }
       // } finally {

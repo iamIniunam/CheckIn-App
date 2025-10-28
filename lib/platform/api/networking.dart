@@ -34,8 +34,8 @@ class NetworkHelper {
       final uri = buildUri();
       debugPrint('Built URI: $uri');
       final defaultHeaders = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        //'Content-Type': 'application/json',
+        'Accept': '*/*',
       };
 
       http.Response response;
@@ -58,8 +58,7 @@ class NetworkHelper {
           try {
             response = await http
                 .post(uri,
-                    headers: defaultHeaders,
-                    body: body != null ? jsonEncode(body) : null)
+                    headers: defaultHeaders, body: body != null ? body : null)
                 .timeout(
                   timeout,
                   onTimeout: () => throw TimeoutException(

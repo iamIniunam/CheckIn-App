@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
+import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance_verification_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +18,7 @@ class _ScanViewState extends State<ScanView> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   Barcode? result;
   MobileScannerController controller = MobileScannerController();
-
+  bool isProcessing = false;
   // The ScanView should use the AttendanceVerificationViewModel provided by
   // the surrounding widget (VerificationPage supplies one via
   // ChangeNotifierProvider). Creating a local view model here meant moves
@@ -35,47 +36,44 @@ class _ScanViewState extends State<ScanView> {
 
   void _onQRViewCreated(
       BarcodeCapture capture, MobileScannerController controller) async {
+    if (isProcessing) return;
+
     final List<Barcode> barcodes = capture.barcodes;
     if (barcodes.isEmpty) return;
 
     result = barcodes.first;
-    debugPrint("Scanned code: ${result?.rawValue}");
+    final code = result?.rawValue;
 
-    if (result?.rawValue == 'res') {
-      setState(() {
-        isLoading = true;
-      });
-      controller.stop();
+    if (code == null) return;
 
-      // Grab the shared VM synchronously before the async gap to avoid using
-      // BuildContext after an await (lint: use_build_context_synchronously).
-      final vm =
-          Provider.of<AttendanceVerificationViewModel>(context, listen: false);
+    setState(() {
+      isProcessing = true;
+    });
 
-      await Future.delayed(const Duration(milliseconds: 500));
+    controller.stop();
 
-      // Move to the next step (location check) and then run the automatic
-      // flow so the location verification starts immediately.
-      vm.moveToNextStep();
+    debugPrint("Scanned code: $code");
 
-      // Run the automatic flow which will perform location checking and
-      // progress to submission if the check succeeds. We await it here so
-      // we can hide the local loading overlay and keep the UX smooth.
-      await vm.proceedWithAutomaticFlow();
+    final viewModel =
+        Provider.of<AttendanceVerificationViewModel>(context, listen: false);
+
+    bool isValid = await viewModel.validateQrCode(code);
+
+    if (!mounted) return;
+
+    if (isValid) {
+      viewModel.moveToNextStep();
+      await viewModel.proceedWithAutomaticFlow();
 
       if (!mounted) return;
-      setState(() {
-        isLoading = false;
-      });
+      Navigator.pop(context);
     } else {
       controller.stop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Oops! 🚫 This QR code doesn\'t match today\'s '
-              'class session. Please let your lecturer know.'),
-        ),
-      );
-      Navigator.pop(context);
+      AppDialogs.showAlertDialog(
+          context: context, message: 'Invalid QR code for this class');
+      setState(() {
+        isProcessing = false;
+      });
     }
   }
 

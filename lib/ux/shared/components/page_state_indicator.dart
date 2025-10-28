@@ -2,12 +2,21 @@ import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class PageLoadingIndicator extends StatelessWidget {
-  const PageLoadingIndicator({super.key});
+  const PageLoadingIndicator({super.key, this.useTopPadding = false});
+
+  final bool useTopPadding;
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: CircularProgressIndicator(),
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 16,
+        top: useTopPadding ? MediaQuery.sizeOf(context).height * 0.18 : 0,
+        right: 16,
+      ),
+      child: const Center(
+        child: CircularProgressIndicator(),
+      ),
     );
   }
 }
