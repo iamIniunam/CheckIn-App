@@ -25,15 +25,14 @@ class CourseListView extends StatelessWidget {
     return DashboardMetricGridView(
       padding: const EdgeInsets.only(left: 16, top: 12, right: 16),
       crossAxisCount: 2,
-      childAspectRatio: 2.35,
       mainAxisSpacing: 10,
       physics: const AlwaysScrollableScrollPhysics(),
       children: courses.map((course) {
-        final selectedSchool = viewModel.getChosenSchoolForCourse(course);
+        final selectedCourse = viewModel.getChosenSchoolForCourse(course);
         return CourseEnrollmentCard(
           semesterCourse: course,
-          selectedSchool: selectedSchool,
-          onTapSchool: (school) {
+          selectedCourse: selectedCourse,
+          onTap: (school) {
             viewModel.updateChosenSchool(course, school);
           },
         );

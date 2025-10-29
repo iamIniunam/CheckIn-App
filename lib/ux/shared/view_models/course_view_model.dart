@@ -10,6 +10,7 @@ class CourseViewModel extends ChangeNotifier {
 
   // Registered courses from API
   List<Course> _registeredCourses = [];
+  String? _lastLoadedStudentId;
   bool _isLoadingRegisteredCourses = false;
   bool _isRegisteringCourses = false;
   String? _registeredCoursesError;
@@ -39,7 +40,14 @@ class CourseViewModel extends ChangeNotifier {
 
   Future<void> loadRegisteredCourses(String studentId,
       {bool forceRefresh = false}) async {
-    if (_hasLoadedRegisteredCourses && !forceRefresh) return;
+    // If we've already loaded courses for the same student and no force
+    // refresh was requested, skip the network call. This prevents showing
+    // stale courses from a previous user when the currently logged-in
+    // student is the same as the last loaded one. If the studentId changed
+    // we must reload.
+    if (_hasLoadedRegisteredCourses &&
+        !forceRefresh &&
+        _lastLoadedStudentId == studentId) return;
 
     // Defensive: do not attempt network call if studentId is empty.
     if (studentId.trim().isEmpty) {
@@ -64,14 +72,17 @@ class CourseViewModel extends ChangeNotifier {
         _registeredCourses = Course.assignUniqueColors(raw);
         _registeredCoursesError = null;
         _hasLoadedRegisteredCourses = true;
+        _lastLoadedStudentId = studentId;
       } else {
         _registeredCoursesError =
             response.message ?? 'Failed to load registered courses';
         _registeredCourses = [];
+        _lastLoadedStudentId = studentId;
       }
     } catch (e) {
       _registeredCoursesError = 'An unexpected error occurred: ${e.toString()}';
       _registeredCourses = [];
+      _lastLoadedStudentId = studentId;
     } finally {
       _isLoadingRegisteredCourses = false;
       notifyListeners();

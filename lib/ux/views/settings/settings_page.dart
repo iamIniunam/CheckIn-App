@@ -31,8 +31,9 @@ class SettingsPage extends StatelessWidget {
             title: 'Add/Drop Courses',
             onTap: () {
               Navigation.navigateToScreen(
-                  context: context,
-                  screen: const CourseEnrollmentPage(isEdit: true));
+                context: context,
+                screen: const CourseEnrollmentPage(isEdit: true),
+              );
             },
           ),
         ],

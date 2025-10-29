@@ -80,14 +80,15 @@ class Course {
   late final Color color;
 
   static const List<Color> courseColors = [
-    AppColors.boxColor1,
-    AppColors.boxColor2,
-    AppColors.boxColor3,
-    AppColors.boxColor4,
-    AppColors.boxColor5,
-    AppColors.boxColor6,
-    AppColors.boxColor7,
-    AppColors.boxColor8,
+    AppColors.lightGrey,
+    AppColors.softRose,
+    AppColors.mintMist,
+    AppColors.babyBlue,
+    AppColors.paleAmber,
+    AppColors.lavenderHaze,
+    AppColors.aquaWhisper,
+    AppColors.lilacBloom,
+    AppColors.blushPearl,
   ];
 
   static Color getColorByIndex(int index) {

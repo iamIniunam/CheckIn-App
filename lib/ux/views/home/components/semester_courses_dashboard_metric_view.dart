@@ -16,19 +16,33 @@ import 'package:provider/provider.dart';
 class SemesterCoursesDashboardMetricView extends StatelessWidget {
   const SemesterCoursesDashboardMetricView({super.key});
 
-  static final List<ShimmerBox> shimmerBoxes = List.generate(
-    9,
-    (index) => ShimmerBox(
-      height: 0,
-      borderRadius: BorderRadius.circular(12),
-    ),
-  );
-
   @override
   Widget build(BuildContext context) {
     return Consumer<CourseViewModel>(
       builder: (context, courseViewModel, _) {
         if (courseViewModel.isLoadingRegisteredCourses) {
+          const int crossAxisCount = 3;
+          const double outerLeft = 16.0;
+          const double outerRight = 16.0;
+          const double crossAxisSpacing = 7.0;
+          const double estimatedCardHeight = 80.0;
+
+          final screenWidth = MediaQuery.of(context).size.width;
+          final availableWidth = screenWidth -
+              outerLeft -
+              outerRight -
+              (crossAxisCount - 1) * crossAxisSpacing;
+          final cardWidth = availableWidth / crossAxisCount;
+          final aspectRatio = cardWidth / estimatedCardHeight;
+
+          final shimmerBoxes = List.generate(9, (index) {
+            return ShimmerBox(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
+              borderRadius: BorderRadius.circular(12),
+              aspectRatio: aspectRatio,
+            );
+          });
+
           return Column(
             children: [
               const SectionHeader(
@@ -37,9 +51,8 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
                 child: DashboardMetricGridView(
                   padding: const EdgeInsets.only(
                       left: 16, top: 10, right: 16, bottom: 0),
-                  crossAxisCount: 3,
-                  childAspectRatio: 1.3,
-                  children: [...shimmerBoxes],
+                  crossAxisCount: crossAxisCount,
+                  children: shimmerBoxes,
                 ),
               ),
             ],
@@ -88,8 +101,6 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
               padding: const EdgeInsets.only(
                   left: 16, top: 10, right: 16, bottom: 16),
               crossAxisCount: 3,
-              // Make tiles slightly wider than tall to reduce vertical space
-              childAspectRatio: 1.2,
               children: courseInfo.length > 9
                   ? courseInfo
                       .take(9)

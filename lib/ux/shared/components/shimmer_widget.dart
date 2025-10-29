@@ -83,30 +83,45 @@ class _SlidingGradientTransform extends GradientTransform {
 /// Convenience box with rounded corners used as a shimmer placeholder.
 class ShimmerBox extends StatelessWidget {
   final double width;
-  final double height;
+  final double? height;
   final BorderRadius borderRadius;
   final EdgeInsets margin;
+  final EdgeInsets padding;
+  final double? aspectRatio;
 
   const ShimmerBox({
     super.key,
     this.width = double.infinity,
-    required this.height,
+    this.height,
     this.borderRadius = const BorderRadius.all(Radius.circular(8)),
     this.margin = EdgeInsets.zero,
+    this.padding = EdgeInsets.zero,
+    this.aspectRatio,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final box = Container(
       width: width,
       height: height,
       margin: margin,
+      padding: padding,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: borderRadius,
       ),
       child: const SizedBox.shrink(),
     );
+
+    // If a fixed height is provided we can return the box directly. When no
+    // height is provided (the common case for responsive placeholders used
+    // inside an Expanded/Flexible parent), wrap the box in an AspectRatio so
+    // it sizes relative to available width. The caller can override the
+    // aspectRatio if desired; otherwise default to 1 (square).
+    if (height != null) return box;
+
+    final ratio = aspectRatio ?? 1.0;
+    return AspectRatio(aspectRatio: ratio, child: box);
   }
 }
 
@@ -136,7 +151,10 @@ class ShimmerList extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: ShimmerBox(height: itemHeight),
+                  child: ShimmerBox(
+                    height: itemHeight,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               ],
             ),

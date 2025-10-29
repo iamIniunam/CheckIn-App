@@ -5,15 +5,16 @@ import 'package:attendance_app/ux/views/attendance/components/padded_column.dart
 import 'package:flutter/material.dart';
 
 class CourseEnrollmentCard extends StatelessWidget {
-  const CourseEnrollmentCard(
-      {super.key,
-      required this.semesterCourse,
-      required this.selectedSchool,
-      required this.onTapSchool});
+  const CourseEnrollmentCard({
+    super.key,
+    required this.semesterCourse,
+    required this.selectedCourse,
+    required this.onTap,
+  });
 
   final Course semesterCourse;
-  final String? selectedSchool;
-  final ValueChanged<String> onTapSchool;
+  final String? selectedCourse;
+  final ValueChanged<String> onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -21,23 +22,23 @@ class CourseEnrollmentCard extends StatelessWidget {
       inkwellBorderRadius: BorderRadius.circular(10),
       onTap: () {
         // if (selectedSchool != null) {
-        onTapSchool(selectedSchool ?? '');
+        onTap(selectedCourse ?? '');
         // }
       },
       child: Container(
         decoration: BoxDecoration(
-          color: (selectedSchool != null)
+          color: (selectedCourse != null)
               ? AppColors.primaryTeal
               : AppColors.white,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: (selectedSchool != null)
+            color: (selectedCourse != null)
                 ? AppColors.defaultColor
                 : AppColors.grey,
           ),
         ),
         child: PaddedColumn(
-          padding: const EdgeInsets.only(left: 8, top: 8, right: 8),
+          padding: const EdgeInsets.all(8),
           children: [
             Text(
               '${semesterCourse.courseCode} (${(semesterCourse.creditHours).toString()})',

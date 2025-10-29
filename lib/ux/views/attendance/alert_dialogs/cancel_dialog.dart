@@ -40,7 +40,7 @@ class AttendanceCancelDialog {
   }) async {
     final result = await AppDialogs.showWarningDialog(
       context: context,
-      title: AppStrings.cancelFaceVerification,
+      title: AppStrings.cancelVerification,
       message: AppStrings.ifYouExitNowYourAttendanceWont,
       secondOption: AppStrings.yesCancel,
       firstOption: 'No',
@@ -66,7 +66,7 @@ class LocationCancelDialog {
   }) async {
     final result = await AppDialogs.showWarningDialog(
       context: context,
-      title: AppStrings.cancelVerification,
+      title: AppStrings.cancelLocationVerification,
       message: AppStrings.ifYouExitNowYourAttendanceWont,
       secondOption: AppStrings.yesCancel,
       firstOption: 'No',

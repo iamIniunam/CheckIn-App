@@ -67,6 +67,7 @@ class AuthService {
     await init();
     try {
       await _prefs?.setBool(AppConstants.isLoggedInKey, false);
+      // await _prefs?.remove(AppConstants.studentDataKey);
       return true;
     } catch (e) {
       debugPrint('Error signing out: $e');

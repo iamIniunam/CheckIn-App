@@ -12,14 +12,17 @@ class AppColors {
   static const Color grey = Color(0xFF9E9E9E);
   static const Color defaultColor = Color(0xFF263238);
   static const Color primaryTeal = Color(0xFFE0F2F1);
-  static const Color boxColor1 = Color(0xffF6F6F6);
-  static const Color boxColor2 = Color(0xffFFF4F4);
-  static const Color boxColor3 = Color(0xffF5F9F9);
-  static const Color boxColor4 = Color(0xffF4F7FF);
-  static const Color boxColor5 = Color(0xffFFF3DE);
-  static const Color boxColor6 = Color(0xffF2EEFF);
-  static const Color boxColor7 = Color(0xffEFFFFA);
-  static const Color boxColor8 = Color(0xFFFDF4FF);
   static const Color field = Color(0xFFF2F4F5);
   static const red500 = Color(0XFFF00707);
+
+  // // course card colors
+  static const Color lightGrey = Color(0xFFF6F6F6); // neutral base
+  static const Color softRose = Color(0xFFFFF4F4); // gentle pink
+  static const Color mintMist = Color(0xFFF2FAF7); // soft mint
+  static const Color babyBlue = Color(0xFFF4F7FF); // light blue
+  static const Color paleAmber = Color(0xFFFFF3DE); // soft yellow
+  static const Color lavenderHaze = Color(0xFFF2EEFF); // gentle purple
+  static const Color aquaWhisper = Color(0xFFEFFFFA); // light aqua
+  static const Color lilacBloom = Color(0xFFFDF4FF); // lilac pink
+  static const Color blushPearl = Color(0xFFFFF0F6); // light blush
 }
