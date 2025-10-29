@@ -19,7 +19,7 @@ class StepContent extends StatelessWidget {
         return const ScanView();
 
       case VerificationStep.onlineCodeEntry:
-        return OnlineCodeEntryContent();
+        return OnlineCodeEntryContent(viewModel: viewModel);
 
       case VerificationStep.locationCheck:
         return LocationCheckContent(viewModel: viewModel);

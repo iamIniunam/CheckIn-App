@@ -1,162 +1,3 @@
-// import 'package:attendance_app/platform/services/location_service.dart';
-// import 'package:attendance_app/ux/shared/resources/app_constants.dart';
-// import 'package:attendance_app/ux/shared/view_models/user_view_model.dart';
-// import 'package:flutter/material.dart';
-// import 'package:geolocator/geolocator.dart';
-
-// class VerificationViewModel extends ChangeNotifier {
-//   bool _isCheckingLocation = false;
-//   String? _locationError;
-//   String? _locationStatus;
-//   late UserViewModel viewModel;
-
-//   bool get isCheckingLocation => _isCheckingLocation;
-//   String? get locationError => _locationError;
-//   String? get locationStatus => _locationStatus;
-
-//   Future<bool> markAttendance() async {
-//     _isCheckingLocation = true;
-//     _locationError = null;
-//     _locationStatus = 'Checking location for building...';
-//     notifyListeners();
-
-//     try {
-//       AttendanceLocationResult result =
-//           await LocationService.canMarkAttendanceHybrid(
-//               campusLat: AppConstants.chisomLat,
-//               campusLong: AppConstants.chisomLong,
-//               maxDistanceMeters: AppConstants.maxDistanceMeters,
-//               showSettingsOption: true);
-
-//       if (!result.canMarkAttendance) {
-//         _locationError = result.errorMessage;
-//         _locationStatus = 'Location check failed';
-//         setLoadingState(false);
-//         return false;
-//       }
-
-//       _locationStatus = 'Location verified! Submitting attendance...';
-//       notifyListeners();
-
-//       if (result.currentPosition == null) {
-//         _locationError = 'Failed to get current position';
-//         _locationStatus = 'Attendance failed';
-//         setLoadingState(false);
-//         return false;
-//       }
-
-//       await submitAttendance(result.currentPosition!); //TODO null check
-
-//       _locationStatus = 'Attendance marked successfully!';
-//       setLoadingState(false);
-//       return true;
-//     } catch (e) {
-//       _locationError = 'Failed to mark attendance: ${e.toString()}';
-//       _locationStatus = 'Attendance failed';
-//       setLoadingState(false);
-//       return false;
-//     }
-//   }
-
-//   void setLoadingState(bool loading) {
-//     _isCheckingLocation = loading;
-//     if (!loading) {
-//       Future.delayed(const Duration(seconds: 3), () {
-//         _locationStatus = null;
-//         notifyListeners();
-//       });
-//     }
-//     notifyListeners();
-//   }
-
-//   Future<void> submitAttendance(Position position) async {
-//     Map<String, dynamic> attendanceData = {
-//       // 'studentId': viewModel.idNumber,
-//       'timestamp': DateTime.now().toIso8601String(),
-//       'latitude': position.latitude,
-//       'longitude': position.longitude,
-//       'accuracy': position.accuracy,
-//       'locationMethod': position.accuracy > 50 ? 'indoor_gps' : 'gps',
-//     };
-
-//     debugPrint('Attendance submitted: $attendanceData');
-//   }
-
-//   Future<String> checkLocationStatus() async {
-//     try {
-//       _locationStatus = 'Checking your location...';
-//       notifyListeners();
-
-//       AttendanceLocationResult result =
-//           await LocationService.canMarkAttendanceHybrid(
-//         campusLat: AppConstants.chisomLat,
-//         campusLong: AppConstants.chisomLong,
-//         maxDistanceMeters: AppConstants.maxDistanceMeters,
-//         showSettingsOption: false,
-//       );
-
-//       String status;
-//       if (result.canMarkAttendance) {
-//         if (result.isNetworkBased) {
-//           status = 'You appear to be on campus (network location)';
-//         } else if (result.isIndoorLocation) {
-//           status =
-//               'You are on campus (indoor GPS, accuracy: ±${LocationService.formatDistance(result.accuracy ?? 0)})';
-//         } else {
-//           status = 'You are on campus and can mark attendance';
-//         }
-//       } else {
-//         status = result.errorMessage ??
-//             'Cannot mark attendance from current location';
-//       }
-
-//       _locationStatus = status;
-//       notifyListeners();
-
-//       return status;
-//     } catch (e) {
-//       String errorMsg = 'Location check failed: ${e.toString()}';
-//       _locationStatus = errorMsg;
-//       notifyListeners();
-//       return errorMsg;
-//     }
-//   }
-
-//   Future<void> testLocationAccuracy() async {
-//     _isCheckingLocation = true;
-//     _locationStatus = 'Testing location accuracy...';
-//     notifyListeners();
-
-//     try {
-//       Position position = await LocationService.getCurrentLocation();
-
-//       double distance = LocationService.calculateDistanceFromCampus(
-//         currentPosition: position,
-//         campusLat: AppConstants.chisomLat,
-//         campusLong: AppConstants.chisomLong,
-//       );
-
-//       _locationStatus = '''Location Test Results:
-//         Your coordinates: ${position.latitude.toStringAsFixed(6)}, ${position.longitude.toStringAsFixed(6)}
-//         School coordinates: ${AppConstants.chisomLat}, ${AppConstants.chisomLong}
-//         Distance: ${LocationService.formatDistance(distance)}
-//         GPS Accuracy: ±${LocationService.formatDistance(position.accuracy)}
-//         Max allowed: ${LocationService.formatDistance(AppConstants.maxDistanceMeters)}''';
-//     } catch (e) {
-//       _locationStatus = 'Location test failed: ${e.toString()}';
-//     } finally {
-//       _isCheckingLocation = false;
-//       notifyListeners();
-//     }
-//   }
-
-//   void clearLocationStatus() {
-//     _locationStatus = null;
-//     _locationError = null;
-//     notifyListeners();
-//   }
-// }
-
 import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/platform/services/message_providers/message_providers.dart';
 import 'package:attendance_app/ux/shared/models/models.dart';
@@ -164,8 +5,11 @@ import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance/attendance_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance/online_code_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance/qr_scan_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/location_verification_view_model.dart';
 import 'package:flutter/material.dart';
+
+enum AutoFlowResult { success, unauthorized, failed }
 
 class AttendanceVerificationViewModel extends ChangeNotifier {
   VerificationState _verificationState = const VerificationState();
@@ -174,20 +18,20 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
   final QrScanViewModel _qrScanViewModel;
   final OnlineCodeViewModel _onlineCodeViewModel;
   final AttendanceViewModel _attendanceViewModel;
+  final AuthViewModel _authViewModel;
   // final AttendanceService _attendanceService;
   final VerificationMessageProvider _messageProvider;
   // final FaceVerificationViewModel _faceViewModel; // Future
 
-  String? _studentId;
-  String? _userLocation;
-
   AttendanceVerificationViewModel({
+    required AuthViewModel authViewModel,
     LocationVerificationViewModel? locationViewModel,
     QrScanViewModel? qrScanViewModel,
     OnlineCodeViewModel? onlineCodeViewModel,
     AttendanceViewModel? attendanceViewModel,
     VerificationMessageProvider? messageProvider,
-  })  : _locationViewModel =
+  })  : _authViewModel = authViewModel,
+        _locationViewModel =
             locationViewModel ?? LocationVerificationViewModel(),
         _qrScanViewModel = qrScanViewModel ?? QrScanViewModel(),
         _onlineCodeViewModel = onlineCodeViewModel ?? OnlineCodeViewModel(),
@@ -199,6 +43,17 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
   LocationState get locationState => _locationViewModel.state;
   String? get scannedQrCode => _qrScanViewModel.scannedCode;
   String? get enteredOnlineCode => _onlineCodeViewModel.enteredCode;
+  bool get isMarkingAttendance => _attendanceViewModel.isMarkingAttendance;
+
+  String? get _studentId => _authViewModel.currentStudent?.idNumber;
+
+  String? getuserLocation() {
+    final position = _locationViewModel.state.currentPosition;
+    if (position != null) {
+      return '${position.latitude.toStringAsFixed(6)}, ${position.longitude.toStringAsFixed(6)}';
+    }
+    return 'Location unavailable';
+  }
 
   bool get requiresLocationCheck =>
       _verificationState.attendanceType == AttendanceType.inPerson;
@@ -214,11 +69,6 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
   bool get isSubmittingAttendance =>
       _verificationState.currentStep == VerificationStep.attendanceSubmission &&
       _verificationState.isLoading;
-
-  void initialize({required String studentId, String? location}) {
-    _studentId = studentId;
-    _userLocation = location ?? 'Unknown';
-  }
 
   // Set attendance type and reset flow
   void setAttendanceType(AttendanceType type) {
@@ -238,38 +88,14 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
     _locationViewModel.reset();
   }
 
-  Future<bool> validateQrCode(String code) async {
-    updateState(_verificationState.copyWith(isLoading: true, clearError: true));
-
-    final result = await _qrScanViewModel.validateQrCode(code);
-
-    if (result.isValid) {
-      updateState(_verificationState.copyWith(isLoading: false));
-      return true;
-    } else {
-      updateState(_verificationState.copyWith(
-        isLoading: false,
-        errorMessage: result.errorMessage,
-      ));
-      return false;
-    }
+  void onQrCodeScanned(String code) {
+    _qrScanViewModel.setScannedCode(code);
+    debugPrint('QR code scanned: $code');
   }
 
-  Future<bool> validateOnlineCode(String code) async {
-    updateState(_verificationState.copyWith(isLoading: true, clearError: true));
-
-    final result = await _onlineCodeViewModel.validateOnlineCode(code);
-
-    if (result.isValid) {
-      updateState(_verificationState.copyWith(isLoading: false));
-      return true;
-    } else {
-      updateState(_verificationState.copyWith(
-        isLoading: false,
-        errorMessage: result.errorMessage,
-      ));
-      return false;
-    }
+  void onOnlineCodeEntered(String code) {
+    _onlineCodeViewModel.setCode(code);
+    debugPrint('Online code entered: $code');
   }
 
   Future<bool> checkLocation() async {
@@ -279,8 +105,8 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
 
     try {
       bool success = await _locationViewModel.verifyLocation(
-        campusLat: AppConstants.houseLat,
-        campusLong: AppConstants.houseLong,
+        campusLat: AppConstants.seaviewLat,
+        campusLong: AppConstants.seaviewLong,
         maxDistanceMeters: AppConstants.maxDistanceMeters,
         showSettingsOption: true,
       );
@@ -313,14 +139,14 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
       bool success;
       if (useNetworkOnly) {
         success = await _locationViewModel.retyrWithNetworkOnly(
-          campusLat: AppConstants.houseLat,
-          campusLong: AppConstants.houseLong,
+          campusLat: AppConstants.seaviewLat,
+          campusLong: AppConstants.seaviewLong,
           maxDistanceMeters: AppConstants.maxDistanceMeters,
         );
       } else {
         success = await _locationViewModel.verifyLocation(
-          campusLat: AppConstants.houseLat,
-          campusLong: AppConstants.houseLong,
+          campusLat: AppConstants.seaviewLat,
+          campusLong: AppConstants.seaviewLong,
           maxDistanceMeters: AppConstants.maxDistanceMeters,
           showSettingsOption: false,
         );
@@ -373,6 +199,8 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
   Future<bool> submitInPersonAttendance() async {
     final qrCode = _qrScanViewModel.scannedCode;
     if (qrCode == null) {
+      debugPrint(
+          'submitInPersonAttendance: qrCode is null - aborting submission');
       updateState(_verificationState.copyWith(
         errorMessage: 'QR code not scanned',
       ));
@@ -380,12 +208,16 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
     }
 
     final locationStatus = _locationViewModel.state.verificationStatus;
+    final userLocation = getuserLocation();
+    final position = _locationViewModel.state.currentPosition;
 
     if (locationStatus == LocationVerificationStatus.successInRange) {
       final result = await _attendanceViewModel.markAttendanceAuthorized(
         code: qrCode,
         studentId: _studentId ?? '',
-        location: _userLocation ?? 'Unknown',
+        location: userLocation,
+        latitude: position?.latitude,
+        longitude: position?.longitude,
       );
 
       if (result.success) {
@@ -397,20 +229,23 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
         return false;
       }
     } else if (locationStatus == LocationVerificationStatus.outOfRange) {
-      _attendanceViewModel.markAttendanceUnauthorized(
+      debugPrint(
+          'submitInPersonAttendance: Out of range — sending unauthorized mark.');
+      debugPrint(
+          'submitInPersonAttendance: code=$qrCode, student=${_studentId ?? ''}, location=$userLocation, lat=${position?.latitude}, lng=${position?.longitude}');
+
+      // Send unauthorized mark, but DO NOT advance the UI flow on success.
+      final result = await _attendanceViewModel.markAttendanceUnauthorized(
         code: qrCode,
         studentId: _studentId ?? '',
-        location: _userLocation ?? 'Unknown',
+        location: userLocation,
+        latitude: position?.latitude,
+        longitude: position?.longitude,
       );
 
-      // updateState(_verificationState.copyWith(
-      //   errorMessage:
-      //       'Cannot mark attendance: You are out of the allowed range.',
-      // ));
-
-      // Still return true to show success to user (for analytics purposes)
-      //TODO: confirm this behavior
-      return true;
+      debugPrint(
+          'markAttendanceUnauthorized result: success=${result.success}, message=${result.message ?? result.errorMessage}');
+      return false;
     } else {
       updateState(_verificationState.copyWith(
         errorMessage: 'Location verification required',
@@ -428,7 +263,7 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
       return false;
     }
 
-    final result = await _attendanceViewModel.markOnlineAttendance(
+    final result = await _attendanceViewModel.markAttendanceAuthorized(
       code: onlineCode,
       studentId: _studentId ?? '',
     );
@@ -445,15 +280,12 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
 
   void moveToNextStep() {
     VerificationStep nextStep;
-    // AttendanceType? stepAttendanceType;
 
     switch (_verificationState.currentStep) {
       case VerificationStep.qrCodeScan:
-        // stepAttendanceType = AttendanceType.inPerson;
         nextStep = VerificationStep.locationCheck;
         break;
       case VerificationStep.onlineCodeEntry:
-        // stepAttendanceType = AttendanceType.online;
         nextStep = VerificationStep.attendanceSubmission;
         break;
       case VerificationStep.locationCheck:
@@ -465,31 +297,76 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
       case VerificationStep.completed:
         return;
     }
-    // if (stepAttendanceType != null) {
-    //   updateState(_verificationState.copyWith(
-    //       currentStep: nextStep, attendanceType: stepAttendanceType));
-    // } else {
     updateState(_verificationState.copyWith(currentStep: nextStep));
-    // }
   }
 
-  Future<bool> proceedWithAutomaticFlow() async {
+  Future<AutoFlowResult> proceedWithAutomaticFlow() async {
+    debugPrint(
+        'proceedWithAutomaticFlow: currentStep=${_verificationState.currentStep}, scannedQr=${_qrScanViewModel.scannedCode}');
+
+    // LOCATION CHECK STEP
     if (_verificationState.currentStep == VerificationStep.locationCheck) {
       bool locationSuccess = await checkLocation();
-      if (!locationSuccess) return false;
+
+      // If location check failed because user is out of range, we want to
+      // record an "unauthorized" attendance (so devs can see it) but we must
+      // NOT advance the UI to the submission content. We'll send the
+      // unauthorized mark and then return AutoFlowResult.unauthorized so the
+      // caller can end the flow silently.
+      if (!locationSuccess) {
+        final locStatus = _locationViewModel.state.verificationStatus;
+        if (locStatus == LocationVerificationStatus.outOfRange) {
+          debugPrint(
+              'proceedWithAutomaticFlow: location out-of-range — sending unauthorized mark and ending flow silently');
+
+          final qrCode = _qrScanViewModel.scannedCode;
+          if (qrCode == null) {
+            debugPrint(
+                'proceedWithAutomaticFlow: scanned QR code missing while handling out-of-range; aborting');
+            return AutoFlowResult.failed;
+          }
+
+          final position = _locationViewModel.state.currentPosition;
+          final userLocation = getuserLocation();
+
+          // Fire the unauthorized mark and await result so devs receive it,
+          // but do NOT change the visible verification step.
+          final result = await _attendanceViewModel.markAttendanceUnauthorized(
+            code: qrCode,
+            studentId: _studentId ?? '',
+            location: userLocation,
+            latitude: position?.latitude,
+            longitude: position?.longitude,
+          );
+
+          debugPrint(
+              'proceedWithAutomaticFlow: markAttendanceUnauthorized result: success=${result.success}, message=${result.message ?? result.errorMessage}');
+
+          // Regardless of whether the backend accepted it, do not advance UI.
+          return AutoFlowResult.unauthorized;
+        } else {
+          debugPrint(
+              'proceedWithAutomaticFlow: location check failed with status=$locStatus — aborting flow');
+          return AutoFlowResult.failed;
+        }
+      }
+
+      // Location check succeeded — advance to submission step and continue.
       moveToNextStep();
     }
 
+    // SUBMISSION STEP
     if (_verificationState.currentStep ==
         VerificationStep.attendanceSubmission) {
       bool submissionSuccess = await submitAttendance();
       if (submissionSuccess) {
         moveToNextStep();
+        return AutoFlowResult.success;
       }
-      return submissionSuccess;
+      return AutoFlowResult.failed;
     }
 
-    return true;
+    return AutoFlowResult.success;
   }
 
   double getProgressPercentage() {
@@ -578,144 +455,4 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
         _locationViewModel.state.verificationStatus ??
             LocationVerificationStatus.successInRange); //TODO: check this again
   }
-
-  // Future<bool> startVerificationFlow({AttendanceType? attendanceType}) async {
-  //   if (attendanceType != null) {
-  //     setAttendanceType(attendanceType);
-  //   }
-
-  //   if (_verificationState.currentStep == VerificationStep.qrCodeScan ||
-  //       _verificationState.currentStep == VerificationStep.onlineCodeEntry) {
-  //     // bool qrSuccess = await verifyQrCode();
-  //     // if (!qrSuccess) return false;
-
-  //     moveToNextStep();
-  //     return await proceedWithAutomaticFlow();
-  //   }
-  //   return true;
-  // }
-
-  // Future<bool> verifyFace() async {
-  //   updateState(_verificationState.copyWith(isLoading: true, clearError: true));
-
-  //   try {
-  //     bool success = await _faceService.verifyFace();
-  //     if (success) {
-  //       updateState(_verificationState.copyWith(faceVerificationPassed: true));
-  //     } else {
-  //       updateState(_verificationState.copyWith(
-  //         errorMessage: _messageProvider
-  //             .getErrorMessage(VerificationError.faceVerificationFailed),
-  //       ));
-  //     }
-  //     return success;
-  //   } finally {
-  //     updateState(_verificationState.copyWith(isLoading: false));
-  //   }
-  // }
-
-  // Future<bool> submitAttendance() async {
-  //   updateState(_verificationState.copyWith(isLoading: true, clearError: true));
-
-  //   try {
-  //     if (requiresLocationCheck &&
-  //         _locationViewModel.state.currentPosition == null) {
-  //       throw Exception('Location data not available for in-person attendance');
-  //     }
-
-  //     // Only require face verification for in-person attendance. For online
-  //     // attendance the demo should allow submission without a prior face
-  //     // verification step (the face flow is currently commented out).
-  //     // if (_verificationState.attendanceType == AttendanceType.inPerson &&
-  //     //     !_verificationState.faceVerificationPassed) {
-  //     //   throw Exception('Face verification not completed');
-  //     // }
-
-  //     if (requiresLocationCheck &&
-  //         _locationViewModel.state.verificationStatus !=
-  //             LocationVerificationStatus.successInRange) {
-  //       throw Exception(
-  //           'Location verification required for in-person attendance');
-  //     }
-  //     // Simulate submitting online attendance without validating an online code.
-  //     if (_verificationState.attendanceType == AttendanceType.online) {
-  //       bool success = await _attendanceService.submitOnlineAttendance();
-
-  //       if (!success) {
-  //         updateState(_verificationState.copyWith(
-  //           errorMessage: _messageProvider
-  //               .getErrorMessage(VerificationError.attendanceSubmissionFailed),
-  //         ));
-  //       }
-
-  //       return success;
-  //     }
-  //     // (This path bypasses the in-person position requirement above.)
-  //     // if (_verificationState.attendanceType == AttendanceType.online) {
-  //     //   final String? code = _verificationState.currentStep == VerificationStep.onlineCodeEntry
-  //     //       ? _verificationState.onlineCode
-  //     //       : null;
-  //     //   if (code == null || code.trim().isEmpty) {
-  //     //     throw Exception('Online code is required for online attendance');
-  //     //   }
-
-  //     //   bool success = await _attendanceService.submitAttendance(
-  //     //     faceVerified: _verificationState.faceVerificationPassed,
-  //     //     attendanceType: AttendanceType.online,
-  //     //     position: _locationViewModel.state.currentPosition,
-  //     //     distanceFromCampus: _locationViewModel.state.distanceFromCampus,
-  //     //     locationMethod: getLocationMethod(),
-  //     //     isIndoorLocation: _locationViewModel.state.isIndoorLocation,
-  //     //     locationStatus: _locationViewModel.state.verificationStatus,
-  //     //     onlineCode: code,
-  //     //   );
-
-  //     //   if (!success) {
-  //     //     updateState(_verificationState.copyWith(
-  //     //       errorMessage: _messageProvider
-  //     //           .getErrorMessage(VerificationError.attendanceSubmissionFailed),
-  //     //     ));
-  //     //   }
-
-  //     //   return success;
-  //     // }
-
-  //     bool success = await _attendanceService.submitAttendance(
-  //       faceVerified: _verificationState.faceVerificationPassed,
-  //       attendanceType: _verificationState.attendanceType ??
-  //           AttendanceType.inPerson, //TODO: check if this is safe and wise
-  //       position: _locationViewModel.state.currentPosition,
-  //       distanceFromCampus: _locationViewModel.state.distanceFromCampus,
-  //       locationMethod: getLocationMethod(),
-  //       isIndoorLocation: _locationViewModel.state.isIndoorLocation,
-  //       locationStatus: _locationViewModel.state.verificationStatus,
-  //     );
-
-  //     if (!success) {
-  //       updateState(_verificationState.copyWith(
-  //         errorMessage: _messageProvider
-  //             .getErrorMessage(VerificationError.attendanceSubmissionFailed),
-  //       ));
-  //     }
-
-  //     return success;
-  //   } catch (e) {
-  //     updateState(_verificationState.copyWith(
-  //       errorMessage: _messageProvider.getErrorMessage(
-  //         VerificationError.attendanceSubmissionFailed,
-  //         context: {'details': e.toString()},
-  //       ),
-  //     ));
-  //     return false;
-  //   } finally {
-  //     updateState(_verificationState.copyWith(isLoading: false));
-  //   }
-  // }
-
-  // String getLocationMethod() {
-  //   final locationState = _locationViewModel.state;
-  //   if (locationState.isNetworkBased) return 'network';
-  //   if (locationState.isIndoorLocation) return 'indoor_gps';
-  //   return 'gps';
-  // }
 }

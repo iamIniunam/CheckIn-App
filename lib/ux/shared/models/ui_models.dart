@@ -145,12 +145,14 @@ class AttendanceClass {
   final int id;
   final String name;
   final int courseId;
+  // final String mode;
   final DateTime date;
 
   AttendanceClass({
     required this.id,
     required this.name,
     required this.courseId,
+    // required this.mode,
     required this.date,
   });
 
@@ -159,6 +161,7 @@ class AttendanceClass {
       id: json['id'] as int,
       name: json['name'] as String,
       courseId: json['course_id'] as int,
+      // mode: json['mode'] as String, //TODO check why this is throws null when parsing sometimes
       date: DateTime.parse(json['date'] as String),
     );
   }
@@ -168,6 +171,7 @@ class AttendanceClass {
       'id': id,
       'name': name,
       'course_id': courseId,
+      // 'mode': mode,
       'date': date.toIso8601String(),
     };
   }

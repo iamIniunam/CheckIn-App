@@ -20,20 +20,26 @@ class MarkAttendanceRequest {
   final String studentId;
   final String status;
   final String? location;
+  final double? latitude;
+  final double? longitude;
 
   MarkAttendanceRequest({
     required this.code,
     required this.studentId,
     required this.status,
     this.location,
+    this.latitude,
+    this.longitude,
   });
 
   Map<String, dynamic> toJson() {
     return {
       'code': code,
-      'studentId': studentId,
+      'student_id': studentId,
       'status': status,
-      'location': location,
+      if (location != null) 'location': location,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
     };
   }
 }

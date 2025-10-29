@@ -18,52 +18,24 @@ class QrScanResult {
 
 class QrScanViewModel extends ChangeNotifier {
   String? _scannedCode;
-  bool _isValidating = false;
-  String? _errorMessage;
+  bool _isScanning = false;
 
   String? get scannedCode => _scannedCode;
-  bool get isValidating => _isValidating;
-  String? get errorMessage => _errorMessage;
+  bool get isScanning => _isScanning;
 
-  Future<QrScanResult> validateQrCode(String code) async {
-    _isValidating = true;
-    _errorMessage = null;
+  void setScannedCode(String code) {
+    _scannedCode = code;
     notifyListeners();
-
-    try {
-      // TODO: Replace with actual API call to validate QR code
-      // For now, simulate validation
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      // Demo: accept code 'res' as valid
-      if (code == 'res') {
-        _scannedCode = code;
-        _isValidating = false;
-        notifyListeners();
-        return QrScanResult.success(code);
-      } else {
-        _errorMessage = 'Invalid QR code for this class session';
-        _isValidating = false;
-        notifyListeners();
-        return QrScanResult.failure(_errorMessage ?? '');
-      }
-    } catch (e) {
-      _errorMessage = 'Failed to validate QR code: ${e.toString()}';
-      _isValidating = false;
-      notifyListeners();
-      return QrScanResult.failure(_errorMessage!);
-    }
   }
 
-  void clearError() {
-    _errorMessage = null;
+  void setIsScanning(bool scanning) {
+    _isScanning = scanning;
     notifyListeners();
   }
 
   void reset() {
     _scannedCode = null;
-    _isValidating = false;
-    _errorMessage = null;
+    _isScanning = false;
     notifyListeners();
   }
 }

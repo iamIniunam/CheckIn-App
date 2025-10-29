@@ -63,6 +63,9 @@ class AttendanceApi {
         body: request.toJson(),
         errorMessage: 'Failed to mark attendance',
       );
+
+      debugPrint(
+          'Mark Attendance Request Body: ${request.toJson().toString()}');
       final response = await networkHelper.getData();
       debugPrint('Mark Attendance Response: $response');
 

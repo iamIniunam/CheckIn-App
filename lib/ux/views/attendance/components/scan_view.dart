@@ -1,7 +1,7 @@
 import 'dart:io';
 
+import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
-import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance_verification_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -19,10 +19,6 @@ class _ScanViewState extends State<ScanView> {
   Barcode? result;
   MobileScannerController controller = MobileScannerController();
   bool isProcessing = false;
-  // The ScanView should use the AttendanceVerificationViewModel provided by
-  // the surrounding widget (VerificationPage supplies one via
-  // ChangeNotifierProvider). Creating a local view model here meant moves
-  // didn't affect the app state. We'll obtain the provider at runtime.
 
   @override
   void reassemble() {
@@ -44,7 +40,7 @@ class _ScanViewState extends State<ScanView> {
     result = barcodes.first;
     final code = result?.rawValue;
 
-    if (code == null) return;
+    if (code == null || code.isEmpty) return;
 
     setState(() {
       isProcessing = true;
@@ -57,34 +53,33 @@ class _ScanViewState extends State<ScanView> {
     final viewModel =
         Provider.of<AttendanceVerificationViewModel>(context, listen: false);
 
-    bool isValid = await viewModel.validateQrCode(code);
+    viewModel.onQrCodeScanned(code);
+
+    viewModel.moveToNextStep();
+
+    final flowResult = await viewModel.proceedWithAutomaticFlow();
 
     if (!mounted) return;
 
-    if (isValid) {
-      viewModel.moveToNextStep();
-      await viewModel.proceedWithAutomaticFlow();
-
-      if (!mounted) return;
-      Navigator.pop(context);
+    setState(() {
+      isProcessing = false;
+    });
+    if (flowResult == AutoFlowResult.success ||
+        flowResult == AutoFlowResult.unauthorized) {
+      Navigation.back(context: context);
     } else {
-      controller.stop();
-      AppDialogs.showAlertDialog(
-          context: context, message: 'Invalid QR code for this class');
-      setState(() {
-        isProcessing = false;
-      });
+      debugPrint(
+          'ScanView: proceedWithAutomaticFlow returned failed — staying on scanner');
     }
   }
 
   @override
   void dispose() {
-    super.dispose();
     controller.dispose();
+    super.dispose();
   }
 
-  bool flash = false;
-  bool isLoading = false;
+  // bool flash = false;
 
   @override
   Widget build(BuildContext context) {
@@ -113,13 +108,13 @@ class _ScanViewState extends State<ScanView> {
           painter: WhiteOverlayPainter(
             scanAreaSize: scanArea,
             borderRadius: 12,
-            showLoading: isLoading,
+            showLoading: isProcessing,
           ),
           child: Container(),
         ),
 
         // Loading indicator - only in the scan area
-        if (isLoading)
+        if (isProcessing)
           Center(
             child: Container(
               width: scanArea,

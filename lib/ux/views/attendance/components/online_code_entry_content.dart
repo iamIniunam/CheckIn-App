@@ -1,10 +1,11 @@
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
+import 'package:attendance_app/ux/shared/view_models/attendance_verification_view_model.dart';
 import 'package:flutter/material.dart';
 
 class OnlineCodeEntryContent extends StatelessWidget {
-  OnlineCodeEntryContent({super.key});
+  const OnlineCodeEntryContent({super.key, required this.viewModel});
 
-  final TextEditingController codeController = TextEditingController();
+  final AttendanceVerificationViewModel viewModel;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +19,8 @@ class OnlineCodeEntryContent extends StatelessWidget {
         textAlign: TextAlign.center,
         textCapitalization: TextCapitalization.characters,
         keyboardType: TextInputType.visiblePassword,
-        controller: codeController,
+        onChanged: (value) => viewModel.onOnlineCodeEntered(value),
+        onSubmitted: (value) => viewModel.onOnlineCodeEntered(value),
       ),
     );
   }

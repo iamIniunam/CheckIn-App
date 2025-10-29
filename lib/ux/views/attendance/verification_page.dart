@@ -3,6 +3,7 @@ import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance_verification_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/views/attendance/alert_dialogs/cancel_dialog.dart';
 import 'package:attendance_app/ux/views/attendance/components/attendance_type_indicator.dart';
 import 'package:attendance_app/ux/views/attendance/components/face_verification_buttons.dart';
@@ -33,7 +34,8 @@ class _VerificationPageState extends State<VerificationPage> {
   @override
   void initState() {
     super.initState();
-    viewModel = AttendanceVerificationViewModel();
+    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+    viewModel = AttendanceVerificationViewModel(authViewModel: authViewModel);
     viewModel.setAttendanceType(widget.attendanceType);
 
     initializeCamera();
@@ -122,17 +124,16 @@ class _VerificationPageState extends State<VerificationPage> {
 
   @override
   void dispose() {
-    // If dispose is async, use the following:
-    // await cameraController?.dispose();
-    // However, Flutter's dispose() cannot be async, so use then() for cleanup.
-    cameraController?.dispose().then((_) {
-      viewModel.dispose();
-      super.dispose();
-    });
-    // If dispose() is not async, keep as is:
-    // cameraController?.dispose();
-    // viewModel.dispose();
-    // super.dispose();
+    // Dispose resources. cameraController.dispose() returns a Future,
+    // but dispose() can't be async — call it without awaiting and
+    // dispose the view model synchronously.
+    try {
+      cameraController?.dispose();
+    } catch (_) {
+      // ignore dispose errors
+    }
+    viewModel.dispose();
+    super.dispose();
   }
 
   @override
@@ -212,13 +213,30 @@ class _VerificationPageState extends State<VerificationPage> {
     if (locationStatus == LocationVerificationStatus.outOfRange) {
       return () => handleOutOfRange(locationStatus);
     }
-    // if (verificationStep == VerificationStep.onlineCodeEntry) {
-    //   return () => handleCompletion();
-    // }
+    if (verificationStep == VerificationStep.onlineCodeEntry) {
+      return () {
+        () async {
+          final success = await viewModel.submitAttendance();
+          if (!mounted) return;
+          if (success) {
+            viewModel.moveToNextStep(); // now at attendanceSubmission
+            viewModel.updateState(viewModel.verificationState
+                .copyWith(isLoading: true, clearError: true));
+
+            await Future.delayed(const Duration(milliseconds: 800));
+
+            if (!mounted) return;
+            viewModel.updateState(viewModel.verificationState
+                .copyWith(isLoading: false, clearError: true));
+            viewModel.moveToNextStep(); // now at completed
+          }
+        }();
+      };
+    }
     if (verificationStep == VerificationStep.completed) {
       return () => handleCompletion();
     }
-    
+
     return handleVerification;
   }
 }
