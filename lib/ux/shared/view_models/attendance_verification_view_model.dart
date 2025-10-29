@@ -47,7 +47,7 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
 
   String? get _studentId => _authViewModel.currentStudent?.idNumber;
 
-  String? getuserLocation() {
+  String getuserLocation() {
     final position = _locationViewModel.state.currentPosition;
     if (position != null) {
       return '${position.latitude.toStringAsFixed(6)}, ${position.longitude.toStringAsFixed(6)}';
@@ -263,10 +263,10 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
       return false;
     }
 
+    const userLocation = 'Online';
+
     final result = await _attendanceViewModel.markAttendanceAuthorized(
-      code: onlineCode,
-      studentId: _studentId ?? '',
-    );
+        code: onlineCode, studentId: _studentId ?? '', location: userLocation);
 
     if (result.success) {
       return true;

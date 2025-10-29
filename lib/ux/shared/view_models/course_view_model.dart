@@ -59,7 +59,9 @@ class CourseViewModel extends ChangeNotifier {
       final response = await _repository.fetchRegisteredCourses(studentId);
 
       if (response.data != null) {
-        _registeredCourses = response.data ?? [];
+        // Ensure each course is assigned a unique color from the palette.
+        final raw = response.data ?? [];
+        _registeredCourses = Course.assignUniqueColors(raw);
         _registeredCoursesError = null;
         _hasLoadedRegisteredCourses = true;
       } else {
@@ -80,6 +82,32 @@ class CourseViewModel extends ChangeNotifier {
     required String studentId,
     required List<Course> courses,
   }) async {
+    // Validate that the same course code hasn't been selected from
+    // different schools. If so, block registration and show a clear error.
+    final Map<String, Set<String>> codeToSchools = {};
+    for (final course in courses) {
+      final code = course.courseCode;
+      final school = (course.school ?? '').trim();
+      codeToSchools.putIfAbsent(code, () => <String>{});
+      codeToSchools[code]?.add(school);
+    }
+
+    final conflicts = codeToSchools.entries
+        .where((e) => e.value.length > 1)
+        .toList(growable: false);
+
+    if (conflicts.isNotEmpty) {
+      final details = conflicts
+          .map((e) =>
+              '${e.key} — ${e.value.where((s) => s.isNotEmpty).join(', ')}')
+          .join('; ');
+      _registrationError =
+          'Duplicate course codes found in multiple schools: $details. \n\nPlease select only one.';
+      _isRegisteringCourses = false;
+      notifyListeners();
+      return false;
+    }
+
     _isRegisteringCourses = true;
     _registrationError = null;
     _totalCoursesToRegister = courses.length;

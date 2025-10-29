@@ -66,7 +66,7 @@ class _FaceVerificationPageState extends State<FaceVerificationPage> {
     Future.delayed(
       const Duration(seconds: 3),
       () {
-        Navigation.navigateToScreen(
+        Navigation.navigateToScreenAndClearOnePrevious(
           context: context,
           screen: navigateBasedOnMode(),
         );

@@ -88,7 +88,7 @@ class _SearchTextFormFieldState extends State<SearchTextFormField> {
             fontSize: 16,
             fontWeight: FontWeight.w500),
         decoration: InputDecoration(
-          contentPadding: const EdgeInsets.only(top: 4, left: 10, right: 10),
+          contentPadding: const EdgeInsets.only(left: 10, top: 6, right: 10),
           hintText: widget.hintText ?? AppStrings.search,
           hintStyle: const TextStyle(
             color: AppColors.grey,

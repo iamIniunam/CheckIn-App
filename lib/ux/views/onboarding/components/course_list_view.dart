@@ -27,6 +27,7 @@ class CourseListView extends StatelessWidget {
       crossAxisCount: 2,
       childAspectRatio: 2.35,
       mainAxisSpacing: 10,
+      physics: const AlwaysScrollableScrollPhysics(),
       children: courses.map((course) {
         final selectedSchool = viewModel.getChosenSchoolForCourse(course);
         return CourseEnrollmentCard(

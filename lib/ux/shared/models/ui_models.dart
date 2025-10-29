@@ -1,3 +1,4 @@
+import 'package:attendance_app/platform/api/attendance/models/attendance_request.dart';
 import 'package:attendance_app/ux/shared/components/global_functions.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:flutter/material.dart';
@@ -93,6 +94,51 @@ class Course {
     return courseColors[index % courseColors.length];
   }
 
+  /// Assign a stable, unique color index to each course in [courses].
+  ///
+  /// This returns a new list of `Course` objects where each course has an
+  /// `index` chosen deterministically from the course `id` (or `courseCode`
+  /// fallback) and collisions are resolved by linear probing so colors are
+  /// not duplicated until the palette is exhausted. If there are more
+  /// courses than available colors, colors will necessarily repeat but this
+  /// algorithm still tries to maximize uniqueness.
+  static List<Course> assignUniqueColors(List<Course> courses) {
+    final int paletteLen = courseColors.length;
+    final used = List<bool>.filled(paletteLen, false);
+    final result = <Course>[];
+
+    for (final c in courses) {
+      // Use numeric id when available, otherwise hash the courseCode to an int
+      final baseKey =
+          (c.id != null && (c.id ?? 0) > 0) ? c.id! : c.courseCode.hashCode;
+      int idx = baseKey.abs() % paletteLen;
+      final start = idx;
+
+      // Linear probe to find an unused color index
+      while (used[idx]) {
+        idx = (idx + 1) % paletteLen;
+        if (idx == start) break; // all used; will reuse
+      }
+
+      used[idx] = true;
+
+      result.add(Course(
+        id: c.id,
+        courseCode: c.courseCode,
+        courseTitle: c.courseTitle,
+        creditHours: c.creditHours,
+        level: c.level,
+        semester: c.semester,
+        school: c.school,
+        status: c.status,
+        showStatus: c.showStatus,
+        index: idx,
+      ));
+    }
+
+    return result;
+  }
+
   Color get getStatusColor => statusColor(status ?? '');
 
   Course({
@@ -145,14 +191,14 @@ class AttendanceClass {
   final int id;
   final String name;
   final int courseId;
-  // final String mode;
+  final String mode;
   final DateTime date;
 
   AttendanceClass({
     required this.id,
     required this.name,
     required this.courseId,
-    // required this.mode,
+    required this.mode,
     required this.date,
   });
 
@@ -161,7 +207,7 @@ class AttendanceClass {
       id: json['id'] as int,
       name: json['name'] as String,
       courseId: json['course_id'] as int,
-      // mode: json['mode'] as String, //TODO check why this is throws null when parsing sometimes
+      mode: (json['mode'] as String?) ?? 'Unknown',
       date: DateTime.parse(json['date'] as String),
     );
   }
@@ -171,7 +217,7 @@ class AttendanceClass {
       'id': id,
       'name': name,
       'course_id': courseId,
-      // 'mode': mode,
+      'mode': mode,
       'date': date.toIso8601String(),
     };
   }
@@ -182,12 +228,14 @@ class AttendanceRecord {
   final String studentId;
   final int classId;
   final DateTime date;
+  final String? status;
 
   AttendanceRecord({
     required this.id,
     required this.studentId,
     required this.classId,
     required this.date,
+    this.status,
   });
 
   factory AttendanceRecord.fromJson(Map<String, dynamic> json) {
@@ -196,6 +244,7 @@ class AttendanceRecord {
       studentId: json['student_id'] as String,
       classId: json['class_id'] as int,
       date: DateTime.parse(json['date'] as String),
+      status: json['status'] as String?,
     );
   }
 
@@ -205,6 +254,7 @@ class AttendanceRecord {
       'student_id': studentId,
       'class_id': classId,
       'date': date.toIso8601String(),
+      'status': status,
     };
   }
 }
@@ -216,7 +266,9 @@ class CourseAttendanceRecord {
   CourseAttendanceRecord(
       {required this.attendanceClass, this.attendanceRecord});
 
-  bool get isPresent => attendanceRecord != null;
+  bool get isPresent =>
+      attendanceRecord != null &&
+      (attendanceRecord?.status ?? '') == AttendanceStatus.authorized.value;
 
   String get status => isPresent ? 'Present' : 'Absent';
   Color get getStatusColor => statusColor(status);

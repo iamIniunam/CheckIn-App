@@ -241,6 +241,7 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
               onClearSearch: clearSearch,
               onChanged: onSearchChanged,
               onSearchSubmitted: (value) {
+                if (value.trim().isEmpty) return;
                 searchViewModel.searchCourses(value.trim());
                 FocusScope.of(context).unfocus();
               },

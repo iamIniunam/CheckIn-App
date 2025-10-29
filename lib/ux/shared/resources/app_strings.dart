@@ -134,6 +134,7 @@ class AppStrings {
   static const yesCancel = 'Yes, cancel';
   //Attendance
   static const cancelFaceVerification = 'Cancel Face Verification?';
+  static const cancelVerification = 'Cancel Verification?';
   static const ifYouExitNowYourAttendanceWont =
       'If you exit now, your attendance won’t be marked. Are you sure you want to cancel?';
   static const registerFace = 'Register Face';

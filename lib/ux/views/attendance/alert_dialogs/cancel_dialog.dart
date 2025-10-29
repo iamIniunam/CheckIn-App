@@ -66,7 +66,7 @@ class LocationCancelDialog {
   }) async {
     final result = await AppDialogs.showWarningDialog(
       context: context,
-      title: AppStrings.cancelLocationVerification,
+      title: AppStrings.cancelVerification,
       message: AppStrings.ifYouExitNowYourAttendanceWont,
       secondOption: AppStrings.yesCancel,
       firstOption: 'No',

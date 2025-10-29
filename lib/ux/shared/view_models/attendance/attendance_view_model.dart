@@ -96,7 +96,7 @@ class AttendanceViewModel extends ChangeNotifier {
   Future<AttendanceMarkResult> markAttendanceAuthorized({
     required String code,
     required String studentId,
-    String? location,
+    required String location,
     double? latitude,
     double? longitude,
   }) async {
