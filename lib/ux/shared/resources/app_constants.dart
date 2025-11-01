@@ -1,8 +1,8 @@
 class AppConstants {
   AppConstants._();
 
-  // static const apiBaseUrl = 'http://10.36.218.84:8000/api';
-  static const apiBaseUrl = 'http://192.168.100.5:8000/api';
+  static const apiBaseUrl = 'http://10.36.218.84:8000/api';
+  // static const apiBaseUrl = 'http://192.168.100.5:8000/api';
 
   static const isLoggedInKey = 'is.logged.in';
   static const studentDataKey = 'student.data';
