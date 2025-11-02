@@ -1,16 +1,43 @@
-# attendance_app
+📱 CheckIn Mobile App
+Overview
 
-A new Flutter project.
+CheckIn is a student-focused mobile application designed to simplify and automate attendance tracking within academic institutions. Built with Flutter and powered by a PHP + MySQL backend, the app allows students to easily sign up, scan QR codes, and verify attendance using their registered details.
 
-## Getting Started
+🎯 Key Features
 
-This project is a starting point for a Flutter application.
+Student Authentication – Secure sign-up and login.
 
-A few resources to get you started if this is your first Flutter project:
+QR Code Scanning – Instant attendance marking through QR verification.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Attendance History – Students can view their attendance records in real-time.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Sync with Web System – Seamlessly integrates with the CheckIn Web app for centralized management.
+
+🛠️ Tech Stack
+
+Frontend: Flutter
+
+Backend: PHP
+
+Database: MySQL
+
+Version Control: Git & GitHub
+
+🧩 Related Project
+
+For lecturer and admin functionalities, see the web version:
+👉 CheckIn Web App
+
+🚀 Getting Started
+
+Clone the repository
+
+git clone https://github.com/iamIniunam/CheckIn-App.git
+
+
+Open with VS Code or Android Studio
+
+Run the project
+
+flutter pub get
+flutter run
