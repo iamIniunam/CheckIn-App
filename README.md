@@ -25,7 +25,7 @@ Version Control: Git & GitHub
 ## 🧩 Related Project
 
 For lecturer and admin functionalities, see the web version:
-👉 CheckIn Web App
+👉 [CheckIn Web App](https://github.com/iamIniunam/CheckIn-Web)
 
 ## 🚀 Getting Started
 
