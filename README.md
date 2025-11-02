@@ -30,13 +30,14 @@ For lecturer and admin functionalities, see the web version:
 ## 🚀 Getting Started
 
 Clone the repository
-
+```bash
 git clone https://github.com/iamIniunam/CheckIn-App.git
-
+```
 
 Open with VS Code or Android Studio
 
 Run the project
-
+```bash
 flutter pub get
 flutter run
+```
