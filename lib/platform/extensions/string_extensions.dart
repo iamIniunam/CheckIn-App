@@ -9,3 +9,7 @@ extension NullableStringExtension on String? {
     return this?.isBlank ?? true;
   }
 }
+
+extension Pluralize on String {
+  String pluralize(int count) => count == 1 ? this : '${this}s';
+}

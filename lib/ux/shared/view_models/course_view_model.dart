@@ -1,5 +1,8 @@
+import 'package:attendance_app/platform/course_search_helper.dart';
+import 'package:attendance_app/platform/extensions/string_extensions.dart';
 import 'package:attendance_app/platform/repositories/course_repository.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
+import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:flutter/material.dart';
 
 class CourseViewModel extends ChangeNotifier {
@@ -21,6 +24,8 @@ class CourseViewModel extends ChangeNotifier {
   int _coursesRegistered = 0;
   List<String> _failedCourses = [];
 
+  String _searchQuery = '';
+
   // Getters
   List<Course> get registeredCourses => List.unmodifiable(_registeredCourses);
   bool get isLoadingRegisteredCourses => _isLoadingRegisteredCourses;
@@ -31,12 +36,62 @@ class CourseViewModel extends ChangeNotifier {
   bool get hasRegistrationError => _registrationError != null;
   bool get hasLoadedRegisteredCourses => _hasLoadedRegisteredCourses;
 
+  String get searchQuery => _searchQuery;
+
   int get totalCoursesToRegister => _totalCoursesToRegister;
   int get coursesRegistered => _coursesRegistered;
   double get registrationProgress => _totalCoursesToRegister > 0
       ? _coursesRegistered / _totalCoursesToRegister
       : 0.0;
   List<String> get failedCourses => List.unmodifiable(_failedCourses);
+
+  int get totalRegisteredCredits {
+    return _registeredCourses.fold(
+        0, (sum, course) => sum + (course.creditHours ?? 0));
+  }
+
+  int get remainingCredits {
+    final remaining = AppConstants.requiredCreditHours - totalRegisteredCredits;
+    return remaining > 0 ? remaining : 0;
+  }
+
+  List<Course> get displayedCourses {
+    final courseToSearch = _registeredCourses;
+
+    if (_searchQuery.isEmpty) {
+      return List.unmodifiable(courseToSearch);
+    }
+
+    return CourseSearchHelper.searchCourses(courseToSearch, _searchQuery);
+  }
+
+  // Helper: find an existing registered course by its id.
+  Course? findExistingById(int? id) {
+    if (id == null) return null;
+    for (final rc in _registeredCourses) {
+      if (rc.id != null && rc.id == id) return rc;
+    }
+    return null;
+  }
+
+  // Helper: find an existing registered course with same code and school.
+  Course? findExistingSameSchool(String courseCode, String school) {
+    for (final rc in _registeredCourses) {
+      if (rc.courseCode == courseCode && (rc.school ?? '').trim() == school) {
+        return rc;
+      }
+    }
+    return null;
+  }
+
+  // Helper: get set of non-empty schools that already have this courseCode registered.
+  Set<String> existingOtherSchoolsForCode(String courseCode) {
+    return _registeredCourses
+        .where((rc) => rc.courseCode == courseCode)
+        .map((rc) => (rc.school ?? '').trim())
+        .where((s) => s.isNotEmpty)
+        .toSet();
+  }
 
   Future<void> loadRegisteredCourses(String studentId,
       {bool forceRefresh = false}) async {
@@ -89,10 +144,79 @@ class CourseViewModel extends ChangeNotifier {
     }
   }
 
-  Future<bool> registerCourses({
-    required String studentId,
-    required List<Course> courses,
-  }) async {
+  Future<bool> registerCourses(
+      {required String studentId,
+      required List<Course> courses,
+      bool isAdding = false}) async {
+    // First, ensure none of the selected courses are already registered
+    // for this student to avoid duplicate registrations. Use helper methods
+    // above to keep the logic small and readable.
+    final List<String> duplicateDetails = [];
+    final Set<String> seenCourseCodes = {};
+
+    for (final course in courses) {
+      final courseCode = course.courseCode;
+      if (seenCourseCodes.contains(courseCode)) continue;
+
+      final school = (course.school ?? '').trim();
+      final existingById = findExistingById(course.id);
+
+      if (existingById != null) {
+        duplicateDetails.add(
+            '$courseCode is already registered${existingById.school != null && (existingById.school ?? '').isNotEmpty ? ' under ${existingById.school}' : ''}');
+        seenCourseCodes.add(courseCode);
+        continue;
+      }
+
+      final existingSameSchool = findExistingSameSchool(courseCode, school);
+      if (existingSameSchool != null) {
+        duplicateDetails
+            .add('$courseCode${school.isNotEmpty ? ' — $school' : ''}');
+        seenCourseCodes.add(courseCode);
+        continue;
+      }
+
+      final existingOtherSchools = existingOtherSchoolsForCode(courseCode);
+      if (existingOtherSchools.isNotEmpty &&
+          !(existingOtherSchools.length == 1 &&
+              existingOtherSchools.contains(school))) {
+        duplicateDetails.add(
+            '$courseCode is already registered under ${existingOtherSchools.join(', ')}');
+        seenCourseCodes.add(courseCode);
+        continue;
+      }
+    }
+
+    if (duplicateDetails.isNotEmpty) {
+      final details = duplicateDetails.join('\n');
+      final count = duplicateDetails.length;
+      _registrationError =
+          'Duplicate ${'course'.pluralize(count)} found:\n$details\n\nRemove ${count == 1 ? 'it' : 'them'} to continue.';
+      _isRegisteringCourses = false;
+      notifyListeners();
+      return false;
+    }
+
+    final int newCredits =
+        courses.fold(0, (sum, course) => sum + (course.creditHours ?? 0));
+
+    int currentCredits = 0;
+    if (isAdding) {
+      currentCredits = _registeredCourses.fold(
+          0, (sum, course) => sum + (course.creditHours ?? 0));
+    }
+
+    final int totalCredits = currentCredits + newCredits;
+
+    if (totalCredits > AppConstants.requiredCreditHours) {
+      _registrationError = isAdding
+          ? 'Cannot add $newCredits credits. You currently have $currentCredits, which would exceed the max of ${AppConstants.requiredCreditHours} (total $totalCredits).'
+          : 'Total $totalCredits credits exceed the max of ${AppConstants.requiredCreditHours}. You currently have $currentCredits.';
+      _isRegisteringCourses = false;
+      notifyListeners();
+      return false;
+    }
+
     // Validate that the same course code hasn't been selected from
     // different schools. If so, block registration and show a clear error.
     final Map<String, Set<String>> codeToSchools = {};

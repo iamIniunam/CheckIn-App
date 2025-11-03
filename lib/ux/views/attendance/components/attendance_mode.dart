@@ -3,11 +3,7 @@ import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class AttendanceMode extends StatelessWidget {
-  const AttendanceMode({
-    super.key,
-    required this.mode,
-    required this.onTap
-  });
+  const AttendanceMode({super.key, required this.mode, required this.onTap});
 
   final String mode;
   final VoidCallback onTap;
@@ -28,9 +24,10 @@ class AttendanceMode extends StatelessWidget {
           child: Text(
             mode,
             style: const TextStyle(
-                color: AppColors.defaultColor,
-                fontSize: 32,
-                fontWeight: FontWeight.w600),
+              color: AppColors.defaultColor,
+              fontSize: 32,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ),

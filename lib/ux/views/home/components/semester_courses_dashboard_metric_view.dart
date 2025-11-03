@@ -7,7 +7,6 @@ import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
 import 'package:attendance_app/ux/shared/components/section_header.dart';
-import 'package:attendance_app/ux/views/course/full_course_list_page.dart';
 import 'package:attendance_app/ux/views/home/components/single_course_card.dart';
 import 'package:attendance_app/ux/views/onboarding/course_enrollment_page.dart';
 import 'package:flutter/material.dart';
@@ -83,30 +82,32 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
 
         return Column(
           children: [
-            SectionHeader(
+            const SectionHeader(
               period: AppStrings.semesterCourses,
-              hasAction: courseInfo.length > 9,
-              onTap: () {
-                if (courseInfo.length > 9) {
-                  Navigation.navigateToScreen(
-                    context: context,
-                    screen: FullCourseListPage(
-                      courses: courseInfo,
-                    ),
-                  );
-                }
-              },
+              hasAction: false,
+              // onTap: () {
+              //   if (courseInfo.length > 9) {
+              //     Navigation.navigateToScreen(
+              //       context: context,
+              //       screen: FullCourseListPage(
+              //         courses: courseInfo,
+              //       ),
+              //     );
+              //   }
+              // },
             ),
             DashboardMetricGridView(
               padding: const EdgeInsets.only(
                   left: 16, top: 10, right: 16, bottom: 16),
               crossAxisCount: 3,
-              children: courseInfo.length > 9
-                  ? courseInfo
-                      .take(9)
-                      .map((course) => SingleCourseCard(course: course))
-                      .toList()
-                  : courseInfo
+              children: 
+              // courseInfo.length > 9
+              //     ? courseInfo
+              //         .take(9)
+              //         .map((course) => SingleCourseCard(course: course))
+              //         .toList()
+              //     : 
+                  courseInfo
                       .map((course) => SingleCourseCard(course: course))
                       .toList(),
             ),

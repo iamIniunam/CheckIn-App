@@ -117,6 +117,7 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
       return await courseViewModel.registerCourses(
         studentId: studentId,
         courses: searchViewModel.selectedCourses.toList(),
+        isAdding: widget.isEdit,
       );
     } catch (e) {
       return false;
@@ -270,7 +271,9 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
                 return Expanded(
                   child: Column(
                     children: [
-                      CourseListContent(viewModel: searchViewModel),
+                      CourseListContent(
+                          viewModel: searchViewModel,
+                          courseViewModel: courseViewModel),
                       ConfirmationSection(
                         totalCreditHours: searchViewModel.totalCreditHours,
                         onConfirmPressed: onConfirmPressed,

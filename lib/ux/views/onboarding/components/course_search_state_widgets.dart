@@ -2,13 +2,16 @@ import 'package:attendance_app/ux/shared/components/empty_state_widget.dart';
 import 'package:attendance_app/ux/shared/components/page_state_indicator.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/view_models/course_search_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
 import 'package:attendance_app/ux/views/onboarding/components/course_list_view.dart';
 import 'package:flutter/material.dart';
 
 class CourseListContent extends StatelessWidget {
-  const CourseListContent({super.key, required this.viewModel});
+  const CourseListContent(
+      {super.key, required this.viewModel, required this.courseViewModel});
 
   final CourseSearchViewModel viewModel;
+  final CourseViewModel courseViewModel;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +37,7 @@ class CourseListContent extends StatelessWidget {
               : Icons.school_rounded,
           message: viewModel.isSearching
               ? 'No courses found'
-              : 'No courses available for \nlevel ${viewModel.selectedLevel}, semester ${viewModel.selectedSemester}',
+              : 'No courses found for the selected filters:\n${viewModel.filterSummary}',
         ),
       );
     }
@@ -42,8 +45,24 @@ class CourseListContent extends StatelessWidget {
     return Expanded(
       child: Column(
         children: [
-          if (viewModel.isSearching || viewModel.hasActiveFilter)
-            CoursesFoundHeader(courseCount: courses.length),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (viewModel.isSearching || viewModel.hasActiveFilter)
+                CoursesFoundHeader(courseCount: courses.length),
+              const SizedBox(width: 8),
+              Visibility(
+                visible: courseViewModel.hasLoadedRegisteredCourses,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 16, top: 8, right: 16),
+                  child: Text(
+                    'Total credits registered: ${courseViewModel.totalRegisteredCredits.toString()}',
+                    style: const TextStyle(color: AppColors.defaultColor),
+                  ),
+                ),
+              ),
+            ],
+          ),
           Expanded(
             child: CourseListView(
               courses: courses,
@@ -71,7 +90,6 @@ class CoursesFoundHeader extends StatelessWidget {
             '$courseCount course${courseCount == 1 ? '' : 's'} found',
             style: const TextStyle(
               color: AppColors.defaultColor,
-              fontSize: 14,
               fontWeight: FontWeight.w300,
             ),
           ),
