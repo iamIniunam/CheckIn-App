@@ -271,8 +271,27 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
     if (result.success) {
       return true;
     } else {
+      // If the backend returned the generic 'Unable to find class' message
+      // it's likely because the student entered a wrong/invalid online code.
+      // Append a user-friendly hint to the error message so the student
+      // understands they should re-check the code.
+      String message = result.errorMessage ?? 'Unable to submit attendance';
+      final lower = message.toLowerCase();
+      // Only append the 'wrong code' hint when the error text looks like the
+      // server returned the specific 'Unable to find class' message AND the
+      // entered online code is plausibly a user-typed code (not JSON or a
+      // long payload). This reduces false positives for unrelated server
+      // errors.
+      final onlineCodeValue = onlineCode.trim();
+      final isPlainCode =
+          RegExp(r'^[A-Za-z0-9\-]{3,20}$').hasMatch(onlineCodeValue);
+      if (lower.contains('unable to find class') && isPlainCode) {
+        message =
+            '$message — this usually means the attendance code entered is incorrect. Please check the code and try again.';
+      }
+
       updateState(_verificationState.copyWith(
-        errorMessage: result.errorMessage,
+        errorMessage: message,
       ));
       return false;
     }

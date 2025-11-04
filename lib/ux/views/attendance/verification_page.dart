@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:provider/provider.dart';
+import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
 
 class VerificationPage extends StatefulWidget {
   const VerificationPage(
@@ -216,6 +217,13 @@ class _VerificationPageState extends State<VerificationPage> {
     if (verificationStep == VerificationStep.onlineCodeEntry) {
       return () {
         () async {
+          final entered = viewModel.enteredOnlineCode;
+          if (entered == null || entered.trim().isEmpty) {
+            AppDialogs.showErrorDialog(
+                context: context, message: 'Please enter the attendance code');
+            return;
+          }
+
           final success = await viewModel.submitAttendance();
           if (!mounted) return;
           if (success) {
@@ -229,6 +237,11 @@ class _VerificationPageState extends State<VerificationPage> {
             viewModel.updateState(viewModel.verificationState
                 .copyWith(isLoading: false, clearError: true));
             viewModel.moveToNextStep(); // now at completed
+          } else {
+            // Show an error dialog so the user knows the online code was wrong.
+            final message = viewModel.verificationState.errorMessage ??
+                'The code you entered is invalid. Please try again.';
+            AppDialogs.showErrorDialog(context: context, message: message);
           }
         }();
       };
