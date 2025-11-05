@@ -1,3 +1,4 @@
+import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
@@ -8,7 +9,6 @@ import 'package:attendance_app/ux/shared/components/app_buttons.dart';
 import 'package:attendance_app/ux/views/onboarding/login_page.dart';
 import 'package:attendance_app/ux/views/profile/components/profile_detail_item.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -18,36 +18,19 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  // late UserViewModel userViewModel;
-  // late CourseSearchViewModel searchViewModel;
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   // userViewModel = context.read<UserViewModel>();
-  //   // searchViewModel = context.read<CourseSearchViewModel>();
-  // }
-
-  // String getUserSchool() {
-  //   String savedSchool = userViewModel.savedPrimarySchool;
-  //   if (savedSchool.isNotEmpty) {
-  //     return savedSchool;
-  //   }
-
-  //   String calculatedSchool =
-  //       userViewModel.getUserPrimarySchool(searchViewModel.chosenSchools);
-  //   return calculatedSchool;
-  // }
+  final AuthViewModel _authViewModel = AppDI.getIt<AuthViewModel>();
 
   Future<void> handleLogout() async {
     final navigatorState = Navigator.of(context, rootNavigator: false);
-    final authViewModel = context.read<AuthViewModel>();
-
     AppDialogs.showLoadingDialog(context);
 
     await Future.delayed(const Duration(milliseconds: 100));
 
-    await authViewModel.logout();
+    try {
+      await _authViewModel.logout();
+    } catch (e) {
+      // ignore logout errors, but ensure we still navigate
+    }
 
     if (!mounted) return;
 
@@ -55,7 +38,7 @@ class _ProfilePageState extends State<ProfilePage> {
       navigatorState.pop();
     } catch (_) {}
 
-    Navigation.navigateToScreen(
+    Navigation.navigateToScreenAndClearAllPrevious(
       context: context,
       screen: const LoginPage(),
     );
@@ -63,19 +46,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    // final semester = userViewModel.semester;
-
-    // String semesterText;
-    // if (semester == 1) {
-    //   semesterText = '1st';
-    // } else if (semester == 2) {
-    //   semesterText = '2nd';
-    // } else {
-    //   semesterText = 'Unknown';
-    // }
-
-    final currentStudent = context.watch<AuthViewModel>().currentStudent;
-
     return AppPageScaffold(
       title: AppStrings.studentProfile,
       body: Padding(
@@ -84,31 +54,6 @@ class _ProfilePageState extends State<ProfilePage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           children: [
-            // AppMaterial(
-            //   customBorder: const CircleBorder(),
-            //   child: CircleAvatar(
-            //     radius: 80,
-            //     backgroundColor: AppColors.defaultColor,
-            //     foregroundColor: AppColors.transparent,
-            //     backgroundImage: AppImages.defaultProfileImageTeal,
-            //   ),
-            // ),
-            // const SizedBox(height: 16),
-            // Text(
-            //   userViewModel.fullName,
-            //   style: const TextStyle(
-            //       color: AppColors.defaultColor,
-            //       fontSize: 24,
-            //       fontWeight: FontWeight.bold),
-            // ),
-            // Text(
-            //   userViewModel.program,
-            //   style: const TextStyle(
-            //       color: Colors.grey,
-            //       fontSize: 18,
-            //       fontWeight: FontWeight.w500),
-            // ),
-            // const SizedBox(height: 36),
             Container(
               padding: const EdgeInsets.only(
                   left: 36, top: 24, right: 36, bottom: 36),
@@ -119,18 +64,23 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ProfileDetailItem(
+                  ProfileDetailCard(
                       title: AppStrings.firstName,
-                      value: currentStudent?.firstName ?? 'N/A'),
-                  ProfileDetailItem(
+                      value:
+                          _authViewModel.appUser?.studentProfile?.firstName ??
+                              'N/A'),
+                  ProfileDetailCard(
                       title: AppStrings.lastName,
-                      value: currentStudent?.lastName ?? 'N/A'),
-                  ProfileDetailItem(
+                      value: _authViewModel.appUser?.studentProfile?.lastName ??
+                          'N/A'),
+                  ProfileDetailCard(
                       title: AppStrings.idNumber,
-                      value: currentStudent?.idNumber ?? 'N/A'),
-                  ProfileDetailItem(
+                      value: _authViewModel.appUser?.studentProfile?.idNumber ??
+                          'N/A'),
+                  ProfileDetailCard(
                     title: AppStrings.program,
-                    value: currentStudent?.program ?? 'N/A',
+                    value: _authViewModel.appUser?.studentProfile?.program ??
+                        'N/A',
                     textDirection: TextDirection.rtl,
                   ),
                   // ProfileDetailItem(
@@ -145,7 +95,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             const Spacer(),
-            // Logout button pinned to the bottom
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: PrimaryButton(

@@ -1,17 +1,15 @@
 import 'package:attendance_app/platform/course_search_helper.dart';
+import 'package:attendance_app/platform/data_source/api/api.dart';
+import 'package:attendance_app/platform/data_source/api/course/models/course_request.dart';
+import 'package:attendance_app/platform/data_source/api/course/models/course_response.dart';
+import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/platform/extensions/string_extensions.dart';
-import 'package:attendance_app/platform/repositories/course_repository.dart';
-import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:flutter/material.dart';
 
 class CourseViewModel extends ChangeNotifier {
-  final CourseRepository _repository;
+  final Api _api = AppDI.getIt<Api>();
 
-  CourseViewModel({CourseRepository? repository})
-      : _repository = repository ?? CourseRepository();
-
-  // Registered courses from API
   List<Course> _registeredCourses = [];
   String? _lastLoadedStudentId;
   bool _isLoadingRegisteredCourses = false;
@@ -65,7 +63,7 @@ class CourseViewModel extends ChangeNotifier {
     return CourseSearchHelper.searchCourses(courseToSearch, _searchQuery);
   }
 
-  // Helper: find an existing registered course by its id.
+  // Helper methods
   Course? findExistingById(int? id) {
     if (id == null) return null;
     for (final rc in _registeredCourses) {
@@ -74,7 +72,6 @@ class CourseViewModel extends ChangeNotifier {
     return null;
   }
 
-  // Helper: find an existing registered course with same code and school.
   Course? findExistingSameSchool(String courseCode, String school) {
     for (final rc in _registeredCourses) {
       if (rc.courseCode == courseCode && (rc.school ?? '').trim() == school) {
@@ -84,7 +81,6 @@ class CourseViewModel extends ChangeNotifier {
     return null;
   }
 
-  // Helper: get set of non-empty schools that already have this courseCode registered.
   Set<String> existingOtherSchoolsForCode(String courseCode) {
     return _registeredCourses
         .where((rc) => rc.courseCode == courseCode)
@@ -95,16 +91,10 @@ class CourseViewModel extends ChangeNotifier {
 
   Future<void> loadRegisteredCourses(String studentId,
       {bool forceRefresh = false}) async {
-    // If we've already loaded courses for the same student and no force
-    // refresh was requested, skip the network call. This prevents showing
-    // stale courses from a previous user when the currently logged-in
-    // student is the same as the last loaded one. If the studentId changed
-    // we must reload.
     if (_hasLoadedRegisteredCourses &&
         !forceRefresh &&
         _lastLoadedStudentId == studentId) return;
 
-    // Defensive: do not attempt network call if studentId is empty.
     if (studentId.trim().isEmpty) {
       _registeredCoursesError = 'No student id provided';
       _registeredCourses = [];
@@ -119,12 +109,12 @@ class CourseViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _repository.fetchRegisteredCourses(studentId);
+      final request = GetRegisteredCoursesRequest(studentId: studentId);
+      final response = await _api.courseApi.getRegisteredCourses(request);
 
-      if (response.data != null) {
-        // Ensure each course is assigned a unique color from the palette.
-        final raw = response.data ?? [];
-        _registeredCourses = Course.assignUniqueColors(raw);
+      if (response.status == ApiResponseStatus.Success &&
+          response.response != null) {
+        _registeredCourses = response.response as List<Course>;
         _registeredCoursesError = null;
         _hasLoadedRegisteredCourses = true;
         _lastLoadedStudentId = studentId;
@@ -144,13 +134,106 @@ class CourseViewModel extends ChangeNotifier {
     }
   }
 
-  Future<bool> registerCourses(
-      {required String studentId,
-      required List<Course> courses,
-      bool isAdding = false}) async {
-    // First, ensure none of the selected courses are already registered
-    // for this student to avoid duplicate registrations. Use helper methods
-    // above to keep the logic small and readable.
+  Future<bool> registerCourses({
+    required String studentId,
+    required List<Course> courses,
+    bool isAdding = false,
+  }) async {
+    // Validate duplicates
+    final duplicateDetails = _checkForDuplicates(courses);
+    if (duplicateDetails.isNotEmpty) {
+      final details = duplicateDetails.join('\n');
+      final count = duplicateDetails.length;
+      _registrationError =
+          'Duplicate ${'course'.pluralize(count)} found:\n$details\n\nRemove ${count == 1 ? 'it' : 'them'} to continue.';
+      _isRegisteringCourses = false;
+      notifyListeners();
+      return false;
+    }
+
+    // Validate credit hours
+    final creditValidation = _validateCredits(courses, isAdding);
+    if (creditValidation != null) {
+      _registrationError = creditValidation;
+      _isRegisteringCourses = false;
+      notifyListeners();
+      return false;
+    }
+
+    // Validate course code conflicts
+    final conflictValidation = _validateCourseCodeConflicts(courses);
+    if (conflictValidation != null) {
+      _registrationError = conflictValidation;
+      _isRegisteringCourses = false;
+      notifyListeners();
+      return false;
+    }
+
+    _isRegisteringCourses = true;
+    _registrationError = null;
+    _totalCoursesToRegister = courses.length;
+    _coursesRegistered = 0;
+    _failedCourses = [];
+    notifyListeners();
+
+    try {
+      for (final course in courses) {
+        if (course.id == null) {
+          debugPrint('Skipping ${course.courseCode} - no ID');
+          _failedCourses.add('${course.courseCode} (No ID)');
+          continue;
+        }
+
+        try {
+          final request = RegisterCourseRequest(
+            courseId: course.id!,
+            studentId: studentId,
+          );
+
+          final response = await _api.courseApi.registerCourse(request);
+
+          if (response.status == ApiResponseStatus.Success) {
+            _coursesRegistered++;
+            debugPrint('Successfully registered ${course.courseCode}');
+          } else {
+            _failedCourses
+                .add('${course.courseCode} (Error: ${response.message})');
+            debugPrint(
+                'Failed to register ${course.courseCode}: ${response.message}');
+          }
+        } catch (e) {
+          _failedCourses.add('${course.courseCode} (Error: $e)');
+          debugPrint('Error registering ${course.courseCode}: $e');
+        }
+        notifyListeners();
+      }
+
+      final allSuccess = _failedCourses.isEmpty;
+
+      if (allSuccess) {
+        await loadRegisteredCourses(studentId, forceRefresh: true);
+        _isRegisteringCourses = false;
+        notifyListeners();
+        return true;
+      } else {
+        _registrationError = _failedCourses.length == courses.length
+            ? 'Failed to register all courses'
+            : 'Successfully registered $_coursesRegistered of $_totalCoursesToRegister courses';
+
+        await loadRegisteredCourses(studentId, forceRefresh: true);
+        _isRegisteringCourses = false;
+        notifyListeners();
+        return _coursesRegistered > 0;
+      }
+    } catch (e) {
+      _registrationError = 'An unexpected error occurred: ${e.toString()}';
+      _isRegisteringCourses = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  List<String> _checkForDuplicates(List<Course> courses) {
     final List<String> duplicateDetails = [];
     final Set<String> seenCourseCodes = {};
 
@@ -187,16 +270,10 @@ class CourseViewModel extends ChangeNotifier {
       }
     }
 
-    if (duplicateDetails.isNotEmpty) {
-      final details = duplicateDetails.join('\n');
-      final count = duplicateDetails.length;
-      _registrationError =
-          'Duplicate ${'course'.pluralize(count)} found:\n$details\n\nRemove ${count == 1 ? 'it' : 'them'} to continue.';
-      _isRegisteringCourses = false;
-      notifyListeners();
-      return false;
-    }
+    return duplicateDetails;
+  }
 
+  String? _validateCredits(List<Course> courses, bool isAdding) {
     final int newCredits =
         courses.fold(0, (sum, course) => sum + (course.creditHours ?? 0));
 
@@ -209,16 +286,15 @@ class CourseViewModel extends ChangeNotifier {
     final int totalCredits = currentCredits + newCredits;
 
     if (totalCredits > AppConstants.requiredCreditHours) {
-      _registrationError = isAdding
+      return isAdding
           ? 'Cannot add $newCredits credits. You currently have $currentCredits, which would exceed the max of ${AppConstants.requiredCreditHours} (total $totalCredits).'
           : 'Total $totalCredits credits exceed the max of ${AppConstants.requiredCreditHours}. You currently have $currentCredits.';
-      _isRegisteringCourses = false;
-      notifyListeners();
-      return false;
     }
 
-    // Validate that the same course code hasn't been selected from
-    // different schools. If so, block registration and show a clear error.
+    return null;
+  }
+
+  String? _validateCourseCodeConflicts(List<Course> courses) {
     final Map<String, Set<String>> codeToSchools = {};
     for (final course in courses) {
       final code = course.courseCode;
@@ -236,83 +312,10 @@ class CourseViewModel extends ChangeNotifier {
           .map((e) =>
               '${e.key} — ${e.value.where((s) => s.isNotEmpty).join(', ')}')
           .join('; ');
-      _registrationError =
-          'Duplicate course codes found in multiple schools: $details. \n\nPlease select only one.';
-      _isRegisteringCourses = false;
-      notifyListeners();
-      return false;
+      return 'Duplicate course codes found in multiple schools: $details. \n\nPlease select only one.';
     }
 
-    _isRegisteringCourses = true;
-    _registrationError = null;
-    _totalCoursesToRegister = courses.length;
-    _coursesRegistered = 0;
-    _failedCourses = [];
-    notifyListeners();
-
-    try {
-      for (final course in courses) {
-        if (course.id == null) {
-          debugPrint('Skipping ${course.courseCode} - no ID');
-          _failedCourses.add('${course.courseCode} (No ID)');
-          continue;
-        }
-
-        try {
-          // debugPrint(
-          //     'Registering course: ${course.courseCode} (ID: ${course.id}) for student: $studentId');
-
-          final response = await _repository.registerCourse(
-            courseId: course.id ?? 0,
-            studentId: studentId,
-          );
-
-          // debugPrint(
-          //     'Register API response for ${course.courseCode}: success=${response.success}, status=${response.statusCode}, message=${response.message}, data=${response.data}');
-
-          if (response.success) {
-            _coursesRegistered++;
-            debugPrint('Successfully registered ${course.courseCode}');
-          } else {
-            _failedCourses
-                .add('${course.courseCode} (Error: ${response.message})');
-            debugPrint(
-                'Failed to register ${course.courseCode}: ${response.message}');
-          }
-        } catch (e) {
-          _failedCourses.add('${course.courseCode} (Error: $e)');
-          debugPrint('Error registering ${course.courseCode}: $e');
-        }
-        notifyListeners();
-      }
-
-      final allSuccess = _failedCourses.isEmpty;
-
-      if (allSuccess) {
-        await loadRegisteredCourses(studentId, forceRefresh: true);
-
-        _isRegisteringCourses = false;
-        notifyListeners();
-        return true;
-      } else {
-        // Some courses failed
-        _registrationError = _failedCourses.length == courses.length
-            ? 'Failed to register all courses'
-            : 'Successfully registered $_coursesRegistered of $_totalCoursesToRegister courses';
-
-        // Still reload to get updated list
-        await loadRegisteredCourses(studentId, forceRefresh: true);
-
-        _isRegisteringCourses = false;
-        notifyListeners();
-        return _coursesRegistered > 0; // Return true if at least one succeeded
-      }
-    } catch (e) {
-      _registrationError = 'An unexpected error occurred: ${e.toString()}';
-      _isRegisteringCourses = false;
-      notifyListeners();
-      return false;
-    }
+    return null;
   }
 
   Future<void> reloadRegisteredCourses(String studentId) async {

@@ -8,6 +8,10 @@ extension NullableStringExtension on String? {
   bool get isNullOrBlank {
     return this?.isBlank ?? true;
   }
+
+  String ifNullOrBlank(String Function() defaultValue) {
+    return isNullOrBlank ? defaultValue() : this ?? defaultValue();
+  }
 }
 
 extension Pluralize on String {

@@ -1,3 +1,5 @@
+import 'package:attendance_app/platform/data_source/api/auth/models/auth_request.dart';
+import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
 import 'package:attendance_app/ux/shared/components/app_buttons.dart';
@@ -9,7 +11,6 @@ import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/views/onboarding/components/auth_redirection_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -19,119 +20,62 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  late final TextEditingController idNumberController;
-  late final TextEditingController passwordController;
-  late final GlobalKey<FormState> formKey;
+  final AuthViewModel authViewModel = AppDI.getIt<AuthViewModel>();
 
-  bool isPasswordVisible = false;
-  bool isLoading = false;
+  TextEditingController idNumberController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    idNumberController = TextEditingController();
-    passwordController = TextEditingController();
-    formKey = GlobalKey<FormState>();
-  }
+  bool isPasswordObscured = true;
 
   void togglePasswordVisibility() {
     setState(() {
-      isPasswordVisible = !isPasswordVisible;
+      isPasswordObscured = !isPasswordObscured;
     });
   }
 
-  Future<void> handleLogin() async {
-    FocusManager.instance.primaryFocus?.unfocus();
+  void handleLoginResult() {
+    final result = authViewModel.loginResult.value;
 
-    if (!validateForm()) return;
-
-    if (isLoading) return;
-
-    setState(() => isLoading = true);
-
-    try {
-      final viewModel = context.read<AuthViewModel>();
-
+    if (result.isLoading) {
       AppDialogs.showLoadingDialog(context);
-      // Show a loading dialog while the login request is in progress.
-      // var showedLoading = false;
-      // try {
-      // showedLoading = true;
+      return;
+    }
 
-      final success = await viewModel.login(
-        idNumber: idNumberController.text.trim(),
-        password: passwordController.text.trim(),
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    }
+
+    if (result.isSuccess) {
+      Navigation.navigateToScreenAndClearOnePrevious(
+        context: context,
+        screen: const NavigationHostPage(),
       );
-
-      if (!mounted) return;
-
-      // if (showedLoading) {
-      //   try {
-      //     dismissLoadingDialog();
-      //   } catch (_) {}
-      // }
-
-      if (success) {
-        handleLoginSuccess();
-      } else {
-        Navigation.back(context: context);
-        handleLoginError(viewModel);
-      }
-      // } finally {
-      //   // Ensure we don't leave the loading dialog shown on error
-      //   // if (showedLoading) {
-      //     try {
-      //       dismissLoadingDialog();
-      //     } catch (_) {}
-      //   // }
-      // }
-    } catch (e) {
-      if (!mounted) return;
-      try {
-        dismissLoadingDialog();
-      } catch (_) {}
-      showErrorDialog('An unexpected error occurred. Please try again.');
-    } finally {
-      if (mounted) {
-        setState(() => isLoading = false);
-      }
+    } else if (result.isError) {
+      final errorMessage = result.message ??
+          'Login failed. Please check your credentials and try again.';
+      AppDialogs.showErrorDialog(
+        context: context,
+        message: errorMessage,
+      );
     }
   }
 
-  bool validateForm() {
-    final formState = formKey.currentState;
-    if (formState == null || !formState.validate()) {
-      return false;
+  Future<void> handleLogin() async {
+    if (idNumberController.text.trim().isEmpty ||
+        passwordController.text.trim().isEmpty) {
+      AppDialogs.showErrorDialog(
+        context: context,
+        message: 'Please enter both ID number and password.',
+      );
+      return;
     }
-    return true;
-  }
-
-  void dismissLoadingDialog() {
-    try {
-      // Match the navigator used when showing the dialog (rootNavigator=false)
-      Navigator.of(context, rootNavigator: true).pop();
-    } catch (_) {}
-  }
-
-  void handleLoginSuccess() {
-    Navigation.navigateToScreenAndClearOnePrevious(
-      context: context,
-      screen: const NavigationHostPage(),
+    final request = LoginRequest(
+      idNumber: idNumberController.text.trim(),
+      password: passwordController.text.trim(),
     );
-  }
 
-  void handleLoginError(AuthViewModel viewModel) {
-    final errorMessage = viewModel.errorMessage ??
-        'Login failed. Please check your credentials and try again.';
-
-    showErrorDialog(errorMessage);
-  }
-
-  void showErrorDialog(String message) {
-    AppDialogs.showErrorDialog(
-      context: context,
-      message: message,
-    );
+    await authViewModel.login(loginRequest: request);
+    if (!mounted) return;
   }
 
   @override
@@ -147,22 +91,25 @@ class _LoginPageState extends State<LoginPage> {
       onTap: () {
         FocusManager.instance.primaryFocus?.unfocus();
       },
-      child: AbsorbPointer(
-        absorbing: false,
-        child: Scaffold(
-          resizeToAvoidBottomInset: false,
-          body: DecoratedBox(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AppImages.backgroundImage,
-                fit: BoxFit.cover,
-                colorFilter: ColorFilter.mode(
-                    AppColors.black.withOpacity(0.7), BlendMode.darken),
-              ),
-            ),
-            child: Consumer<AuthViewModel>(
-              builder: (context, authViewModel, _) {
-                return Center(
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: ValueListenableBuilder(
+            valueListenable: authViewModel.loginResult,
+            builder: (context, result, _) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                handleLoginResult();
+              });
+
+              return DecoratedBox(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AppImages.backgroundImage,
+                    fit: BoxFit.cover,
+                    colorFilter: ColorFilter.mode(
+                        AppColors.black.withOpacity(0.7), BlendMode.darken),
+                  ),
+                ),
+                child: Center(
                   child: ListView(
                     shrinkWrap: true,
                     padding: const EdgeInsets.only(left: 24, right: 24),
@@ -184,56 +131,50 @@ class _LoginPageState extends State<LoginPage> {
                           color: AppColors.white,
                           borderRadius: BorderRadius.circular(28),
                         ),
-                        child: Form(
-                          key: formKey,
-                          child: Column(
-                            children: [
-                              PrimaryTextFormField(
-                                labelText: AppStrings.studentIdNumber,
-                                controller: idNumberController,
-                                keyboardType: TextInputType.visiblePassword,
-                                hintText: AppStrings.sampleIdNumber,
-                                textInputAction: TextInputAction.next,
-                                textCapitalization:
-                                    TextCapitalization.characters,
-                                bottomPadding: 0,
-                              ),
-                              PrimaryTextFormField(
-                                labelText: AppStrings.password,
-                                hintText: AppStrings.enterYourPassword,
-                                controller: passwordController,
-                                keyboardType: TextInputType.visiblePassword,
-                                textInputAction: TextInputAction.done,
-                                obscureText: !isPasswordVisible,
-                                suffixWidget: IconButton(
-                                  icon: Icon(
-                                    isPasswordVisible
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
-                                    color: AppColors.defaultColor,
-                                  ),
-                                  onPressed: togglePasswordVisibility,
+                        child: Column(
+                          children: [
+                            PrimaryTextFormField(
+                              labelText: AppStrings.studentIdNumber,
+                              controller: idNumberController,
+                              keyboardType: TextInputType.visiblePassword,
+                              hintText: AppStrings.sampleIdNumber,
+                              textInputAction: TextInputAction.next,
+                              textCapitalization: TextCapitalization.characters,
+                              bottomPadding: 0,
+                            ),
+                            PrimaryTextFormField(
+                              labelText: AppStrings.password,
+                              hintText: AppStrings.enterYourPassword,
+                              controller: passwordController,
+                              keyboardType: TextInputType.visiblePassword,
+                              textInputAction: TextInputAction.done,
+                              obscureText: isPasswordObscured,
+                              suffixWidget: IconButton(
+                                icon: Icon(
+                                  isPasswordObscured
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                  color: AppColors.defaultColor,
                                 ),
-                                bottomPadding: 0,
+                                onPressed: togglePasswordVisibility,
                               ),
-                              const SizedBox(height: 30),
-                              PrimaryButton(
-                                onTap: handleLogin,
-                                child: const Text(AppStrings.login),
-                              ),
-                              const SizedBox(height: 16),
-                              const AuthRedirectionWidget(isLogin: true),
-                            ],
-                          ),
+                              bottomPadding: 0,
+                            ),
+                            const SizedBox(height: 30),
+                            PrimaryButton(
+                              onTap: handleLogin,
+                              child: const Text(AppStrings.login),
+                            ),
+                            const SizedBox(height: 16),
+                            const AuthRedirectionWidget(isLogin: true),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                );
-              },
-            ),
-          ),
-        ),
+                ),
+              );
+            }),
       ),
     );
   }

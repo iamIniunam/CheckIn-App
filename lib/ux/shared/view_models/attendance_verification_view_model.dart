@@ -45,7 +45,9 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
   String? get enteredOnlineCode => _onlineCodeViewModel.enteredCode;
   bool get isMarkingAttendance => _attendanceViewModel.isMarkingAttendance;
 
-  String? get _studentId => _authViewModel.currentStudent?.idNumber;
+  String? get _studentId => _authViewModel.appUser?.studentProfile?.idNumber;
+  
+  // String? get _studentId => 'ENG23A00028Y';
 
   String getuserLocation() {
     final position = _locationViewModel.state.currentPosition;

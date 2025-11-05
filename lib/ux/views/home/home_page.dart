@@ -1,3 +1,4 @@
+import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/utils/general_ui_utils.dart';
@@ -16,38 +17,30 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late final AuthViewModel _authViewModel;
+
   @override
   void initState() {
     super.initState();
-    loadData();
+    _authViewModel = AppDI.getIt<AuthViewModel>();
+    WidgetsBinding.instance.addPostFrameCallback((_) => loadData());
   }
 
   void loadData() async {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
-      final studentId = authViewModel.currentStudent?.idNumber;
+      final studentId = _authViewModel.appUser?.studentProfile?.idNumber;
 
-      // Only attempt to load registered courses when we have a non-empty id
       if (studentId != null && studentId.isNotEmpty) {
-        // Load registered courses
         context.read<CourseViewModel>().loadRegisteredCourses(studentId);
-
-        // Load other data here if needed
-        // e.g., attendance data, current class, etc.
       }
     });
   }
 
   Future<void> refreshData() async {
-    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
-    final studentId = authViewModel.currentStudent?.idNumber;
+    final studentId = _authViewModel.appUser?.studentProfile?.idNumber;
 
     if (studentId != null) {
-      // Reload all data when user pulls to refresh
       await context.read<CourseViewModel>().reloadRegisteredCourses(studentId);
-
-      // Reload other data if needed
-      // await context.read<AttendanceViewModel>().loadData(studentId);
     }
   }
 
@@ -56,7 +49,7 @@ class _HomePageState extends State<HomePage> {
     return AppPageScaffold(
       hideAppBar: true,
       headerTitle: UiUtils.getGreetingTitle(
-          context.watch<AuthViewModel>().currentStudent?.firstName ?? ''),
+          _authViewModel.appUser?.studentProfile?.firstName ?? ''),
       headerSubtitle: UiUtils.getGreetingSubtitle(),
       showInformationBanner: true,
       informationBannerText: AppStrings.qrCodeExpirationWarning,

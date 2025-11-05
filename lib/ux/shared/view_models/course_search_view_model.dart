@@ -1,33 +1,32 @@
 import 'package:attendance_app/platform/course_search_helper.dart';
-import 'package:attendance_app/platform/repositories/course_repository.dart';
-import 'package:attendance_app/ux/shared/models/ui_models.dart';
+import 'package:attendance_app/platform/data_source/api/api.dart';
+import 'package:attendance_app/platform/data_source/api/course/models/course_request.dart';
+import 'package:attendance_app/platform/data_source/api/course/models/course_response.dart';
+import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:flutter/material.dart';
 
 class CourseSearchViewModel extends ChangeNotifier {
-  final CourseRepository _repository;
+  final Api _api = AppDI.getIt<Api>();
 
-  CourseSearchViewModel({CourseRepository? repository})
-      : _repository = repository ?? CourseRepository();
-
-//All courses for search
+  // All courses for search
   List<Course> _allCourses = [];
   List<Course> _filteredCourses = [];
   String _searchQuery = '';
   bool _isLoadingCourses = false;
   String? _loadError;
 
-  //Filter state
+  // Filter state
   int? _selectedLevel;
   int? _selectedSemester;
   String? _selectedSchool;
   bool _hasActiveFilter = false;
 
-  //Selected courses state (for adding courses)
+  // Selected courses state (for adding courses)
   final Set<Course> _selectedCourses = {};
   final Map<Course, String?> _chosenSchools = {};
   String? _errorMessage;
 
-  //Getters for courses with search applied
+  // Getters for courses with search applied
   List<Course> get displayedCourses {
     final courseToSearch = _hasActiveFilter ? _filteredCourses : _allCourses;
 
@@ -46,7 +45,7 @@ class CourseSearchViewModel extends ChangeNotifier {
   String? get loadError => _loadError;
   bool get hasLoadError => _loadError != null;
 
-  //Filter getters
+  // Filter getters
   int? get selectedLevel => _selectedLevel;
   int? get selectedSemester => _selectedSemester;
   String? get selectedSchool => _selectedSchool;
@@ -61,7 +60,7 @@ class CourseSearchViewModel extends ChangeNotifier {
     return parts.isNotEmpty ? parts.join(', ') : 'No Filter';
   }
 
-  //Selected courses getters
+  // Selected courses getters
   Set<Course> get selectedCourses => Set.unmodifiable(_selectedCourses);
   Map<Course, String?> get chosenSchools => Map.unmodifiable(_chosenSchools);
   String? get errorMessage => _errorMessage;
@@ -72,7 +71,7 @@ class CourseSearchViewModel extends ChangeNotifier {
         (sum, course) => sum + (course.creditHours ?? 0),
       );
 
-  //Search functionality
+  // Search functionality
   void searchCourses(String query) {
     _searchQuery = query.trim();
     notifyListeners();
@@ -85,7 +84,6 @@ class CourseSearchViewModel extends ChangeNotifier {
 
   // Filter functionality
   Future<void> applyFilter(int? level, int? semester, String? school) async {
-    // If no filters were provided, clear any active filters
     final hasAnyFilter = level != null || semester != null || school != null;
 
     if (!hasAnyFilter) {
@@ -93,7 +91,6 @@ class CourseSearchViewModel extends ChangeNotifier {
       return;
     }
 
-    // Save filter selections and mark filter as active
     _selectedLevel = level;
     _selectedSemester = semester;
     _selectedSchool = school;
@@ -106,15 +103,18 @@ class CourseSearchViewModel extends ChangeNotifier {
     try {
       List<Course> coursesToFilter;
 
-      // Use server API when both level and semester are provided
       if (level != null && semester != null) {
-        final response = await _repository.fetchCoursesForLevelAndSemester(
-          level.toString(),
-          semester,
+        final request = GetCoursesForLevelAndSemesterRequest(
+          levelId: level.toString(),
+          semesterId: semester.toString(),
         );
 
-        if (response.data != null) {
-          coursesToFilter = response.data ?? [];
+        final response =
+            await _api.courseApi.getCoursesForLevelAndSemester(request);
+
+        if (response.status == ApiResponseStatus.Success &&
+            response.response != null) {
+          coursesToFilter = response.response as List<Course>;
           _loadError = null;
         } else {
           _loadError = response.message ?? 'Failed to load filtered courses';
@@ -122,16 +122,12 @@ class CourseSearchViewModel extends ChangeNotifier {
           return;
         }
       } else {
-        // No dedicated API for the requested filter combination (e.g. school-only)
-        // Fall back to client-side filtering on the full course list
         if (_allCourses.isEmpty) {
           await loadAllCourses();
         }
         coursesToFilter = _allCourses;
       }
 
-      // Always apply client-side filters (this will handle school filtering
-      // even when the API doesn't support it)
       _filteredCourses = applyClientSideFilters(
         coursesToFilter,
         level: level,
@@ -156,8 +152,6 @@ class CourseSearchViewModel extends ChangeNotifier {
     String? school,
   }) {
     return courses.where((course) {
-      // Compare using string representations to be robust against differing
-      // types (API may provide level/semester as String or int)
       if (level != null && course.level?.toString() != level.toString()) {
         return false;
       }
@@ -189,10 +183,11 @@ class CourseSearchViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _repository.fetchAllCourses();
+      final response = await _api.courseApi.getAllCourses();
 
-      if (response.data != null) {
-        _allCourses = response.data ?? [];
+      if (response.status == ApiResponseStatus.Success &&
+          response.response != null) {
+        _allCourses = response.response as List<Course>;
         _loadError = null;
       } else {
         _loadError = response.message ?? 'Failed to load courses';

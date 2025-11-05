@@ -1,5 +1,5 @@
+import 'package:attendance_app/platform/data_source/api/course/models/course_response.dart';
 import 'package:attendance_app/ux/shared/components/app_material.dart';
-import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/views/attendance/components/padded_column.dart';
 import 'package:flutter/material.dart';

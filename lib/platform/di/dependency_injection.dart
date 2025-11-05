@@ -1,0 +1,50 @@
+import 'package:attendance_app/platform/data_source/api/api.dart';
+import 'package:attendance_app/platform/data_source/api/attendance/attendance_api.dart';
+import 'package:attendance_app/platform/data_source/api/auth/auth_api.dart';
+import 'package:attendance_app/platform/data_source/api/course/course_api.dart';
+import 'package:attendance_app/platform/data_source/api/requester.dart';
+import 'package:attendance_app/platform/data_source/persistence/manager.dart';
+import 'package:attendance_app/ux/shared/view_models/attendance/attendance_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/course_search_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
+import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class AppDI {
+  const AppDI._();
+
+  static GetIt getIt = GetIt.instance;
+
+  static Future<void> init(
+      {required SharedPreferences sharedPreferences}) async {
+    final manager = PreferenceManager(sharedPreferences);
+    final requester = Requester(manager: manager);
+
+    getIt.registerSingleton<SharedPreferences>(sharedPreferences);
+    getIt.registerLazySingleton<PreferenceManager>(() => manager);
+    getIt.registerLazySingleton<Requester>(() => requester);
+
+    getIt.registerLazySingleton<Api>(() => Api(requester: requester));
+
+    getIt.registerLazySingleton<AuthApi>(() => AuthApi(requester: requester));
+    getIt.registerLazySingleton<CourseApi>(
+        () => CourseApi(requester: requester));
+    getIt.registerLazySingleton<AttendanceApi>(
+        () => AttendanceApi(requester: requester));
+
+    //View Models
+    getIt.registerLazySingleton<AuthViewModel>(() => AuthViewModel());
+    getIt.registerLazySingleton<CourseViewModel>(() => CourseViewModel());
+    getIt.registerLazySingleton<AttendanceViewModel>(
+        () => AttendanceViewModel());
+    getIt.registerLazySingleton<CourseSearchViewModel>(
+        () => CourseSearchViewModel());
+  }
+}
+
+extension ApiExtensions on Api {
+  AuthApi get authApi => AppDI.getIt<AuthApi>();
+  CourseApi get courseApi => AppDI.getIt<CourseApi>();
+  AttendanceApi get attendanceApi => AppDI.getIt<AttendanceApi>();
+}

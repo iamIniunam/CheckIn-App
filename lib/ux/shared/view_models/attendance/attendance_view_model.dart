@@ -1,7 +1,8 @@
 import 'dart:convert';
-import 'package:attendance_app/platform/api/attendance/models/attendance_request.dart';
-import 'package:attendance_app/platform/repositories/attendance_repository.dart';
-import 'package:attendance_app/ux/shared/models/ui_models.dart';
+import 'package:attendance_app/platform/data_source/api/api.dart';
+import 'package:attendance_app/platform/data_source/api/attendance/models/attedance_response.dart';
+import 'package:attendance_app/platform/data_source/api/attendance/models/attendance_request.dart';
+import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:flutter/material.dart';
 
 class AttendanceMarkResult {
@@ -31,10 +32,7 @@ class AttendanceMarkResult {
 }
 
 class AttendanceViewModel extends ChangeNotifier {
-  final AttendanceRepository _attendanceRepository;
-
-  AttendanceViewModel({AttendanceRepository? attendanceRepository})
-      : _attendanceRepository = attendanceRepository ?? AttendanceRepository();
+  final Api _api = AppDI.getIt<Api>();
 
   List<CourseAttendanceRecord> _attendanceRecords = [];
   bool _isMarkingAttendance = false;
@@ -54,7 +52,7 @@ class AttendanceViewModel extends ChangeNotifier {
   bool get hasError => _errorMessage != null;
   bool get hasMarkAttendanceError => _markAttendanceError != null;
 
-//Attendance statistics
+  // Attendance statistics
   int get totalClasses => _attendanceRecords.length;
   int get attendedClasses =>
       _attendanceRecords.where((record) => record.isPresent).length;
@@ -67,16 +65,22 @@ class AttendanceViewModel extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
 
-    // remember parameters so we can refresh later
     _lastCourseId = courseId;
     _lastStudentId = studentId;
 
     try {
-      final response = await _attendanceRepository.fetchCourseAttendanceRecord(
-          courseId, studentId);
+      final request = GetCourseAttendanceRequest(
+        courseId: courseId,
+        studentId: studentId,
+      );
 
-      if (response.success && response.data != null) {
-        _attendanceRecords = response.data ?? [];
+      final response =
+          await _api.attendanceApi.getCourseAttendanceRecord(request);
+
+      if (response.status == ApiResponseStatus.Success &&
+          response.response != null) {
+        _attendanceRecords = response.response as List<CourseAttendanceRecord>;
+        _errorMessage = null;
         debugPrint('Successfully loaded ${_attendanceRecords.length} records');
       } else {
         _errorMessage = response.message ?? 'Failed to load attendance records';
@@ -105,39 +109,7 @@ class AttendanceViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // The QR scanner may provide a JSON payload (with sessionId, className, etc.)
-      // while the backend likely expects a simple session identifier. Attempt
-      // to parse the QR code and extract a sessionId if present, otherwise
-      // fall back to sending the raw code string.
-      String codeToSend = code;
-      try {
-        dynamic parsed;
-        try {
-          parsed = jsonDecode(code);
-        } catch (_) {
-          // Try URL-decoding then JSON decode (some QR generators URL-encode payload)
-          try {
-            final decoded = Uri.decodeFull(code);
-            parsed = jsonDecode(decoded);
-          } catch (_) {
-            parsed = null;
-          }
-        }
-
-        if (parsed is Map<String, dynamic>) {
-          if (parsed.containsKey('sessionId')) {
-            codeToSend = parsed['sessionId'].toString();
-          } else if (parsed.containsKey('session_id')) {
-            codeToSend = parsed['session_id'].toString();
-          } else if (parsed.containsKey('id')) {
-            codeToSend = parsed['id'].toString();
-          } else {
-            codeToSend = jsonEncode(parsed);
-          }
-        }
-      } catch (_) {
-        // ignore parse errors and use the raw code string
-      }
+      String codeToSend = _extractSessionId(code);
 
       final request = MarkAttendanceRequest(
         code: codeToSend,
@@ -148,12 +120,12 @@ class AttendanceViewModel extends ChangeNotifier {
         longitude: longitude,
       );
 
-      final response = await _attendanceRepository.markAttendance(request);
+      final response = await _api.attendanceApi.markAttendance(request);
 
       _isMarkingAttendance = false;
       notifyListeners();
 
-      if (response.success) {
+      if (response.status == ApiResponseStatus.Success) {
         return AttendanceMarkResult.success(response.message);
       } else {
         _markAttendanceError = response.message ?? 'Failed to mark attendance';
@@ -179,35 +151,7 @@ class AttendanceViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Try to extract a session id from QR payload similar to the authorized flow
-      String codeToSend = code;
-      try {
-        dynamic parsed;
-        try {
-          parsed = jsonDecode(code);
-        } catch (_) {
-          try {
-            final decoded = Uri.decodeFull(code);
-            parsed = jsonDecode(decoded);
-          } catch (_) {
-            parsed = null;
-          }
-        }
-
-        if (parsed is Map<String, dynamic>) {
-          if (parsed.containsKey('sessionId')) {
-            codeToSend = parsed['sessionId'].toString();
-          } else if (parsed.containsKey('session_id')) {
-            codeToSend = parsed['session_id'].toString();
-          } else if (parsed.containsKey('id')) {
-            codeToSend = parsed['id'].toString();
-          } else {
-            codeToSend = jsonEncode(parsed);
-          }
-        }
-      } catch (_) {
-        // ignore
-      }
+      String codeToSend = _extractSessionId(code);
 
       final request = MarkAttendanceRequest(
         code: codeToSend,
@@ -218,13 +162,13 @@ class AttendanceViewModel extends ChangeNotifier {
         longitude: longitude,
       );
 
-      debugPrint('markAttendanceUnauthorized - Request: ${request.toJson()}');
-      final response = await _attendanceRepository.markAttendance(request);
+      debugPrint('markAttendanceUnauthorized - Request: ${request.toMap()}');
+      final response = await _api.attendanceApi.markAttendance(request);
 
       _isMarkingAttendance = false;
       notifyListeners();
 
-      if (response.success) {
+      if (response.status == ApiResponseStatus.Success) {
         return AttendanceMarkResult.success(response.message);
       } else {
         _markAttendanceError = response.message ?? 'Failed to mark attendance';
@@ -238,55 +182,56 @@ class AttendanceViewModel extends ChangeNotifier {
     }
   }
 
-  // Future<AttendanceMarkResult> markOnlineAttendance(
-  //     {required String code, required String studentId}) async {
-  //   _isMarkingAttendance = true;
-  //   _markAttendanceError = null;
-  //   notifyListeners();
+  String _extractSessionId(String code) {
+    try {
+      dynamic parsed;
+      try {
+        parsed = jsonDecode(code);
+      } catch (_) {
+        try {
+          final decoded = Uri.decodeFull(code);
+          parsed = jsonDecode(decoded);
+        } catch (_) {
+          parsed = null;
+        }
+      }
 
-  //   try {
-  //     final request = MarkAttendanceRequest(
-  //       code: code,
-  //       studentId: studentId,
-  //       status: AttendanceStatus.authorized.value,
-  //     );
+      if (parsed is Map<String, dynamic>) {
+        if (parsed.containsKey('sessionId')) {
+          return parsed['sessionId'].toString();
+        } else if (parsed.containsKey('session_id')) {
+          return parsed['session_id'].toString();
+        } else if (parsed.containsKey('id')) {
+          return parsed['id'].toString();
+        } else {
+          return jsonEncode(parsed);
+        }
+      }
+    } catch (_) {
+      // Ignore parse errors
+    }
+    return code;
+  }
 
-  //     final response = await _attendanceRepository.markAttendance(request);
-
-  //     _isMarkingAttendance = false;
-  //     notifyListeners();
-
-  //     if (response.success) {
-  //       return AttendanceMarkResult.success(response.message);
-  //     } else {
-  //       _markAttendanceError = response.message ?? 'Failed to mark attendance';
-  //       return AttendanceMarkResult.failure(_markAttendanceError ?? '');
-  //     }
-  //   } catch (e) {
-  //     _markAttendanceError = 'An unexpected error occurred: ${e.toString()}';
-  //     _isMarkingAttendance = false;
-  //     notifyListeners();
-  //     return AttendanceMarkResult.failure(_markAttendanceError ?? '');
-  //   }
-  // }
-
-  /// Refreshes the currently loaded attendance records using the last
-  /// requested courseId and studentId. This uses [_isRefreshing] so UI can
-  /// differentiate between first-load and background refresh.
   Future<void> refresh() async {
     if (_lastCourseId == null || _lastStudentId == null) return;
-    // If already refreshing, avoid duplicate refreshes
     if (_isRefreshing) return;
 
     _isRefreshing = true;
     notifyListeners();
 
     try {
-      final response = await _attendanceRepository.fetchCourseAttendanceRecord(
-          _lastCourseId ?? 0, _lastStudentId ?? '');
+      final request = GetCourseAttendanceRequest(
+        courseId: _lastCourseId!,
+        studentId: _lastStudentId!,
+      );
 
-      if (response.success && response.data != null) {
-        _attendanceRecords = response.data ?? [];
+      final response =
+          await _api.attendanceApi.getCourseAttendanceRecord(request);
+
+      if (response.status == ApiResponseStatus.Success &&
+          response.response != null) {
+        _attendanceRecords = response.response as List<CourseAttendanceRecord>;
         _errorMessage = null;
         debugPrint(
             'Successfully refreshed ${_attendanceRecords.length} records');

@@ -3,7 +3,7 @@ import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/views/attendance/components/attendance_mode.dart';
-import 'package:attendance_app/ux/views/attendance/face_veification_page.dart';
+import 'package:attendance_app/ux/views/attendance/face_verification_page.dart';
 import 'package:flutter/material.dart';
 
 class SelectAttendanceModePage extends StatelessWidget {

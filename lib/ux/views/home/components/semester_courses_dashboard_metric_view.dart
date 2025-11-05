@@ -8,7 +8,7 @@ import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
 import 'package:attendance_app/ux/shared/components/section_header.dart';
 import 'package:attendance_app/ux/views/home/components/single_course_card.dart';
-import 'package:attendance_app/ux/views/onboarding/course_enrollment_page.dart';
+import 'package:attendance_app/ux/views/course/course_enrollment_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

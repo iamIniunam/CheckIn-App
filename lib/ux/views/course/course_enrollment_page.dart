@@ -1,3 +1,4 @@
+import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
 import 'package:attendance_app/ux/shared/bottom_sheets/show_app_bottom_sheet.dart';
@@ -9,11 +10,11 @@ import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_search_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
-import 'package:attendance_app/ux/views/onboarding/components/course_search_bottom_widgets.dart';
-import 'package:attendance_app/ux/views/onboarding/components/course_search_state_widgets.dart';
-import 'package:attendance_app/ux/views/onboarding/components/search_and_filter_bar.dart';
-import 'package:attendance_app/ux/views/onboarding/course_registration_info_bottom_sheet.dart';
-import 'package:attendance_app/ux/views/onboarding/filter_courses_bottom_page.dart';
+import 'package:attendance_app/ux/views/course/components/course_search_bottom_widgets.dart';
+import 'package:attendance_app/ux/views/course/components/course_search_state_widgets.dart';
+import 'package:attendance_app/ux/views/course/components/search_and_filter_bar.dart';
+import 'package:attendance_app/ux/views/course/course_registration_info_bottom_sheet.dart';
+import 'package:attendance_app/ux/views/course/filter_courses_bottom_page.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -29,6 +30,8 @@ class CourseEnrollmentPage extends StatefulWidget {
 }
 
 class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
+  final AuthViewModel _authViewModel = AppDI.getIt<AuthViewModel>();
+
   late final TextEditingController searchController;
   late final CourseSearchViewModel searchViewModel;
   late final CourseViewModel courseViewModel;
@@ -38,9 +41,6 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
   void initState() {
     super.initState();
     searchController = TextEditingController();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      searchViewModel.loadAllCourses();
-    });
   }
 
   @override
@@ -48,6 +48,9 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
     super.didChangeDependencies();
     searchViewModel = context.read<CourseSearchViewModel>();
     courseViewModel = context.read<CourseViewModel>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      searchViewModel.loadAllCourses();
+    });
   }
 
   Future<void> refreshAllCourses() async {
@@ -56,6 +59,7 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
 
   void onSearchChanged(String value) {
     _searchDebounce?.cancel();
+    _searchDebounce = null;
     _searchDebounce = Timer(const Duration(milliseconds: 300), () {
       if (!mounted) return;
       searchViewModel.searchCourses(value.trim());
@@ -68,8 +72,10 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
   }
 
   Future<void> onConfirmPressed() async {
-    final authViewModel = context.read<AuthViewModel>();
-    final studentId = authViewModel.currentStudent?.idNumber;
+    // final authViewModel = context.read<AuthViewModel>();
+    // final studentId = authViewModel.currentStudent?.idNumber;
+    // final studentId = 'ENG23A00028Y';
+    final studentId = _authViewModel.appUser?.studentProfile?.idNumber;
 
     if (studentId == null) {
       AppDialogs.showErrorDialog(

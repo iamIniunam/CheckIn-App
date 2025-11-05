@@ -1,4 +1,4 @@
-import 'package:attendance_app/ux/shared/models/ui_models.dart';
+import 'package:attendance_app/platform/data_source/api/course/models/course_response.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/views/course/components/course_card.dart';
 import 'package:attendance_app/ux/shared/components/section_header.dart';

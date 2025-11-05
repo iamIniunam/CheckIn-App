@@ -7,7 +7,7 @@ class GetCourseAttendanceRequest {
     required this.studentId,
   });
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'courseId': courseId,
       'studentId': studentId,
@@ -32,7 +32,7 @@ class MarkAttendanceRequest {
     this.longitude,
   });
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'code': code,
       'student_id': studentId,
@@ -41,6 +41,19 @@ class MarkAttendanceRequest {
       if (latitude != null) 'latitude': latitude,
       if (longitude != null) 'longitude': longitude,
     };
+  }
+
+  String? validate() {
+    if (code.trim().isEmpty) {
+      return 'Code is required';
+    }
+    if (studentId.trim().isEmpty) {
+      return 'Student ID is required';
+    }
+    if (status.trim().isEmpty) {
+      return 'Status is required';
+    }
+    return null;
   }
 }
 

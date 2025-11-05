@@ -4,7 +4,7 @@ import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/views/attendance/components/face_verification_content.dart';
 import 'package:attendance_app/ux/views/attendance/verification_page.dart';
-import 'package:attendance_app/ux/views/onboarding/course_enrollment_page.dart';
+import 'package:attendance_app/ux/views/course/course_enrollment_page.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 

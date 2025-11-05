@@ -2,8 +2,7 @@ import 'package:attendance_app/ux/shared/components/app_form_fields.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
-import 'package:attendance_app/ux/views/drop_courses_search_state_widgets.dart';
-import 'package:attendance_app/ux/views/onboarding/components/course_search_bottom_widgets.dart';
+import 'package:attendance_app/ux/views/course/components/course_search_bottom_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

@@ -1,8 +1,8 @@
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 
-class ProfileDetailItem extends StatelessWidget {
-  const ProfileDetailItem({
+class ProfileDetailCard extends StatelessWidget {
+  const ProfileDetailCard({
     super.key,
     required this.title,
     required this.value,

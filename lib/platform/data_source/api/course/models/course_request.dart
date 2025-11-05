@@ -7,7 +7,7 @@ class GetCoursesForLevelAndSemesterRequest {
     required this.semesterId,
   });
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'levelId': levelId,
       'semesterId': semesterId,
@@ -24,11 +24,21 @@ class RegisterCourseRequest {
     required this.studentId,
   });
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
-      'courseId': courseId,
-      'studentId': studentId,
+      'course_id': courseId,
+      'idnumber': studentId,
     };
+  }
+
+  String? validate() {
+    if (courseId <= 0) {
+      return 'Invalid course ID';
+    }
+    if (studentId.trim().isEmpty) {
+      return 'Student ID is required';
+    }
+    return null;
   }
 }
 
@@ -39,9 +49,16 @@ class GetRegisteredCoursesRequest {
     required this.studentId,
   });
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'studentId': studentId,
     };
+  }
+
+  String? validate() {
+    if (studentId.trim().isEmpty) {
+      return 'Student ID is required';
+    }
+    return null;
   }
 }

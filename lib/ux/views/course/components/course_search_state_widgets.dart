@@ -3,7 +3,7 @@ import 'package:attendance_app/ux/shared/components/page_state_indicator.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/view_models/course_search_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
-import 'package:attendance_app/ux/views/onboarding/components/course_list_view.dart';
+import 'package:attendance_app/ux/views/course/components/course_list_view.dart';
 import 'package:flutter/material.dart';
 
 class CourseListContent extends StatelessWidget {

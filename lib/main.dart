@@ -1,63 +1,86 @@
-import 'package:attendance_app/ux/shared/resources/app_colors.dart';
+import 'dart:async';
+import 'dart:io';
+
+import 'package:attendance_app/app.dart';
+import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance/attendance_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_search_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
 import 'package:attendance_app/ux/views/splash_screen.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
-
-bool isLoggedIn = false;
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  // SharedPreferences prefs = await SharedPreferences.getInstance();
-  final authViewModel = AuthViewModel();
-  await authViewModel.loadSavedStudent();
+  runAppWithZone();
+}
 
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: authViewModel),
-        ChangeNotifierProvider(create: (_) => CourseViewModel()),
-        ChangeNotifierProvider(create: (_) => AttendanceViewModel()),
-        ChangeNotifierProvider(create: (_) => CourseSearchViewModel()),
-        // ChangeNotifierProxyProvider<AuthViewModel, UserViewModel>(
-        //   create: (_) =>
-        //       UserViewModel(pref: prefs, authViewModel: authViewModel),
-        //   update: (_, auth, previous) =>
-        //       previous ?? UserViewModel(pref: prefs, authViewModel: auth),
-        // ),
-      ],
-      child: const MyApp(),
-    ),
+void runAppWithZone() {
+  runZonedGuarded<Future<void>>(
+    () async {
+      final appFuture = initializeApp();
+      runApp(
+        FutureBuilder<SharedPreferences>(
+          future: appFuture,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const SplashScreen();
+            }
+            return MultiProvider(
+              providers: [
+                ChangeNotifierProvider<AuthViewModel>(
+                  create: (_) => AppDI.getIt<AuthViewModel>(),
+                ),
+                ChangeNotifierProvider<CourseViewModel>(
+                  create: (_) => AppDI.getIt<CourseViewModel>(),
+                ),
+                ChangeNotifierProvider<AttendanceViewModel>(
+                  create: (_) => AppDI.getIt<AttendanceViewModel>(),
+                ),
+                ChangeNotifierProvider<CourseSearchViewModel>(
+                  create: (_) => AppDI.getIt<CourseSearchViewModel>(),
+                ),
+              ],
+              child: const CheckInApp(),
+            );
+          },
+        ),
+      );
+    },
+    errorHandler,
   );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+Future<SharedPreferences> initializeApp() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  HttpOverrides.global = MyHttpOverrides();
 
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+
+  try {
+    await AppDI.init(sharedPreferences: preferences);
+  } catch (e) {
+    if (kDebugMode) {
+      print('Initialization error: $e');
+    }
+  }
+  return preferences;
+}
+
+void errorHandler(Object error, StackTrace stack) {
+  if (kDebugMode) {
+    print('Error: $error');
+    print('Stack trace: $stack');
+  }
+}
+
+class MyHttpOverrides extends HttpOverrides {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: false,
-        primarySwatch: Colors.blueGrey,
-        fontFamily: 'Nunito',
-        pageTransitionsTheme: const PageTransitionsTheme(builders: {
-          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
-          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-        }),
-        bottomAppBarTheme: const BottomAppBarTheme(
-          elevation: 0,
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          color: AppColors.white,
-          surfaceTintColor: AppColors.white,
-        ),
-      ),
-      home: const SplashScreen(),
-    );
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
   }
 }

@@ -1,7 +1,7 @@
 import 'package:attendance_app/ux/shared/components/empty_state_widget.dart';
 import 'package:attendance_app/ux/shared/components/page_state_indicator.dart';
 import 'package:attendance_app/ux/shared/view_models/course_search_view_model.dart';
-import 'package:attendance_app/ux/views/onboarding/components/course_search_state_widgets.dart';
+import 'package:attendance_app/ux/views/course/components/course_search_state_widgets.dart';
 import 'package:attendance_app/ux/views/registered_courses_list_view.dart';
 import 'package:flutter/material.dart';
 

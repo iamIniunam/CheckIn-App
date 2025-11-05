@@ -13,7 +13,7 @@ class SignUpRequest {
     required this.password,
   });
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'idnumber': idNumber,
       'first_name': firstName,
@@ -55,7 +55,7 @@ class LoginRequest {
     required this.password,
   });
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'idnumber': idNumber,
       'password': password,

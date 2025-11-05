@@ -1,3 +1,5 @@
+import 'package:attendance_app/platform/data_source/api/auth/models/auth_request.dart';
+import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/ux/shared/components/app_buttons.dart';
 import 'package:attendance_app/ux/shared/components/app_dropdown_field.dart';
 import 'package:attendance_app/ux/shared/enums.dart';
@@ -9,11 +11,9 @@ import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
 import 'package:attendance_app/ux/shared/resources/app_images.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
-import 'package:attendance_app/ux/views/onboarding/login_page.dart';
-import 'package:attendance_app/ux/views/attendance/face_veification_page.dart';
+import 'package:attendance_app/ux/views/attendance/face_verification_page.dart';
 import 'package:attendance_app/ux/views/onboarding/components/auth_redirection_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:searchfield/searchfield.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -24,113 +24,69 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  final idNumberController = TextEditingController();
-  final firstNameController = TextEditingController();
-  final lastNameController = TextEditingController();
-  final passwordController = TextEditingController();
-  final formKey = GlobalKey<FormState>();
+  final AuthViewModel authViewModel = AppDI.getIt<AuthViewModel>();
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  final TextEditingController idNumberController = TextEditingController();
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
   String? selectedProgram;
 
-  bool isPasswordVisible = false;
-  bool alreadyAccountDialogShown = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Post-frame check for existing saved account. We run this once in
-    // initState to keep build() pure and avoid showing dialogs during build.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (alreadyAccountDialogShown) return;
-      final auth = context.read<AuthViewModel>();
-      final saved = auth.currentStudent;
-      if (saved != null &&
-          (saved.idNumber.trim().isNotEmpty) &&
-          !auth.isLoggedIn) {
-        alreadyAccountDialogShown = true;
-        AppDialogs.showAlertDialog(
-          context: context,
-          title: 'Account exists',
-          message:
-              'An account for this device already exists. Please log in instead of signing up.',
-          action: () {
-            try {
-              Navigator.of(context, rootNavigator: true).pop();
-            } catch (_) {}
-            Navigation.navigateToScreen(
-              context: context,
-              screen: const LoginPage(),
-            );
-          },
-        );
-      }
-    });
-  }
+  bool isPasswordObscured = true;
 
   void togglePasswordVisibility() {
     setState(() {
-      isPasswordVisible = !isPasswordVisible;
+      isPasswordObscured = !isPasswordObscured;
     });
   }
 
-  Future<void> handleSignUp() async {
-    FocusManager.instance.primaryFocus?.unfocus();
-    if (!validateForm()) return;
+  void handleSignUpResult() {
+    final result = authViewModel.signUpResult.value;
 
-    final viewModel = context.read<AuthViewModel>();
-    // Show a loading dialog immediately while the sign-up request runs.
-    // Track whether we showed it so we only dismiss what we displayed.
-    bool showedLoading = false;
-    if (mounted) {
-      showedLoading = true;
+    if (result.isLoading) {
       AppDialogs.showLoadingDialog(context);
+      return;
     }
 
-    final success = await viewModel.signUp(
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    }
+
+    if (result.isSuccess) {
+      Navigation.navigateToScreenAndClearOnePrevious(
+        context: context,
+        screen: const FaceVerificationPage(
+          mode: FaceVerificationMode.signUp,
+        ),
+      );
+    } else if (result.isError) {
+      final errorMessage = result.message ??
+          'Sign Up failed. Please check your details and try again.';
+      AppDialogs.showErrorDialog(
+        context: context,
+        title: 'Sign Up Failed',
+        message: errorMessage,
+      );
+    }
+  }
+
+  Future<void> handleSignUp() async {
+    final formState = _formKey.currentState;
+    if (formState == null || !formState.validate()) {
+      return;
+    }
+    final request = SignUpRequest(
       idNumber: idNumberController.text.trim(),
       firstName: firstNameController.text.trim(),
       lastName: lastNameController.text.trim(),
       program: selectedProgram ?? '',
       password: passwordController.text,
     );
-
-    debugPrint(viewModel.currentStudent?.toJson().toString());
-
+    await authViewModel.signUp(signUpRequest: request);
     if (!mounted) return;
-
-    if (showedLoading) {
-      dismissLoadingDialog();
-    }
-
-    if (success) {
-      Navigation.navigateToScreen(
-        context: context,
-        screen: const FaceVerificationPage(
-          mode: FaceVerificationMode.signUp,
-        ),
-      );
-    } else {
-      AppDialogs.showErrorDialog(
-        context: context,
-        title: 'Sign Up Failed',
-        message: viewModel.errorMessage ?? 'An unknown error occurred',
-      );
-    }
-  }
-
-  void dismissLoadingDialog() {
-    try {
-      Navigator.of(context, rootNavigator: true).pop();
-    } catch (_) {}
-  }
-
-  bool validateForm() {
-    final formState = formKey.currentState;
-    if (formState == null || !formState.validate()) {
-      return false;
-    }
-    return true;
   }
 
   @override
@@ -144,7 +100,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
-    // build remains pure — UI only
     return GestureDetector(
       onTap: () {
         FocusManager.instance.primaryFocus?.unfocus();
@@ -153,8 +108,13 @@ class _SignUpPageState extends State<SignUpPage> {
         absorbing: false,
         child: Scaffold(
           resizeToAvoidBottomInset: false,
-          body: Consumer<AuthViewModel>(
-            builder: (context, authViewModel, _) {
+          body: ValueListenableBuilder(
+            valueListenable: authViewModel.signUpResult,
+            builder: (context, result, _) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                handleSignUpResult();
+              });
+
               return DecoratedBox(
                 decoration: BoxDecoration(
                   image: DecorationImage(
@@ -187,7 +147,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           borderRadius: BorderRadius.circular(28),
                         ),
                         child: Form(
-                          key: formKey,
+                          key: _formKey,
                           child: Column(
                             children: [
                               PrimaryTextFormField(
@@ -199,6 +159,12 @@ class _SignUpPageState extends State<SignUpPage> {
                                 textCapitalization:
                                     TextCapitalization.characters,
                                 bottomPadding: 0,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter your student ID number';
+                                  }
+                                  return null;
+                                },
                               ),
                               PrimaryTextFormField(
                                 controller: firstNameController,
@@ -208,6 +174,12 @@ class _SignUpPageState extends State<SignUpPage> {
                                 keyboardType: TextInputType.name,
                                 textCapitalization: TextCapitalization.words,
                                 textInputAction: TextInputAction.next,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter your first name';
+                                  }
+                                  return null;
+                                },
                               ),
                               PrimaryTextFormField(
                                 controller: lastNameController,
@@ -217,6 +189,12 @@ class _SignUpPageState extends State<SignUpPage> {
                                 keyboardType: TextInputType.name,
                                 textCapitalization: TextCapitalization.words,
                                 textInputAction: TextInputAction.next,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter your last name';
+                                  }
+                                  return null;
+                                },
                               ),
                               CustomSearchTextFormField(
                                 labelText: 'Programs',
@@ -231,19 +209,26 @@ class _SignUpPageState extends State<SignUpPage> {
                                     selectedProgram = program;
                                   });
                                 },
+                                validator: (value) {
+                                  if (selectedProgram == null ||
+                                      (selectedProgram ?? '').isEmpty) {
+                                    return 'Please select a program';
+                                  }
+                                  return null;
+                                },
                               ),
                               PrimaryTextFormField(
                                 controller: passwordController,
                                 labelText: AppStrings.password,
                                 hintText: AppStrings.enterAPassword,
-                                obscureText: !isPasswordVisible,
+                                obscureText: isPasswordObscured,
                                 keyboardType: TextInputType.visiblePassword,
                                 textInputAction: TextInputAction.done,
                                 suffixWidget: IconButton(
                                   icon: Icon(
-                                    isPasswordVisible
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
+                                    isPasswordObscured
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
                                     color: AppColors.defaultColor,
                                   ),
                                   onPressed: togglePasswordVisibility,
@@ -261,7 +246,6 @@ class _SignUpPageState extends State<SignUpPage> {
                               ),
                               const SizedBox(height: 30),
                               PrimaryButton(
-                                // enabled: viewModel.enableButton,
                                 onTap: handleSignUp,
                                 child: const Text(AppStrings.signUp),
                               ),

@@ -1,6 +1,6 @@
 import 'package:attendance_app/ux/shared/components/dashboard_metric_grid_view.dart';
 import 'package:attendance_app/ux/shared/view_models/course_search_view_model.dart';
-import 'package:attendance_app/ux/views/onboarding/components/course_enrollment_card.dart';
+import 'package:attendance_app/ux/views/course/components/course_enrollment_card.dart';
 import 'package:flutter/material.dart';
 
 class RegisteredCourseListView extends StatelessWidget {

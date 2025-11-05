@@ -1,4 +1,4 @@
-import 'package:attendance_app/ux/shared/models/ui_models.dart';
+import 'package:attendance_app/platform/data_source/api/course/models/course_response.dart';
 
 class CourseSearchHelper {
   static List<Course> searchCourses(List<Course> courses, String query) {
