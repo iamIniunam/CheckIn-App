@@ -90,9 +90,7 @@ class DashboardMetricGridView extends StatelessWidget {
   }
 
   Widget horizontalSpacer() {
-    return const SizedBox(
-      width: 7,
-    );
+    return const SizedBox(width: 7);
   }
 
   bool indexIsAvailable(int index) {

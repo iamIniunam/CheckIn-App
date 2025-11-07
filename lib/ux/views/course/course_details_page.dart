@@ -60,60 +60,63 @@ class _CourseDetailsBody extends StatelessWidget {
     return AppPageScaffold(
       title: course.courseCode,
       body: RefreshIndicator(
+        displacement: 20,
         onRefresh: () async {
-          await context.read<AttendanceViewModel>().refresh();
+          Future.microtask(() => context.read<AttendanceViewModel>().refresh());
+          return Future.value();
         },
-        child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        course.courseTitle ?? '',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: AppColors.defaultColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          course.courseTitle ?? '',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: AppColors.defaultColor,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      Text(
-                        '${course.level ?? ''} level • ${course.semester}${semesterSuffix()} • ${course.creditHours ?? ''} credit hours',
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontWeight: FontWeight.bold,
+                        Text(
+                          '${course.level ?? ''} level • ${course.semester}${semesterSuffix()} • ${course.creditHours ?? ''} credit hours',
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryTeal.withOpacity(0.4),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: AppColors.primaryTeal.withOpacity(0.7),
+                      ],
                     ),
                   ),
-                  child: Text(
-                    courseSchool ?? '',
-                    style: const TextStyle(
-                      color: AppColors.defaultColor,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
+                  const SizedBox(width: 10),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryTeal.withOpacity(0.4),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppColors.primaryTeal.withOpacity(0.7),
+                      ),
+                    ),
+                    child: Text(
+                      courseSchool ?? '',
+                      style: const TextStyle(
+                        color: AppColors.defaultColor,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             Consumer<AttendanceViewModel>(
               builder: (context, viewModel, _) {
@@ -142,21 +145,34 @@ class _CourseDetailsBody extends StatelessWidget {
                   );
                 }
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      AppStrings.history,
-                      style: TextStyle(
-                        color: AppColors.defaultColor,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                return Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          AppStrings.history,
+                          style: TextStyle(
+                            color: AppColors.defaultColor,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
-                    ...viewModel.attendanceRecords
-                        .map((record) => SessionHistory(record: record))
-                        .toList(),
-                  ],
+                      Expanded(
+                        child: ListView(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          children: [
+                            ...viewModel.attendanceRecords
+                                .map((record) => SessionHistory(record: record))
+                                .toList(),
+                            const SizedBox(height: 14),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               },
             ),

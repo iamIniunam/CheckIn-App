@@ -24,18 +24,19 @@ class SingleCourseCard extends StatelessWidget {
         );
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               course.creditHours.toString(),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: AppColors.defaultColor,
-                fontSize: 32,
-                fontWeight: FontWeight.w600,
+                fontSize: 25,
+                fontWeight: FontWeight.w300,
               ),
             ),
             Text(
@@ -43,8 +44,8 @@ class SingleCourseCard extends StatelessWidget {
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: AppColors.defaultColor,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],

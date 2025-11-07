@@ -40,22 +40,25 @@ class _HomePageState extends State<HomePage> {
     final studentId = _authViewModel.appUser?.studentProfile?.idNumber;
 
     if (studentId != null) {
-      await context.read<CourseViewModel>().reloadRegisteredCourses(studentId);
+      Future.microtask(() =>
+          context.read<CourseViewModel>().reloadRegisteredCourses(studentId));
+      Future.value();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return AppPageScaffold(
-      hideAppBar: true,
-      headerTitle: UiUtils.getGreetingTitle(
-          _authViewModel.appUser?.studentProfile?.firstName ?? ''),
-      headerSubtitle: UiUtils.getGreetingSubtitle(),
-      showInformationBanner: true,
-      informationBannerText: AppStrings.qrCodeExpirationWarning,
-      body: RefreshIndicator(
-        onRefresh: refreshData,
-        child: ListView(
+    return RefreshIndicator(
+      displacement: 60,
+      onRefresh: refreshData,
+      child: AppPageScaffold(
+        hideAppBar: true,
+        headerTitle: UiUtils.getGreetingTitle(
+            _authViewModel.appUser?.studentProfile?.firstName ?? ''),
+        headerSubtitle: UiUtils.getGreetingSubtitle(),
+        showInformationBanner: true,
+        informationBannerText: AppStrings.qrCodeExpirationWarning,
+        body: ListView(
           children: const [
             CurrentClass(),
             // AttendanceThresholdWidget(),

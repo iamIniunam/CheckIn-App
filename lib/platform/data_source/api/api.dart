@@ -9,7 +9,8 @@ class Api {
 }
 
 abstract class ApiCore {
-  static String apiBaseUrl = 'http://192.168.100.5:8000/api';
+static String apiBaseUrl = 'http://192.168.100.5:8000/api';
+// static String apiBaseUrl = 'http://10.207.210.84:8000/api';
   static const String baseUrlPrefix = 'http://';
 
   Requester requester;
