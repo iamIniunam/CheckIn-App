@@ -41,17 +41,22 @@ class AttendanceSummaryCard extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           StatColumn(
-              icon: Icons.class_rounded,
-              value: viewModel.totalClasses.toString(),
-              label: 'Total'),
+            icon: Icons.class_rounded,
+            value: viewModel.totalClasses.toString(),
+            label: 'Total',
+            color: AppColors.totalClassesColor,
+          ),
           StatColumn(
-              icon: Icons.check_circle_rounded,
-              value: viewModel.attendedClasses.toString(),
-              label: 'Present'),
+            icon: Icons.check_circle_rounded,
+            value: viewModel.attendedClasses.toString(),
+            label: 'Present',
+            color: AppColors.presentColor,
+          ),
           StatColumn(
             icon: Icons.cancel_rounded,
             value: viewModel.missedClasses.toString(),
             label: 'Absent',
+            color: AppColors.absentColor,
           ),
         ],
       ),
@@ -65,31 +70,33 @@ class StatColumn extends StatelessWidget {
     required this.icon,
     required this.value,
     required this.label,
+    required this.color,
   });
 
   final IconData icon;
   final String value;
   final String label;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, color: AppColors.defaultColor, size: 28),
+        Icon(icon, color: color, size: 28),
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: AppColors.defaultColor,
+            color: color,
           ),
         ),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
-            color: AppColors.defaultColor,
+            color: color,
           ),
         ),
       ],

@@ -25,4 +25,11 @@ class AppColors {
   static const Color aquaWhisper = Color(0xFFEFFFFA); // light aqua
   static const Color lilacBloom = Color(0xFFFDF4FF); // lilac pink
   static const Color blushPearl = Color(0xFFFFF0F6); // light blush
+
+  static const totalClassesColor = Color(0xFF546E7A);
+  static const presentColor = Color(0xFF4CAF50);
+  static const absentColor = Color(0xFFEF5350);
+
+  // static const presentColor = Color(0xFF4CAF50); // Material green
+  // static const absentColor = Color(0xFFF44336); // Material red
 }

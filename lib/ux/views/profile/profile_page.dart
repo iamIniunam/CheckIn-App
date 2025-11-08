@@ -18,7 +18,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final AuthViewModel _authViewModel = AppDI.getIt<AuthViewModel>();
+  final AuthViewModel authViewModel = AppDI.getIt<AuthViewModel>();
 
   Future<void> handleLogout() async {
     final navigatorState = Navigator.of(context, rootNavigator: false);
@@ -27,7 +27,7 @@ class _ProfilePageState extends State<ProfilePage> {
     await Future.delayed(const Duration(milliseconds: 100));
 
     try {
-      await _authViewModel.logout();
+      await authViewModel.logout();
     } catch (e) {
       // ignore logout errors, but ensure we still navigate
     }
@@ -66,21 +66,20 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   ProfileDetailCard(
                       title: AppStrings.firstName,
-                      value:
-                          _authViewModel.appUser?.studentProfile?.firstName ??
-                              'N/A'),
+                      value: authViewModel.appUser?.studentProfile?.firstName ??
+                          'N/A'),
                   ProfileDetailCard(
                       title: AppStrings.lastName,
-                      value: _authViewModel.appUser?.studentProfile?.lastName ??
+                      value: authViewModel.appUser?.studentProfile?.lastName ??
                           'N/A'),
                   ProfileDetailCard(
                       title: AppStrings.idNumber,
-                      value: _authViewModel.appUser?.studentProfile?.idNumber ??
+                      value: authViewModel.appUser?.studentProfile?.idNumber ??
                           'N/A'),
                   ProfileDetailCard(
                     title: AppStrings.program,
-                    value: _authViewModel.appUser?.studentProfile?.program ??
-                        'N/A',
+                    value:
+                        authViewModel.appUser?.studentProfile?.program ?? 'N/A',
                     textDirection: TextDirection.rtl,
                   ),
                   // ProfileDetailItem(

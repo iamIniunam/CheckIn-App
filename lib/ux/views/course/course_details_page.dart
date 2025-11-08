@@ -25,13 +25,13 @@ class CourseDetailsPage extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) =>
           AttendanceViewModel()..loadAttendanceRecords(course.id!, studentId),
-      child: _CourseDetailsBody(course: course),
+      child: CourseDetailsBody(course: course),
     );
   }
 }
 
-class _CourseDetailsBody extends StatelessWidget {
-  const _CourseDetailsBody({required this.course});
+class CourseDetailsBody extends StatelessWidget {
+  const CourseDetailsBody({super.key, required this.course});
   final Course course;
 
   @override
@@ -59,93 +59,83 @@ class _CourseDetailsBody extends StatelessWidget {
 
     return AppPageScaffold(
       title: course.courseCode,
-      body: RefreshIndicator(
-        displacement: 20,
-        onRefresh: () async {
-          Future.microtask(() => context.read<AttendanceViewModel>().refresh());
-          return Future.value();
-        },
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          course.courseTitle ?? '',
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: AppColors.defaultColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+      body: Consumer<AttendanceViewModel>(builder: (context, viewModel, _) {
+        return RefreshIndicator(
+          displacement: 20,
+          onRefresh: () async {
+            Future.microtask(() => viewModel.refresh());
+            return Future.value();
+          },
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            course.courseTitle ?? '',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: AppColors.defaultColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        Text(
-                          '${course.level ?? ''} level • ${course.semester}${semesterSuffix()} • ${course.creditHours ?? ''} credit hours',
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontWeight: FontWeight.bold,
+                          Text(
+                            '${course.level ?? ''} level • ${course.semester}${semesterSuffix()} • ${course.creditHours ?? ''} credit hours',
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryTeal.withOpacity(0.4),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: AppColors.primaryTeal.withOpacity(0.7),
+                        ],
                       ),
                     ),
-                    child: Text(
-                      courseSchool ?? '',
-                      style: const TextStyle(
-                        color: AppColors.defaultColor,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                    const SizedBox(width: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryTeal.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppColors.primaryTeal.withOpacity(0.7),
+                        ),
+                      ),
+                      child: Text(
+                        courseSchool ?? '',
+                        style: const TextStyle(
+                          color: AppColors.defaultColor,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Consumer<AttendanceViewModel>(
-              builder: (context, viewModel, _) {
-                return AttendanceSummaryCard(viewModel: viewModel);
-              },
-            ),
-            const SizedBox(height: 12),
-            Consumer<AttendanceViewModel>(
-              builder: (context, viewModel, _) {
-                if (viewModel.isLoading || viewModel.isRefreshing) {
-                  return const PageLoadingIndicator(useTopPadding: true);
-                }
-
-                if (viewModel.hasError) {
-                  return PageErrorIndicator(
-                    text: viewModel.errorMessage ??
-                        'Error loading attendance records',
-                    useTopPadding: true,
-                  );
-                }
-
-                if (viewModel.attendanceRecords.isEmpty) {
-                  return const PageErrorIndicator(
-                    text: 'No attendance records found',
-                    useTopPadding: true,
-                  );
-                }
-
-                return Expanded(
+              AttendanceSummaryCard(viewModel: viewModel),
+              const SizedBox(height: 12),
+              if (viewModel.isLoading || viewModel.isRefreshing)
+                const PageLoadingIndicator(useTopPadding: true)
+              else if (viewModel.hasError)
+                PageErrorIndicator(
+                  text: viewModel.errorMessage ??
+                      'Error loading attendance records',
+                  useTopPadding: true,
+                )
+              else if (viewModel.attendanceRecords.isEmpty)
+                const PageErrorIndicator(
+                  text: 'No attendance records found',
+                  useTopPadding: true,
+                )
+              else ...[
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -173,12 +163,12 @@ class _CourseDetailsBody extends StatelessWidget {
                       ),
                     ],
                   ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+                ),
+              ],
+            ],
+          ),
+        );
+      }),
     );
   }
 }
