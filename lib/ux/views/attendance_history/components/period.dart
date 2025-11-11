@@ -2,10 +2,7 @@ import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class Period extends StatelessWidget {
-  const Period({
-    super.key,
-    required this.period
-  });
+  const Period({super.key, required this.period});
 
   final String period;
 

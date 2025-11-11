@@ -20,7 +20,7 @@ class SessionHistory extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${record.attendanceClass.name} — ${record.attendanceClass.mode}',
+                '${record.attendanceClass.name} • ${record.attendanceClass.mode}',
                 style: const TextStyle(
                   color: AppColors.defaultColor,
                   fontWeight: FontWeight.bold,

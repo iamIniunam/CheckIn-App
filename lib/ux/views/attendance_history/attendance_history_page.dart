@@ -30,7 +30,7 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
       Course(
         courseCode: 'CS101',
         courseTitle: 'Introduction to Computer Science',
-        status: AppStrings.late,
+        status: AppStrings.present,
         showStatus: true,
       ),
       Course(
@@ -64,13 +64,13 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
       Course(
         courseCode: 'CS101',
         courseTitle: 'Introduction to Computer Science',
-        status: AppStrings.late,
+        status: AppStrings.absent,
         showStatus: true,
       ),
       Course(
         courseCode: 'CS101',
         courseTitle: 'Introduction to Computer Science',
-        status: AppStrings.late,
+        status: AppStrings.absent,
         showStatus: true,
       ),
       Course(
