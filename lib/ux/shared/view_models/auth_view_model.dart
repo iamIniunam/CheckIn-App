@@ -79,9 +79,8 @@ class AuthViewModel extends ChangeNotifier {
     return signUpResult.value;
   }
 
-  Future<UIResult<StudentProfile>> login({
-    required LoginRequest loginRequest,
-  }) async {
+  Future<UIResult<StudentProfile>> login(
+      {required LoginRequest loginRequest}) async {
     loginResult.value = UIResult.loading();
 
     final response = await _api.authApi.login(loginRequest);

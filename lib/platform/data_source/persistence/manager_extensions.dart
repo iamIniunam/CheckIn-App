@@ -1,28 +1,10 @@
 import 'dart:convert';
 
-import 'package:attendance_app/platform/data_source/api/api_base_models.dart';
 import 'package:attendance_app/platform/data_source/api/auth/models/app_user.dart';
 import 'package:attendance_app/platform/data_source/persistence/manager.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 
 extension PreferenceManagerExtensions on PreferenceManager {
-  // Auth Token
-  String? get authToken {
-    return sharedPreference.getString(AppConstants.authTokenKey);
-  }
-
-  Future saveAuthToken(String? token) async {
-    if (token == null) {
-      await sharedPreference.remove(AppConstants.authTokenKey);
-    } else {
-      await sharedPreference.setString(AppConstants.authTokenKey, token);
-    }
-  }
-
-  AuthorizationPayload getAccessToken() {
-    return AuthorizationPayload(accessToken: authToken);
-  }
-
   AppUser? get appUser {
     String jsonString = sharedPreference.getString(AppConstants.appUser) ?? "";
     if (jsonString.isEmpty) return null;
@@ -45,7 +27,6 @@ extension PreferenceManagerExtensions on PreferenceManager {
 
   Future<void> clearUserData() async {
     await saveAppUser(null);
-    await saveAuthToken(null);
   }
 
   // Clear all preferences

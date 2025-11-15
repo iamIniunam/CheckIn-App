@@ -1,4 +1,4 @@
-import 'package:attendance_app/platform/course_search_helper.dart';
+import 'package:attendance_app/platform/utils/course_search_helper.dart';
 import 'package:attendance_app/platform/data_source/api/api.dart';
 import 'package:attendance_app/platform/data_source/api/course/models/course_request.dart';
 import 'package:attendance_app/platform/data_source/api/course/models/course_response.dart';

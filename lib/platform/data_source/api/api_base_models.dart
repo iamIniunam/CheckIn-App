@@ -2,35 +2,6 @@ import 'package:attendance_app/platform/data_source/api/api.dart';
 import 'package:attendance_app/platform/data_source/api/network_strings.dart';
 import 'package:attendance_app/platform/extensions/map_extensions.dart';
 
-class AuthorizationPayload {
-  String? accessToken;
-
-  AuthorizationPayload({required this.accessToken});
-}
-
-// class ApiResponse<T> {
-//   final bool success;
-//   final T? data;
-//   final String? message;
-//   final int? statusCode;
-
-//   ApiResponse({
-//     required this.success,
-//     this.data,
-//     this.message,
-//     this.statusCode,
-//   });
-
-//   factory ApiResponse.success(T data, {String? message}) {
-//     return ApiResponse(success: true, data: data, message: message);
-//   }
-
-//   factory ApiResponse.error(String message, {int? statusCode}) {
-//     return ApiResponse(
-//         success: false, message: message, statusCode: statusCode);
-//   }
-// }
-
 class ApiResponse<T> {
   T? response;
   ApiResponseStatus? status;

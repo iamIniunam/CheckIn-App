@@ -4,16 +4,7 @@ class AppConstants {
   // static const apiBaseUrl = 'http://10.36.218.84:8000/api';
   static const apiBaseUrl = 'http://192.168.100.5:8000/api';
 
-  static const authTokenKey = 'auth.token';
   static const appUser = 'app.user';
-
-  // static const isLoggedInKey = 'is.logged.in';
-  // static const studentDataKey = 'student.data';
-  // static const levelKey = 'level';
-  // static const semesterKey = 'semester';
-  // static const passwordKey = 'password';
-  // static const userSchoolKey = 'user.school';
-  // static const appUserKey = 'app.user';
 
   static const similarittyThreshold = 0.70;
   static int embeddingSize = 128;
@@ -51,23 +42,17 @@ class AppConstants {
   static const List<int> levels = [100, 200, 300, 400];
   static const List<int> semesters = [1, 2];
 
-  // static const String selectedCoursesKey = 'selected.courses';
-  // static const String selectedSchoolsKey = 'selected.schools';
-
   static const List<String> programs = [
-    'BSc. Information Technology', //id 1
-    'BSc. Computer Science', //id 2
-    'BSc. Business Administration (Accounting & Finance)', //id 3
-    'BSc. Business Administration (E-Commerce)', //id 4
-    'BSc. Business Administration (HRM & IT)', //id 5
-    'BSc. Business Administration (Marketing & IT)', //id 6
-    'BEng. Computer Engineering', //id 7
-    'BEng. Electrical Electronics Engineering', //id 8
-    'BEng. Civil Engineering', //id 9
+    'BSc. Information Technology',
+    'BSc. Computer Science',
+    'BSc. Business Administration (Accounting & Finance)',
+    'BSc. Business Administration (E-Commerce)',
+    'BSc. Business Administration (HRM & IT)',
+    'BSc. Business Administration (Marketing & IT)',
+    'BEng. Computer Engineering',
+    'BEng. Electrical Electronics Engineering',
+    'BEng. Civil Engineering',
   ];
-
-  // static const String programKey = 'selected.program';
-  // static const String programIdKey = 'selected.program.id';
 
   static int getProgramId(String program) {
     final index = programs.indexOf(program);

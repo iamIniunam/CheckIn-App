@@ -62,9 +62,7 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
           return Column(
             children: [
               const SectionHeader(
-                period: AppStrings.semesterCourses,
-                hasAction: false,
-              ),
+                  period: AppStrings.semesterCourses, hasAction: false),
               PageErrorIndicator(
                 text: courseViewModel.registeredCoursesError ??
                     'Error loading courses',
@@ -85,31 +83,14 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
             const SectionHeader(
               period: AppStrings.semesterCourses,
               hasAction: false,
-              // onTap: () {
-              //   if (courseInfo.length > 9) {
-              //     Navigation.navigateToScreen(
-              //       context: context,
-              //       screen: FullCourseListPage(
-              //         courses: courseInfo,
-              //       ),
-              //     );
-              //   }
-              // },
             ),
             DashboardMetricGridView(
               padding: const EdgeInsets.only(
                   left: 16, top: 10, right: 16, bottom: 16),
               crossAxisCount: 3,
-              children: 
-              // courseInfo.length > 9
-              //     ? courseInfo
-              //         .take(9)
-              //         .map((course) => SingleCourseCard(course: course))
-              //         .toList()
-              //     : 
-                  courseInfo
-                      .map((course) => SingleCourseCard(course: course))
-                      .toList(),
+              children: courseInfo
+                  .map((course) => SingleCourseCard(course: course))
+                  .toList(),
             ),
           ],
         );

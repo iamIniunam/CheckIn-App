@@ -25,12 +25,8 @@ class Requester {
 
   Future<Map<String, String>> getDefaultHeaders() async {
     var headers = <String, String>{};
-    var authorizationPayload = manager.getAccessToken();
     headers['Content-Type'] = 'application/json';
     headers['Accept'] = '*/*';
-    if (authorizationPayload.accessToken != null) {
-      headers['Authorization'] = 'Bearer ${authorizationPayload.accessToken}';
-    }
     return headers;
   }
 

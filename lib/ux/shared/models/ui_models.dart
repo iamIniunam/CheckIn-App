@@ -1,4 +1,3 @@
-
 enum UIState { empty, loading, success, error }
 
 class UIResult<T> {
