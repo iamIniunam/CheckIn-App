@@ -26,7 +26,7 @@ class SignUpCancelDialog {
       cameraController = null;
 
       if (context.mounted) {
-        Navigation.navigateToScreen(
+        Navigation.navigateToScreenAndClearAllPrevious(
             context: context, screen: const SignUpPage());
       }
     }
@@ -52,7 +52,7 @@ class AttendanceCancelDialog {
       await cameraController?.dispose();
       cameraController = null;
       if (context.mounted) {
-        Navigation.navigateToScreen(
+        Navigation.navigateToScreenAndClearAllPrevious(
             context: context, screen: const NavigationHostPage());
       }
     }
@@ -78,7 +78,7 @@ class LocationCancelDialog {
       await cameraController?.dispose();
       cameraController = null;
       if (context.mounted) {
-        Navigation.navigateToScreen(
+        Navigation.navigateToScreenAndClearAllPrevious(
             context: context, screen: const NavigationHostPage());
       }
     }
