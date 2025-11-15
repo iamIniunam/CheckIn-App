@@ -33,9 +33,12 @@ class InformationBanner extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     icon ??
-                        const Icon(Icons.info_outline,
-                            color: AppColors.defaultColor, size: 20),
-                    const SizedBox(width: 8),
+                        const Icon(
+                          Icons.info_outline,
+                          color: AppColors.defaultColor,
+                          size: 16,
+                        ),
+                    const SizedBox(width: 4),
                     Flexible(
                       child: Text(
                         text,
@@ -43,9 +46,10 @@ class InformationBanner extends StatelessWidget {
                         textAlign: TextAlign.center,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                            color: AppColors.defaultColor,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600),
+                          color: AppColors.defaultColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],

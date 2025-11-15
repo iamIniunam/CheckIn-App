@@ -28,29 +28,30 @@ class AppPageScaffold extends StatelessWidget {
   final bool showDivider;
   final String? informationBannerText;
 
-  const AppPageScaffold(
-      {super.key,
-      required this.body,
-      this.hideAppBar = false,
-      this.title,
-      this.headerTitle,
-      this.headerSubtitle,
-      this.actions,
-      this.backgroundColor = AppColors.white,
-      this.appBarColor = AppColors.white,
-      this.titleTextColor = AppColors.defaultColor,
-      this.leadingIconColor = AppColors.defaultColor,
-      this.appBarBottom,
-      this.floatingActionButton,
-      this.floatingActionButtonLocation,
-      this.bottomNavigationBar,
-      this.onBackPressed,
-      this.useSafeArea = true,
-      this.showBackButton = true,
-      this.appBarLeadingIcon,
-      this.showInformationBanner = false,
-      this.showDivider = false,
-      this.informationBannerText});
+  const AppPageScaffold({
+    super.key,
+    required this.body,
+    this.hideAppBar = false,
+    this.title,
+    this.headerTitle,
+    this.headerSubtitle,
+    this.actions,
+    this.backgroundColor = AppColors.white,
+    this.appBarColor = AppColors.white,
+    this.titleTextColor = AppColors.defaultColor,
+    this.leadingIconColor = AppColors.defaultColor,
+    this.appBarBottom,
+    this.floatingActionButton,
+    this.floatingActionButtonLocation,
+    this.bottomNavigationBar,
+    this.onBackPressed,
+    this.useSafeArea = true,
+    this.showBackButton = true,
+    this.appBarLeadingIcon,
+    this.showInformationBanner = false,
+    this.showDivider = false,
+    this.informationBannerText,
+  });
 
   @override
   Widget build(BuildContext context) {
