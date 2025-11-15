@@ -8,7 +8,7 @@ import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
-import 'package:attendance_app/ux/views/onboarding/sign_up_page.dart';
+import 'package:attendance_app/ux/views/onboarding/login_page.dart';
 import 'package:attendance_app/ux/views/splash_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -70,7 +70,7 @@ class _EntryPageState extends State<EntryPage> {
         await Future.delayed(const Duration(seconds: 1));
         if (!mounted) return;
         Navigation.navigateToScreenAndClearAllPrevious(
-            context: context, screen: const SignUpPage());
+            context: context, screen: const LoginPage());
         return;
       }
 
