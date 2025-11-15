@@ -89,8 +89,7 @@ class AppStrings {
   static const morningGreetingSubtitle = 'Ready to make the most of today?';
   static const afternoonGreetingSubtitle =
       "Let’s get things done this afternoon.";
-  static const eveningGreetingSubtitle =
-      "Evening check-in — let’s finish strong.";
+  static const eveningGreetingSubtitle = "Let’s wrap up the day smoothly.";
   static const semesterCourses = 'Semester Courses';
   static const todaysClasses = "Today's Classes";
   static const currentClass = 'Current Class';

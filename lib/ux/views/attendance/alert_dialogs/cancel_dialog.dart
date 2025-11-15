@@ -7,10 +7,9 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
 class SignUpCancelDialog {
-  static Future<void> show({
-    required BuildContext context,
-    CameraController? cameraController,
-  }) async {
+  static Future<void> show(
+      {required BuildContext context,
+      CameraController? cameraController}) async {
     final result = await AppDialogs.showWarningDialog(
       context: context,
       title: AppStrings.cancelFaceRegistration,
@@ -34,13 +33,11 @@ class SignUpCancelDialog {
 }
 
 class AttendanceCancelDialog {
-  static Future<void> show({
-    required BuildContext context,
-    CameraController? cameraController,
-  }) async {
+  static Future<void> show(
+      {required BuildContext context,
+      CameraController? cameraController}) async {
     final result = await AppDialogs.showWarningDialog(
       context: context,
-      title: AppStrings.cancelVerification,
       message: AppStrings.ifYouExitNowYourAttendanceWont,
       secondOption: AppStrings.yesCancel,
       firstOption: 'No',
