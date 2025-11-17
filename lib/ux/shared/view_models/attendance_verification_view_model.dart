@@ -7,6 +7,7 @@ import 'package:attendance_app/ux/shared/view_models/attendance/online_code_view
 import 'package:attendance_app/ux/shared/view_models/attendance/qr_scan_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/location_verification_view_model.dart';
+import 'package:attendance_app/platform/services/location_service.dart';
 import 'package:flutter/material.dart';
 
 enum AutoFlowResult { success, unauthorized, failed }
@@ -19,7 +20,6 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
   final OnlineCodeViewModel _onlineCodeViewModel;
   final AttendanceViewModel _attendanceViewModel;
   final AuthViewModel _authViewModel;
-  // final AttendanceService _attendanceService;
   final VerificationMessageProvider _messageProvider;
   // final FaceVerificationViewModel _faceViewModel; // Future
 
@@ -46,12 +46,23 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
   bool get isMarkingAttendance => _attendanceViewModel.isMarkingAttendance;
 
   String? get _studentId => _authViewModel.appUser?.studentProfile?.idNumber;
-  
-  // String? get _studentId => 'ENG23A00028Y';
 
-  String getuserLocation() {
+  Future<String> getuserLocation() async {
     final position = _locationViewModel.state.currentPosition;
     if (position != null) {
+      try {
+        final place = await LocationService.getPlaceFromCoordinates(
+          latitude: position.latitude,
+          longitude: position.longitude,
+          addCountry: false,
+          maxWords: 2,
+        );
+
+        if (place != null && !place.toLowerCase().contains('error')) {
+          return place;
+        }
+      } catch (_) {}
+
       return '${position.latitude.toStringAsFixed(6)}, ${position.longitude.toStringAsFixed(6)}';
     }
     return 'Location unavailable';
@@ -210,7 +221,7 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
     }
 
     final locationStatus = _locationViewModel.state.verificationStatus;
-    final userLocation = getuserLocation();
+    final userLocation = await getuserLocation();
     final position = _locationViewModel.state.currentPosition;
 
     if (locationStatus == LocationVerificationStatus.successInRange) {
@@ -348,7 +359,7 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
           }
 
           final position = _locationViewModel.state.currentPosition;
-          final userLocation = getuserLocation();
+          final userLocation = await getuserLocation();
 
           // Fire the unauthorized mark and await result so devs receive it,
           // but do NOT change the visible verification step.

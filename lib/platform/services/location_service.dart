@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:attendance_app/platform/extensions/string_extensions.dart';
 import 'package:attendance_app/platform/utils/permission_utils.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
 class LocationService {
@@ -298,6 +300,43 @@ class LocationService {
         canMarkAttendance: false,
         errorMessage: 'Location services failed: ${e.toString()}',
       );
+    }
+  }
+
+  static Future<String?> getPlaceFromCoordinates(
+      {required double latitude,
+      required double longitude,
+      bool addCountry = false,
+      int maxWords = 2}) async {
+    try {
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(latitude, longitude);
+
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks.first;
+
+        // Collect non-null, non-empty parts
+        List<String> parts = [
+          place.name,
+          place.locality ?? place.subAdministrativeArea,
+          place.administrativeArea,
+          if (addCountry) place.country,
+        ].where((e) => e?.isNullOrBlank == false).cast<String>().toList();
+
+        // Any part of the list which is duplicated should be removed
+        parts = parts.toSet().toList();
+
+        //reduce the list to a maximum of maxWords
+        if (parts.length > maxWords) {
+          parts = parts.sublist(0, maxWords);
+        }
+
+        return parts.join(', ');
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return 'Error retrieving location';
     }
   }
 }

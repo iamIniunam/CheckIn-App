@@ -7,6 +7,9 @@ import 'package:attendance_app/platform/data_source/persistence/manager_extensio
 import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:flutter/material.dart';
+import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/course_search_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/attendance/attendance_view_model.dart';
 
 class AuthViewModel extends ChangeNotifier {
   final Api _api = AppDI.getIt<Api>();
@@ -121,5 +124,30 @@ class AuthViewModel extends ChangeNotifier {
     await _preferenceManager.clearUserData();
     _appUser = null;
     notifyListeners();
+
+    try {
+      final courseVm = AppDI.getIt<CourseViewModel>();
+      courseVm.clear();
+    } catch (_) {}
+
+    try {
+      final attendanceVm = AppDI.getIt<AttendanceViewModel>();
+      attendanceVm.clear();
+    } catch (_) {}
+
+    try {
+      final courseSearchVm = AppDI.getIt<CourseSearchViewModel>();
+      courseSearchVm.clearSelectedCourses();
+      courseSearchVm.clearFilter();
+      courseSearchVm.clearSearch();
+    } catch (_) {}
+
+    try {
+      loginResult.value = UIResult.empty();
+    } catch (_) {}
+
+    try {
+      signUpResult.value = UIResult.empty();
+    } catch (_) {}
   }
 }

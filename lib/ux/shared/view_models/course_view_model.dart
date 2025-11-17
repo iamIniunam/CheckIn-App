@@ -331,4 +331,20 @@ class CourseViewModel extends ChangeNotifier {
     _registrationError = null;
     notifyListeners();
   }
+
+  // Clear all in-memory course state (useful on logout)
+  void clear() {
+    _registeredCourses = [];
+    _lastLoadedStudentId = null;
+    _isLoadingRegisteredCourses = false;
+    _isRegisteringCourses = false;
+    _registeredCoursesError = null;
+    _registrationError = null;
+    _hasLoadedRegisteredCourses = false;
+    _totalCoursesToRegister = 0;
+    _coursesRegistered = 0;
+    _failedCourses = [];
+    _searchQuery = '';
+    notifyListeners();
+  }
 }

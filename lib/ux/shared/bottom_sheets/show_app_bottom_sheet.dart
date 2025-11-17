@@ -23,8 +23,8 @@ Future showAppBottomSheet({
     enableDrag: isDismissible,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(16),
-        topRight: Radius.circular(16),
+        topLeft: Radius.circular(20),
+        topRight: Radius.circular(20),
       ),
     ),
     builder: (BuildContext context) {
@@ -91,9 +91,7 @@ Future showAppBottomSheet({
                       SafeArea(child: child),
 
                       // space
-                      const SizedBox(
-                        height: 16,
-                      ),
+                      const SizedBox(height: 16),
                     ],
                   ),
                 ),
