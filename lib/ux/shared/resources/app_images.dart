@@ -18,8 +18,6 @@ class AppImages {
       const AssetImage('assets/images/default_profile_image.png');
   static AssetImage defaultProfileImageTeal =
       const AssetImage('assets/images/default_profile_image_teal.png');
-  static AssetImage placeholderImage =
-      const AssetImage('assets/images/placeholder.png');
   static AssetImage splashBackground =
       const AssetImage('assets/images/splash_background.png');
 
