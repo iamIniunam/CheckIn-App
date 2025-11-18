@@ -74,22 +74,6 @@ class _VerificationPageState extends State<VerificationPage> {
     }
   }
 
-  // Future<void> handleVerification() async {
-  //   final attendanceType =
-  //       viewModel.verificationState.attendanceType ?? widget.attendanceType;
-
-  //   await handleAttendanceVerification(attendanceType);
-  // }
-
-  // Future<void> handleAttendanceVerification(
-  //     AttendanceType attendanceType) async {
-  //   if (viewModel.verificationState.attendanceType == null) {
-  //     viewModel.setAttendanceType(attendanceType);
-  //   }
-
-  //   // await viewModel.startVerificationFlow(attendanceType: attendanceType);
-  // }
-
   Future<void> handleCompletion() async {
     Navigation.navigateToScreen(
         context: context, screen: const NavigationHostPage());
@@ -120,6 +104,54 @@ class _VerificationPageState extends State<VerificationPage> {
     final type =
         viewModel.verificationState.attendanceType ?? widget.attendanceType;
     return type == AttendanceType.inPerson || type == AttendanceType.online;
+  }
+
+  Future<void> handleOnlineCodeSubmission() async {
+    final entered = viewModel.enteredOnlineCode;
+    if (entered == null || entered.trim().isEmpty) {
+      AppDialogs.showErrorDialog(
+          context: context, message: 'Please enter the attendance code');
+      return;
+    }
+
+    if (entered.length < 6) {
+      AppDialogs.showErrorDialog(
+          context: context,
+          message: 'The attendance code must be 6 characters long.');
+      return;
+    }
+
+    final success = await viewModel.submitAttendance();
+
+    if (!mounted) return;
+
+    if (success) {
+      viewModel.moveToNextStep();
+
+      viewModel.updateState(viewModel.verificationState
+          .copyWith(isLoading: true, clearError: true));
+
+      await Future.delayed(const Duration(milliseconds: 800));
+
+      if (!mounted) return;
+
+      viewModel.updateState(viewModel.verificationState
+          .copyWith(isLoading: false, clearError: true));
+      viewModel.moveToNextStep();
+    } else {
+      final message = viewModel.verificationState.errorMessage ??
+          'Unable to submit attendance. Please check your code and try again.';
+      AppDialogs.showErrorDialog(
+        context: context,
+        message: message,
+        action: () {
+          if (message.contains(
+              'You are not registered for the course linked to this attendance code.')) {
+            Navigation.navigateToHomePage(context: context);
+          }
+        },
+      );
+    }
   }
 
   @override
@@ -200,36 +232,7 @@ class _VerificationPageState extends State<VerificationPage> {
       return () => handleOutOfRange(locationStatus);
     }
     if (verificationStep == VerificationStep.onlineCodeEntry) {
-      return () {
-        () async {
-          final entered = viewModel.enteredOnlineCode;
-          if (entered == null || entered.trim().isEmpty) {
-            AppDialogs.showErrorDialog(
-                context: context, message: 'Please enter the attendance code');
-            return;
-          }
-
-          final success = await viewModel.submitAttendance();
-          if (!mounted) return;
-          if (success) {
-            viewModel.moveToNextStep(); // now at attendanceSubmission
-            viewModel.updateState(viewModel.verificationState
-                .copyWith(isLoading: true, clearError: true));
-
-            await Future.delayed(const Duration(milliseconds: 800));
-
-            if (!mounted) return;
-            viewModel.updateState(viewModel.verificationState
-                .copyWith(isLoading: false, clearError: true));
-            viewModel.moveToNextStep(); // now at completed
-          } else {
-            // Show an error dialog so the user knows the online code was wrong.
-            final message = viewModel.verificationState.errorMessage ??
-                'The code you entered is invalid. Please try again.';
-            AppDialogs.showErrorDialog(context: context, message: message);
-          }
-        }();
-      };
+      return () => handleOnlineCodeSubmission();
     }
     if (verificationStep == VerificationStep.completed) {
       return () => handleCompletion();

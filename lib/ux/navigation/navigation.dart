@@ -1,4 +1,4 @@
-import 'package:attendance_app/ux/views/home/home_page.dart';
+import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
 import 'package:flutter/material.dart';
 
 class Navigation {
@@ -34,7 +34,8 @@ class Navigation {
   static Future navigateToHomePage({required BuildContext context}) {
     return Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (BuildContext context) => const HomePage()),
+        MaterialPageRoute(
+            builder: (BuildContext context) => const NavigationHostPage()),
         (route) => false);
   }
 }

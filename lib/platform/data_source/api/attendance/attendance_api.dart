@@ -64,6 +64,19 @@ class AttendanceApi extends ApiCore {
       ),
     );
 
+    if (response.response != null && response.response is Map) {
+      final hasError = response.response['error'] == true;
+      final errorMessage = response.response['message'] as String?;
+
+      if (hasError) {
+        return ApiResponse(
+          status: ApiResponseStatus.Error,
+          statusCode: response.statusCode,
+          message: errorMessage ?? 'Failed to mark attendance',
+        );
+      }
+    }
+
     if (response.status == ApiResponseStatus.Success) {
       try {
         final markResponse = MarkAttendanceResponse.fromJson(response.response);

@@ -54,7 +54,6 @@ class _ScanViewState extends State<ScanView> {
         Provider.of<AttendanceVerificationViewModel>(context, listen: false);
 
     viewModel.onQrCodeScanned(code);
-
     viewModel.moveToNextStep();
 
     final flowResult = await viewModel.proceedWithAutomaticFlow();

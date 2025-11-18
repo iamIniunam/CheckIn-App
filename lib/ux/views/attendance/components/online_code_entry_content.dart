@@ -21,6 +21,7 @@ class OnlineCodeEntryContent extends StatelessWidget {
         keyboardType: TextInputType.visiblePassword,
         onChanged: (value) => viewModel.onOnlineCodeEntered(value),
         onSubmitted: (value) => viewModel.onOnlineCodeEntered(value),
+        maxLength: 6,
       ),
     );
   }

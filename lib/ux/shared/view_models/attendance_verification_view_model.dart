@@ -322,9 +322,8 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
       if (result.success) {
         return true;
       } else {
-        updateState(_verificationState.copyWith(
-          errorMessage: result.errorMessage,
-        ));
+        updateState(
+            _verificationState.copyWith(errorMessage: result.errorMessage));
         return false;
       }
     } else if (locStatus == LocationVerificationStatus.outOfRange) {
@@ -372,9 +371,12 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
           RegExp(r'^[A-Za-z0-9\-]{3,20}$').hasMatch(onlineCodeValue);
 
       if (lower.contains('unable to find class') && isPlainCode) {
+        message = '$message\nPlease check the code and try again.';
+      }
+      if (lower.contains('student is not registered to this course') &&
+          isPlainCode) {
         message =
-            '$message — this usually means the attendance code entered is incorrect. '
-            'Please check the code and try again.';
+            'You are not registered for the course linked to this attendance code. Check your enrollment and try again.';
       }
 
       updateState(_verificationState.copyWith(errorMessage: message));
