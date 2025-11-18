@@ -87,9 +87,10 @@ class CourseCard extends StatelessWidget {
                   Text(
                     DateTime.now().friendlyTime(),
                     style: const TextStyle(
-                        color: AppColors.defaultColor,
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold),
+                      color: AppColors.defaultColor,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   Visibility(
                     visible: course.showStatus,
