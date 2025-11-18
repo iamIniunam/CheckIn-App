@@ -1,4 +1,4 @@
-import 'package:attendance_app/platform/services/location_service.dart';
+import 'package:attendance_app/platform/utils/location_utils.dart';
 import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/shared/models/models.dart';
 
@@ -102,8 +102,8 @@ Try:
         final distance = context?['distance'] as double?;
         final maxDistance = context?['maxDistance'] as double?;
         if (distance != null && maxDistance != null) {
-          return 'You are ${LocationService.formatDistance(distance)} from campus. '
-              'You need to be within ${LocationService.formatDistance(maxDistance)} to mark attendance.';
+          return 'You are ${LocationUtils.formatDistance(distance)} from campus. '
+              'You need to be within ${LocationUtils.formatDistance(maxDistance)} to mark attendance.';
         }
         return 'You are outside the allowed range for attendance';
       case VerificationError.locationServiceFailed:
@@ -134,16 +134,16 @@ Try:
     if (locationState.currentPosition == null) return 'No location data';
 
     String info =
-        'Distance: ${LocationService.formatDistance(locationState.distanceFromCampus ?? 0)}';
+        'Distance: ${LocationUtils.formatDistance(locationState.distanceFromCampus ?? 0)}';
 
     if (locationState.isNetworkBased) {
       info += '\nMethod: Network location';
     } else if (locationState.isIndoorLocation) {
       info +=
-          '\nMethod: Indoor GPS (±${LocationService.formatDistance(locationState.currentPosition?.accuracy ?? 0)})';
+          '\nMethod: Indoor GPS (±${LocationUtils.formatDistance(locationState.currentPosition?.accuracy ?? 0)})';
     } else {
       info +=
-          '\nMethod: GPS (±${LocationService.formatDistance(locationState.currentPosition?.accuracy ?? 0)})';
+          '\nMethod: GPS (±${LocationUtils.formatDistance(locationState.currentPosition?.accuracy ?? 0)})';
     }
 
     final verificationStatus = locationState.verificationStatus;

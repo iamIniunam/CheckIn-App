@@ -7,9 +7,8 @@ import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance/attendance_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance/online_code_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance/qr_scan_view_model.dart';
-import 'package:attendance_app/ux/shared/view_models/attendance_location_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/attendance/attendance_location_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
-import 'package:attendance_app/platform/services/location_service.dart';
 import 'package:flutter/material.dart';
 
 enum AutoFlowResult { success, unauthorized, failed }
@@ -168,7 +167,7 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
 
     if (position != null) {
       try {
-        final place = await LocationService.getPlaceFromCoordinates(
+        final place = await LocationUtils.getPlaceFromCoordinates(
           latitude: position.latitude,
           longitude: position.longitude,
           addCountry: false,

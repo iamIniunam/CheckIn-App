@@ -9,7 +9,7 @@ import 'package:attendance_app/ux/shared/resources/constants/attendance_validato
 import 'package:attendance_app/ux/shared/view_models/attendance/attendance_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance/online_code_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance/qr_scan_view_model.dart';
-import 'package:attendance_app/ux/shared/view_models/attendance_location_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/attendance/attendance_location_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_search_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';

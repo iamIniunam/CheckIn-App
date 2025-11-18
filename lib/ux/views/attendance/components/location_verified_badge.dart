@@ -1,4 +1,4 @@
-import 'package:attendance_app/platform/services/location_service.dart';
+import 'package:attendance_app/platform/utils/location_utils.dart';
 import 'package:flutter/material.dart';
 
 class LocationVerifiedBadge extends StatelessWidget {
@@ -27,7 +27,7 @@ class LocationVerifiedBadge extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Text(
-            'Location verified: ${formattedDistance ?? LocationService.formatDistance(distance)}',
+            'Location verified: ${formattedDistance ?? LocationUtils.formatDistance(distance)}',
             style: TextStyle(
               color: Colors.green.shade700,
               fontSize: 12,
