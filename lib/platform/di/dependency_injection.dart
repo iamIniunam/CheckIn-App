@@ -4,7 +4,12 @@ import 'package:attendance_app/platform/data_source/api/auth/auth_api.dart';
 import 'package:attendance_app/platform/data_source/api/course/course_api.dart';
 import 'package:attendance_app/platform/data_source/api/requester.dart';
 import 'package:attendance_app/platform/data_source/persistence/manager.dart';
+import 'package:attendance_app/platform/utils/location_provider.dart';
+import 'package:attendance_app/ux/shared/resources/constants/attendance_validator.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance/attendance_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/attendance/online_code_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/attendance/qr_scan_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/attendance_location_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_search_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
@@ -40,6 +45,22 @@ class AppDI {
         () => AttendanceViewModel());
     getIt.registerLazySingleton<CourseSearchViewModel>(
         () => CourseSearchViewModel());
+    getIt.registerLazySingleton<QrScanViewModel>(() => QrScanViewModel());
+    getIt.registerLazySingleton<OnlineCodeViewModel>(
+        () => OnlineCodeViewModel());
+
+    getIt.registerFactory<AttendanceLocationViewModel>(
+      () => AttendanceLocationViewModel(),
+    );
+
+    // Services
+    getIt.registerLazySingleton<LocationProvider>(
+      () => LocationProvider(),
+    );
+
+    getIt.registerLazySingleton<AttendanceValidator>(
+      () => AttendanceValidator(),
+    );
   }
 }
 

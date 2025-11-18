@@ -14,87 +14,94 @@ class StepIndicatorWidget extends StatelessWidget {
       top: MediaQuery.of(context).padding.top + 80,
       left: 20,
       right: 20,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.95),
-          borderRadius: BorderRadius.circular(25),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
+      child: AnimatedBuilder(
+        animation: viewModel,
+        builder: (context, _) {
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.95),
+              borderRadius: BorderRadius.circular(25),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            // Show QR scan step when attendance type is in-person or not set yet
-            if (viewModel.verificationState.attendanceType == null ||
-                viewModel.verificationState.attendanceType ==
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                // QR scan step for in-person
+                if (viewModel.verificationState.attendanceType == null ||
+                    viewModel.verificationState.attendanceType ==
+                        AttendanceType.inPerson) ...[
+                  StepIndicatorItem(
+                    label: 'QR Scan',
+                    icon: Icons.qr_code_2_rounded,
+                    isActive: viewModel.verificationState.currentStep.index >=
+                        VerificationStep.qrCodeScan.index,
+                    isLoading: viewModel.verificationState.currentStep ==
+                            VerificationStep.qrCodeScan &&
+                        viewModel.verificationState.isLoading,
+                  ),
+                  StepConnector(
+                    isActive: viewModel.verificationState.currentStep.index >
+                        VerificationStep.qrCodeScan.index,
+                  ),
+                ],
+
+                // Online code entry for online
+                if (viewModel.verificationState.attendanceType ==
+                    AttendanceType.online) ...[
+                  StepIndicatorItem(
+                    label: 'Online Code',
+                    icon: Icons.keyboard_alt_rounded,
+                    isActive: viewModel.verificationState.currentStep.index >=
+                        VerificationStep.onlineCodeEntry.index,
+                    isLoading: viewModel.verificationState.currentStep ==
+                            VerificationStep.onlineCodeEntry &&
+                        viewModel.verificationState.isLoading,
+                  ),
+                  StepConnector(
+                    isActive: viewModel.verificationState.currentStep.index >
+                        VerificationStep.onlineCodeEntry.index,
+                  ),
+                ],
+
+                // Location step only for in-person
+                if (viewModel.verificationState.attendanceType ==
                     AttendanceType.inPerson) ...[
-              StepIndicatorItem(
-                label: 'QR Scan',
-                icon: Icons.qr_code_2_rounded,
-                isActive: viewModel.verificationState.currentStep.index >=
-                    VerificationStep.qrCodeScan.index,
-                isLoading: viewModel.verificationState.currentStep ==
-                        VerificationStep.qrCodeScan &&
-                    viewModel.verificationState.isLoading,
-              ),
-              StepConnector(
-                isActive: viewModel.verificationState.currentStep.index >
-                    VerificationStep.qrCodeScan.index,
-              ),
-            ],
+                  StepIndicatorItem(
+                    label: 'Location',
+                    icon: Icons.location_on,
+                    isActive: viewModel.verificationState.currentStep.index >=
+                        VerificationStep.locationCheck.index,
+                    isLoading: viewModel.verificationState.currentStep ==
+                            VerificationStep.locationCheck &&
+                        viewModel.verificationState.isLoading,
+                  ),
+                  StepConnector(
+                    isActive: viewModel.verificationState.currentStep.index >
+                        VerificationStep.locationCheck.index,
+                  ),
+                ],
 
-            if (viewModel.verificationState.attendanceType ==
-                AttendanceType.online) ...[
-              StepIndicatorItem(
-                label: 'Online Code',
-                icon: Icons.keyboard_alt_rounded,
-                isActive: viewModel.verificationState.currentStep.index >=
-                    VerificationStep.onlineCodeEntry.index,
-                isLoading: viewModel.verificationState.currentStep ==
-                        VerificationStep.onlineCodeEntry &&
-                    viewModel.verificationState.isLoading,
-              ),
-              StepConnector(
-                isActive: viewModel.verificationState.currentStep.index >
-                    VerificationStep.onlineCodeEntry.index,
-              ),
-            ],
-
-            // Show Location step only for in-person attendance
-            if (viewModel.verificationState.attendanceType ==
-                AttendanceType.inPerson) ...[
-              StepIndicatorItem(
-                label: 'Location',
-                icon: Icons.location_on,
-                isActive: viewModel.verificationState.currentStep.index >=
-                    VerificationStep.locationCheck.index,
-                isLoading: viewModel.verificationState.currentStep ==
-                        VerificationStep.locationCheck &&
-                    viewModel.verificationState.isLoading,
-              ),
-              StepConnector(
-                isActive: viewModel.verificationState.currentStep.index >
-                    VerificationStep.locationCheck.index,
-              ),
-            ],
-
-            StepIndicatorItem(
-              label: 'Submit',
-              icon: Icons.check_circle,
-              isActive: viewModel.verificationState.currentStep.index >=
-                  VerificationStep.attendanceSubmission.index,
-              isLoading: viewModel.verificationState.currentStep ==
-                      VerificationStep.attendanceSubmission &&
-                  viewModel.verificationState.isLoading,
+                // Submit step
+                StepIndicatorItem(
+                  label: 'Submit',
+                  icon: Icons.check_circle,
+                  isActive: viewModel.verificationState.currentStep.index >=
+                      VerificationStep.attendanceSubmission.index,
+                  isLoading: viewModel.verificationState.currentStep ==
+                          VerificationStep.attendanceSubmission &&
+                      viewModel.verificationState.isLoading,
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

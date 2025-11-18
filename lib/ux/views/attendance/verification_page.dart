@@ -74,21 +74,21 @@ class _VerificationPageState extends State<VerificationPage> {
     }
   }
 
-  Future<void> handleVerification() async {
-    final attendanceType =
-        viewModel.verificationState.attendanceType ?? widget.attendanceType;
+  // Future<void> handleVerification() async {
+  //   final attendanceType =
+  //       viewModel.verificationState.attendanceType ?? widget.attendanceType;
 
-    await handleAttendanceVerification(attendanceType);
-  }
+  //   await handleAttendanceVerification(attendanceType);
+  // }
 
-  Future<void> handleAttendanceVerification(
-      AttendanceType attendanceType) async {
-    if (viewModel.verificationState.attendanceType == null) {
-      viewModel.setAttendanceType(attendanceType);
-    }
+  // Future<void> handleAttendanceVerification(
+  //     AttendanceType attendanceType) async {
+  //   if (viewModel.verificationState.attendanceType == null) {
+  //     viewModel.setAttendanceType(attendanceType);
+  //   }
 
-    // await viewModel.startVerificationFlow(attendanceType: attendanceType);
-  }
+  //   // await viewModel.startVerificationFlow(attendanceType: attendanceType);
+  // }
 
   Future<void> handleCompletion() async {
     Navigation.navigateToScreen(
@@ -108,7 +108,6 @@ class _VerificationPageState extends State<VerificationPage> {
       context: context,
       cameraController: cameraController,
     );
-    // }
   }
 
   bool shouldShowStepIndicator() {
@@ -125,9 +124,6 @@ class _VerificationPageState extends State<VerificationPage> {
 
   @override
   void dispose() {
-    // Dispose resources. cameraController.dispose() returns a Future,
-    // but dispose() can't be async — call it without awaiting and
-    // dispose the view model synchronously.
     try {
       cameraController?.dispose();
     } catch (_) {
@@ -148,18 +144,14 @@ class _VerificationPageState extends State<VerificationPage> {
           hideAppBar: true,
           body: Consumer<AttendanceVerificationViewModel>(
             builder: (context, verificationViewModel, _) {
-              final locationStatus =
-                  verificationViewModel.locationState.verificationStatus;
-
+              final locationStatus = verificationViewModel.locationStatus;
               final verificationStep =
                   verificationViewModel.verificationState.currentStep;
 
               return Stack(
                 children: [
                   // Main content
-                  StepContent(
-                    viewModel: verificationViewModel,
-                  ),
+                  StepContent(viewModel: verificationViewModel),
 
                   // Step indicator for attendance mode
                   if (shouldShowStepIndicator())
@@ -170,9 +162,10 @@ class _VerificationPageState extends State<VerificationPage> {
                       verificationViewModel.verificationState.attendanceType !=
                           null)
                     AttendanceTypeIndicator(
-                        attendanceType: verificationViewModel
-                                .verificationState.attendanceType ??
-                            widget.attendanceType),
+                      attendanceType: verificationViewModel
+                              .verificationState.attendanceType ??
+                          widget.attendanceType,
+                    ),
 
                   // Exit button: prefer VM attendanceType, fallback to widget
                   ExitButton(
@@ -187,19 +180,11 @@ class _VerificationPageState extends State<VerificationPage> {
                   VerificationButton(
                     viewModel: verificationViewModel,
                     onVerify: getOnVerify(
-                        locationStatus ??
-                            LocationVerificationStatus
-                                .successInRange, //TODO: check this logic
-                        verificationStep),
+                      locationStatus ??
+                          LocationVerificationStatus.successInRange,
+                      verificationStep,
+                    ),
                   ),
-
-                  // Loading overlay
-                  // Visibility(
-                  //   visible: verificationViewModel.isFaceVerifying,
-                  //   child: BlurredLoadingOverlay(
-                  //       showLoader:
-                  //           verificationViewModel.verificationState.isLoading),
-                  // ),
                 ],
               );
             },
@@ -250,6 +235,6 @@ class _VerificationPageState extends State<VerificationPage> {
       return () => handleCompletion();
     }
 
-    return handleVerification;
+    return () {};
   }
 }

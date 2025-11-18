@@ -1,3 +1,4 @@
+import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance_verification_view_model.dart';
 import 'package:attendance_app/ux/views/attendance/components/error_message.dart';
@@ -64,10 +65,20 @@ class SubmissionContent extends StatelessWidget {
                 ],
               ),
             ),
-            if (viewModel.requiresLocationCheck &&
-                viewModel.locationState.distanceFromCampus != null)
-              LocationVerifiedBadge(
-                  distance: viewModel.locationState.distanceFromCampus ?? 0),
+            if (viewModel.requiresLocationCheck)
+              ValueListenableBuilder<UIResult<AttendanceResult>>(
+                valueListenable: viewModel.locationCheckResult,
+                builder: (context, result, child) {
+                  if (result.isSuccess && result.data != null) {
+                    final data = result.data;
+                    return LocationVerifiedBadge(
+                      distance: data?.distance ?? 0.0,
+                      formattedDistance: data?.formattedDistance,
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
             if (viewModel.verificationState.errorMessage != null)
               ErrorMessage(
                   message: viewModel.verificationState.errorMessage ?? ''),

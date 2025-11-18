@@ -1,5 +1,6 @@
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance_verification_view_model.dart';
+import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/views/attendance/components/error_message.dart';
 import 'package:flutter/material.dart';
 
@@ -51,21 +52,97 @@ class LocationCheckContent extends StatelessWidget {
                 color: Colors.grey,
               ),
             ),
-            if (viewModel.isLocationChecking) ...[
-              const SizedBox(height: 24),
-              const CircularProgressIndicator(
-                valueColor:
-                    AlwaysStoppedAnimation<Color>(AppColors.defaultColor),
-              ),
-            ],
+
+            // Real-time location updates using ValueListenableBuilder
+            ValueListenableBuilder<UIResult<AttendanceResult>>(
+              valueListenable: viewModel.locationCheckResult,
+              builder: (context, result, child) {
+                // Show loading spinner
+                if (result.isLoading || viewModel.isLocationChecking) {
+                  return const Column(
+                    children: [
+                      SizedBox(height: 24),
+                      CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.defaultColor),
+                      ),
+                    ],
+                  );
+                }
+
+                // Show distance if available
+                if (result.isSuccess && result.data != null) {
+                  final data = result.data!;
+                  return Column(
+                    children: [
+                      const SizedBox(height: 24),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: data.canAttend
+                              ? Colors.green.shade50
+                              : Colors.orange.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: data.canAttend
+                                ? Colors.green.shade300
+                                : Colors.orange.shade300,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.location_on,
+                                  color: data.canAttend
+                                      ? Colors.green.shade700
+                                      : Colors.orange.shade700,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Distance: ${data.formattedDistance}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: data.canAttend
+                                        ? Colors.green.shade700
+                                        : Colors.orange.shade700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (data.accuracy != null) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                'Accuracy: ±${data.accuracy?.toStringAsFixed(0)}m',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                }
+
+                return const SizedBox.shrink();
+              },
+            ),
+
+            // Show error message if exists
             if (viewModel.verificationState.errorMessage != null)
               ErrorMessage(
-                  message: viewModel.verificationState.errorMessage ?? ''),
-            // const SizedBox(height: 16),
-            // Text(
-            //     'Current Latitude: ${viewModel.locationState.currentPosition?.latitude}'),
-            // Text(
-            //     'Current Longitude: ${viewModel.locationState.currentPosition?.longitude}'),
+                message: viewModel.verificationState.errorMessage ?? '',
+              ),
           ],
         ),
       ),

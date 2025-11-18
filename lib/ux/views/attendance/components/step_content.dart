@@ -28,7 +28,7 @@ class StepContent extends StatelessWidget {
         return SubmissionContent(viewModel: viewModel);
 
       case VerificationStep.completed:
-        return const CompletionContent();
+        return CompletionContent(viewModel: viewModel);
     }
   }
 }
