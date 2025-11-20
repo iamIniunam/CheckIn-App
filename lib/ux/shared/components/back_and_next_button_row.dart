@@ -15,6 +15,7 @@ class BackAndNextButtonRow extends StatelessWidget {
     this.secondIcon,
     this.buttonColor,
     this.nextWidget,
+    this.hasBottomPadding = false,
   });
 
   final bool enableNextButton;
@@ -27,11 +28,13 @@ class BackAndNextButtonRow extends StatelessWidget {
   final Widget? secondIcon;
   final Color? buttonColor;
   final Widget? nextWidget;
+  final bool hasBottomPadding;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
+      padding: EdgeInsets.only(
+          top: 16, left: 16, right: 16, bottom: hasBottomPadding ? 16 : 0),
       color: AppColors.white,
       child: Row(
         mainAxisSize: MainAxisSize.min,

@@ -1,4 +1,5 @@
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:searchfield/searchfield.dart';
@@ -69,15 +70,10 @@ class AppDropdownField extends StatelessWidget {
             ),
           ),
           SizedBox(
-            child: DropdownButtonFormField<dynamic>(
-              //menuMaxHeight: 100,
+            child: DropdownButtonFormField2<dynamic>(
               isExpanded: true,
               validator: validator,
               value: valueHolder,
-              icon: const Icon(
-                Icons.keyboard_arrow_down,
-                color: AppColors.defaultColor,
-              ),
               style: const TextStyle(
                 color: AppColors.defaultColor,
                 fontFamily: 'Nunito',
@@ -85,11 +81,41 @@ class AppDropdownField extends StatelessWidget {
                 fontWeight: FontWeight.w500,
                 overflow: TextOverflow.ellipsis,
               ),
+              hint: Text(
+                hintText ?? '',
+                style: const TextStyle(
+                  color: Color.fromRGBO(166, 164, 164, 1),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              buttonStyleData: ButtonStyleData(
+                padding: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.grey.shade200,
+                ),
+              ),
+              dropdownStyleData: DropdownStyleData(
+                elevation: 0,
+                maxHeight: 200,
+                offset: const Offset(0, -5),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.grey.shade100,
+                ),
+                scrollbarTheme: ScrollbarThemeData(
+                  radius: const Radius.circular(40),
+                  thickness: MaterialStateProperty.all(6),
+                ),
+              ),
+              menuItemStyleData: const MenuItemStyleData(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              ),
               decoration: InputDecoration(
                 filled: true,
                 fillColor: Colors.grey.shade200,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                contentPadding: const EdgeInsets.symmetric(vertical: 5),
                 hintText: hintText,
                 hintStyle: const TextStyle(
                   color: Color.fromRGBO(166, 164, 164, 1),
@@ -123,11 +149,16 @@ class AppDropdownField extends StatelessWidget {
                                     child: itemsIcon,
                                   ),
                                 ),
-                                Text(
-                                  item,
-                                  style: const TextStyle(
+                                Expanded(
+                                  child: Text(
+                                    item,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
                                       color: AppColors.defaultColor,
-                                      fontWeight: FontWeight.w400),
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -314,7 +345,7 @@ class _CustomSearchTextFormFieldState extends State<CustomSearchTextFormField> {
             textCapitalization: TextCapitalization.sentences,
             inputFormatters: widget.inputFormatters,
             controller: widget.controller,
-            textInputAction: TextInputAction.next,
+            textInputAction: TextInputAction.done,
           ),
         ],
       ),
