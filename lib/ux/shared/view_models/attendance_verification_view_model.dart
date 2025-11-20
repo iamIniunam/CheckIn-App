@@ -1,7 +1,7 @@
 import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/platform/utils/location_utils.dart';
 import 'package:attendance_app/ux/shared/enums.dart';
-import 'package:attendance_app/platform/services/message_providers/message_providers.dart';
+import 'package:attendance_app/platform/services/message_providers.dart';
 import 'package:attendance_app/ux/shared/models/models.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance/attendance_view_model.dart';

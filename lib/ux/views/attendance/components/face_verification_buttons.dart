@@ -26,7 +26,9 @@ class ExitButton extends StatelessWidget {
   Widget build(BuildContext context) {
     if (isAttendanceMode() &&
         viewModel.verificationState.currentStep !=
-            VerificationStep.qrCodeScan) {
+            VerificationStep.qrCodeScan &&
+        viewModel.verificationState.currentStep !=
+            VerificationStep.onlineCodeEntry) {
       return const SizedBox.shrink();
     }
 

@@ -39,11 +39,11 @@ class AuthViewModel extends ChangeNotifier {
       final isError = response.response['error'] == true;
 
       if (isError) {
-        loginResult.value = UIResult.error(
+        signUpResult.value = UIResult.error(
           message: response.response['message'] ??
               'Sign Up failed. Please try again.',
         );
-        return loginResult.value;
+        return signUpResult.value;
       }
 
       try {

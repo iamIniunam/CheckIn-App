@@ -4,6 +4,7 @@ import 'package:attendance_app/platform/data_source/api/auth/auth_api.dart';
 import 'package:attendance_app/platform/data_source/api/course/course_api.dart';
 import 'package:attendance_app/platform/data_source/api/requester.dart';
 import 'package:attendance_app/platform/data_source/persistence/manager.dart';
+import 'package:attendance_app/platform/services/local_auth_service.dart';
 import 'package:attendance_app/platform/utils/location_provider.dart';
 import 'package:attendance_app/ux/shared/resources/constants/attendance_validator.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance/attendance_view_model.dart';
@@ -61,6 +62,8 @@ class AppDI {
     getIt.registerLazySingleton<AttendanceValidator>(
       () => AttendanceValidator(),
     );
+
+    getIt.registerLazySingleton<LocalAuthService>(() => LocalAuthService());
   }
 }
 

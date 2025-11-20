@@ -1,4 +1,3 @@
-import 'package:attendance_app/platform/utils/permission_utils.dart';
 import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/enums.dart';
@@ -10,7 +9,6 @@ import 'package:attendance_app/ux/views/attendance/components/face_verification_
 import 'package:attendance_app/ux/views/attendance/components/step_content.dart';
 import 'package:attendance_app/ux/views/attendance/components/step_indicator_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
@@ -27,9 +25,6 @@ class VerificationPage extends StatefulWidget {
 }
 
 class _VerificationPageState extends State<VerificationPage> {
-  CameraController? cameraController;
-  bool isCameraInitialized = false;
-  List<CameraDescription> cameras = [];
   late AttendanceVerificationViewModel viewModel;
 
   @override
@@ -38,40 +33,6 @@ class _VerificationPageState extends State<VerificationPage> {
     final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
     viewModel = AttendanceVerificationViewModel(authViewModel: authViewModel);
     viewModel.setAttendanceType(widget.attendanceType);
-
-    initializeCamera();
-  }
-
-  Future<void> initializeCamera() async {
-    try {
-      final permissionGranted = await PermissionUtils.requestCameraPermission(
-          showSettingsOption: true);
-
-      if (!permissionGranted) {
-        debugPrint("Camera permission not granted, stopping initialization.");
-        return;
-      }
-
-      cameras = await availableCameras();
-      cameraController = CameraController(
-        cameras.firstWhere(
-          (camera) => camera.lensDirection == CameraLensDirection.front,
-          orElse: () => cameras.first,
-        ),
-        ResolutionPreset.medium,
-        enableAudio: false,
-      );
-
-      await cameraController?.initialize();
-
-      if (mounted) {
-        setState(() {
-          isCameraInitialized = true;
-        });
-      }
-    } catch (e) {
-      debugPrint("Unexpected Camera Error: $e");
-    }
   }
 
   Future<void> handleCompletion() async {
@@ -88,10 +49,7 @@ class _VerificationPageState extends State<VerificationPage> {
   }
 
   void handleExit() {
-    AttendanceCancelDialog.show(
-      context: context,
-      cameraController: cameraController,
-    );
+    AttendanceCancelDialog.show(context: context);
   }
 
   bool shouldShowStepIndicator() {
@@ -156,11 +114,6 @@ class _VerificationPageState extends State<VerificationPage> {
 
   @override
   void dispose() {
-    try {
-      cameraController?.dispose();
-    } catch (_) {
-      // ignore dispose errors
-    }
     viewModel.dispose();
     super.dispose();
   }

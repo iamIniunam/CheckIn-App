@@ -35,16 +35,6 @@ class _LoginPageState extends State<LoginPage> {
 
   void handleLoginResult() {
     final result = authViewModel.loginResult.value;
-
-    if (result.isLoading) {
-      AppDialogs.showLoadingDialog(context);
-      return;
-    }
-
-    if (Navigator.canPop(context)) {
-      Navigator.pop(context);
-    }
-
     if (result.isSuccess) {
       Navigation.navigateToScreenAndClearOnePrevious(
         context: context,
@@ -69,6 +59,7 @@ class _LoginPageState extends State<LoginPage> {
       );
       return;
     }
+    AppDialogs.showLoadingDialog(context);
     final request = LoginRequest(
       idNumber: idNumberController.text.trim(),
       password: passwordController.text.trim(),
@@ -76,6 +67,8 @@ class _LoginPageState extends State<LoginPage> {
 
     await authViewModel.login(loginRequest: request);
     if (!mounted) return;
+    Navigation.back(context: context);
+    handleLoginResult();
   }
 
   @override
@@ -93,88 +86,79 @@ class _LoginPageState extends State<LoginPage> {
       },
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        body: ValueListenableBuilder(
-          valueListenable: authViewModel.loginResult,
-          builder: (context, result, _) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              handleLoginResult();
-            });
-
-            return DecoratedBox(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AppImages.backgroundImage,
-                  fit: BoxFit.cover,
-                  colorFilter: ColorFilter.mode(
-                      AppColors.black.withOpacity(0.7), BlendMode.darken),
+        body: DecoratedBox(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AppImages.backgroundImage,
+              fit: BoxFit.cover,
+              colorFilter: ColorFilter.mode(
+                  AppColors.black.withOpacity(0.7), BlendMode.darken),
+            ),
+          ),
+          child: Center(
+            child: ListView(
+              shrinkWrap: true,
+              padding: const EdgeInsets.only(left: 24, right: 24),
+              children: [
+                const Text(
+                  AppStrings.login,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 45,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              child: Center(
-                child: ListView(
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.only(left: 24, right: 24),
-                  children: [
-                    const Text(
-                      AppStrings.login,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 45,
-                        fontWeight: FontWeight.bold,
+                const SizedBox(height: 18),
+                Container(
+                  padding: const EdgeInsets.only(
+                      left: 24, top: 30, right: 24, bottom: 30),
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(28),
+                  ),
+                  child: Column(
+                    children: [
+                      PrimaryTextFormField(
+                        labelText: AppStrings.studentIdNumber,
+                        controller: idNumberController,
+                        keyboardType: TextInputType.visiblePassword,
+                        hintText: AppStrings.sampleIdNumber,
+                        textInputAction: TextInputAction.next,
+                        textCapitalization: TextCapitalization.characters,
+                        bottomPadding: 0,
                       ),
-                    ),
-                    const SizedBox(height: 18),
-                    Container(
-                      padding: const EdgeInsets.only(
-                          left: 24, top: 30, right: 24, bottom: 30),
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.circular(28),
+                      PrimaryTextFormField(
+                        labelText: AppStrings.password,
+                        hintText: AppStrings.enterYourPassword,
+                        controller: passwordController,
+                        keyboardType: TextInputType.visiblePassword,
+                        textInputAction: TextInputAction.done,
+                        obscureText: isPasswordObscured,
+                        suffixWidget: IconButton(
+                          icon: Icon(
+                            isPasswordObscured
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: AppColors.defaultColor,
+                          ),
+                          onPressed: togglePasswordVisibility,
+                        ),
+                        bottomPadding: 0,
                       ),
-                      child: Column(
-                        children: [
-                          PrimaryTextFormField(
-                            labelText: AppStrings.studentIdNumber,
-                            controller: idNumberController,
-                            keyboardType: TextInputType.visiblePassword,
-                            hintText: AppStrings.sampleIdNumber,
-                            textInputAction: TextInputAction.next,
-                            textCapitalization: TextCapitalization.characters,
-                            bottomPadding: 0,
-                          ),
-                          PrimaryTextFormField(
-                            labelText: AppStrings.password,
-                            hintText: AppStrings.enterYourPassword,
-                            controller: passwordController,
-                            keyboardType: TextInputType.visiblePassword,
-                            textInputAction: TextInputAction.done,
-                            obscureText: isPasswordObscured,
-                            suffixWidget: IconButton(
-                              icon: Icon(
-                                isPasswordObscured
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                                color: AppColors.defaultColor,
-                              ),
-                              onPressed: togglePasswordVisibility,
-                            ),
-                            bottomPadding: 0,
-                          ),
-                          const SizedBox(height: 30),
-                          PrimaryButton(
-                            onTap: handleLogin,
-                            child: const Text(AppStrings.login),
-                          ),
-                          const SizedBox(height: 16),
-                          const AuthRedirectionWidget(isLogin: true),
-                        ],
+                      const SizedBox(height: 30),
+                      PrimaryButton(
+                        onTap: handleLogin,
+                        child: const Text(AppStrings.login),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 16),
+                      const AuthRedirectionWidget(isLogin: true),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              ],
+            ),
+          ),
         ),
       ),
     );
