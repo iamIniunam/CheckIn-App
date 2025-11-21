@@ -1,4 +1,3 @@
-import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_images.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
@@ -11,10 +10,9 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.ltr,
-      child: AppPage(
-        hideAppBar: true,
-        backgroundColor: AppColors.white,
-        body: Column(
+      child: Material(
+        color: AppColors.white,
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

@@ -1,5 +1,6 @@
 import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
+import 'package:attendance_app/ux/shared/components/information_banner.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/utils/general_ui_utils.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
@@ -56,16 +57,21 @@ class _HomePageState extends State<HomePage> {
         headerTitle: UiUtils.getGreetingTitle(
             _authViewModel.appUser?.studentProfile?.firstName ?? ''),
         headerSubtitle: UiUtils.getGreetingSubtitle(),
-        showInformationBanner: true,
-        informationBannerText: AppStrings.qrCodeExpirationWarning,
-        body: ListView(
-          children: const [
-            MarkAttendanceQuickAccess(),
-            // AttendanceThresholdWidget(),
-            SizedBox(height: 10),
-            SemesterCoursesDashboardMetricView(),
-            // SizedBox(height: 10),
-            // TodaysClasses(),
+        body: Column(
+          children: [
+            const InformationBanner(text: AppStrings.qrCodeExpirationWarning),
+            Expanded(
+              child: ListView(
+                children: const [
+                  MarkAttendanceQuickAccess(),
+                  // AttendanceThresholdWidget(),
+                  SizedBox(height: 10),
+                  SemesterCoursesDashboardMetricView(),
+                  // SizedBox(height: 10),
+                  // TodaysClasses(),
+                ],
+              ),
+            ),
           ],
         ),
       ),

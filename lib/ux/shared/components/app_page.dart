@@ -1,9 +1,8 @@
 import 'dart:io';
 
 import 'package:attendance_app/platform/utils/general_utils.dart';
-import 'package:attendance_app/ux/shared/components/information_banner.dart';
+import 'package:attendance_app/ux/shared/components/app_safe_area.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
-import 'package:attendance_app/ux/shared/components/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 
 typedef OnBackPressed = Function();
@@ -27,11 +26,10 @@ class AppPage extends StatelessWidget {
   final bool useSafeArea;
   final bool showBackButton;
   final Widget? appBarLeadingIcon;
-  final bool showInformationBanner;
   final bool showDivider;
-  final String? informationBannerText;
   final bool canSwipeBackToPreviousScreen;
   final bool? enableHorizontalDragUpdate;
+  final bool hasBottomPadding;
 
   const AppPage({
     super.key,
@@ -53,11 +51,10 @@ class AppPage extends StatelessWidget {
     this.useSafeArea = true,
     this.showBackButton = true,
     this.appBarLeadingIcon,
-    this.showInformationBanner = false,
     this.showDivider = false,
-    this.informationBannerText,
     this.canSwipeBackToPreviousScreen = true,
     this.enableHorizontalDragUpdate = true,
+    this.hasBottomPadding = true,
   });
 
   @override
@@ -100,27 +97,15 @@ class AppPage extends StatelessWidget {
       resizeToAvoidBottomInset: false,
       backgroundColor: backgroundColor,
       appBar: hideAppBar ? null : appBar(context),
-      body: useSafeArea ? appSafeArea() : body,
+      body: useSafeArea
+          ? AppSafeArea(
+              hasBottomPadding:
+                  (hasBottomPadding && bottomNavigationBar == null),
+              child: body)
+          : body,
       floatingActionButton: floatingActionButton,
       floatingActionButtonLocation: floatingActionButtonLocation,
       bottomNavigationBar: bottomNavigationBar,
-    );
-  }
-
-  SafeArea appSafeArea() {
-    return SafeArea(
-      child: Column(
-        children: [
-          if (hideAppBar && headerTitle != null && headerSubtitle != null)
-            CustomAppBar(
-              title: headerTitle ?? '',
-              subtitle: headerSubtitle ?? '',
-            ),
-          if (showInformationBanner == true)
-            InformationBanner(text: informationBannerText ?? ''),
-          Expanded(child: body),
-        ],
-      ),
     );
   }
 

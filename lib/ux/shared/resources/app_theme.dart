@@ -17,8 +17,8 @@ class AppTheme {
     bottomAppBarTheme: const BottomAppBarTheme(
       elevation: 0,
       padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      color: AppColors.white,
-      surfaceTintColor: AppColors.white,
+      color: AppColors.transparent,
+      surfaceTintColor: AppColors.transparent,
     ),
   );
 }

@@ -1,7 +1,11 @@
+import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/ux/shared/components/app_material.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
+import 'package:attendance_app/ux/shared/components/custom_app_bar.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
+import 'package:attendance_app/ux/shared/utils/general_ui_utils.dart';
+import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/views/attendance_history/attendance_history_page.dart';
 import 'package:attendance_app/ux/views/home/home_page.dart';
 import 'package:attendance_app/ux/views/attendance/select_attendance_mode_page.dart';
@@ -18,6 +22,7 @@ class NavigationHostPage extends StatefulWidget {
 }
 
 class _NavigationHostPageState extends State<NavigationHostPage> {
+  final AuthViewModel _authViewModel = AppDI.getIt<AuthViewModel>();
   int currentPageIndex = 0;
 
   late List<Widget> pages;
@@ -43,7 +48,18 @@ class _NavigationHostPageState extends State<NavigationHostPage> {
   Widget build(BuildContext context) {
     return AppPage(
       hideAppBar: true,
-      body: pages[currentPageIndex],
+      hasBottomPadding: currentPageIndex != 2,
+      body: Column(
+        children: [
+          CustomAppBar(
+            title: getPageTitle(currentPageIndex),
+            subtitle: getPageSubtitle(currentPageIndex),
+          ),
+          Expanded(
+            child: pages[currentPageIndex],
+          ),
+        ],
+      ),
       bottomNavigationBar: BottomAppBar(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -63,6 +79,33 @@ class _NavigationHostPageState extends State<NavigationHostPage> {
         ),
       ),
     );
+  }
+
+  String getPageTitle(int value) {
+    switch (value) {
+      case 0:
+        return UiUtils.getGreetingTitle(
+            _authViewModel.appUser?.studentProfile?.firstName ?? '');
+      case 1:
+        return AppStrings.selectAttendanceType;
+      case 2:
+        return AppStrings.attendanceHistory;
+      default:
+        return '';
+    }
+  }
+
+  String getPageSubtitle(int value) {
+    switch (value) {
+      case 0:
+        return UiUtils.getGreetingSubtitle();
+      case 1:
+        return AppStrings.areYouAttendingInPersonOrOnline;
+      case 2:
+        return AppStrings.viewYourAttendanceHistory;
+      default:
+        return '';
+    }
   }
 }
 

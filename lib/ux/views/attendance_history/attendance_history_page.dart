@@ -1,5 +1,4 @@
 import 'package:attendance_app/platform/data_source/api/course/models/course_response.dart';
-import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/views/attendance_history/components/period.dart';
 import 'package:attendance_app/ux/views/course/components/course_card.dart';
@@ -89,25 +88,20 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
   ];
   @override
   Widget build(BuildContext context) {
-    return AppPage(
-      hideAppBar: true,
-      headerTitle: AppStrings.attendanceHistory,
-      headerSubtitle: AppStrings.viewYourAttendanceHistory,
-      body: ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        itemCount: periods.length,
-        itemBuilder: (context, index) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Period(period: periods[index]),
-              ...courseHistory[index]
-                  .map((course) => CourseCard(course: course))
-                  .toList(),
-            ],
-          );
-        },
-      ),
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      itemCount: periods.length,
+      itemBuilder: (context, index) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Period(period: periods[index]),
+            ...courseHistory[index]
+                .map((course) => CourseCard(course: course))
+                .toList(),
+          ],
+        );
+      },
     );
   }
 }

@@ -1,10 +1,8 @@
 import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/platform/services/local_auth_service.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
-import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
-import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/views/attendance/components/attendance_mode.dart';
 import 'package:attendance_app/ux/views/attendance/verification_page.dart';
 import 'package:flutter/material.dart';
@@ -59,40 +57,33 @@ class _SelectAttendanceModePageState extends State<SelectAttendanceModePage> {
 
   @override
   Widget build(BuildContext context) {
-    return AppPage(
-      hideAppBar: true,
-      headerTitle: AppStrings.selectAttendanceType,
-      headerSubtitle: AppStrings.areYouAttendingInPersonOrOnline,
-      body: Stack(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                AttendanceMode(
-                    mode: 'In-person',
-                    onTap: _isAuthenticating
-                        ? null
-                        : () {
-                            authenticateAndNavigate(
-                              context,
-                              AttendanceType.inPerson,
-                            );
-                          }),
-                const SizedBox(height: 20),
-                AttendanceMode(
-                    mode: 'Online',
-                    onTap: _isAuthenticating
-                        ? null
-                        : () {
-                            authenticateAndNavigate(
-                              context,
-                              AttendanceType.online,
-                            );
-                          }),
-              ],
-            ),
+          AttendanceMode(
+            mode: 'In-person',
+            onTap: _isAuthenticating
+                ? null
+                : () {
+                    authenticateAndNavigate(
+                      context,
+                      AttendanceType.inPerson,
+                    );
+                  },
+          ),
+          const SizedBox(height: 20),
+          AttendanceMode(
+            mode: 'Online',
+            onTap: _isAuthenticating
+                ? null
+                : () {
+                    authenticateAndNavigate(
+                      context,
+                      AttendanceType.online,
+                    );
+                  },
           ),
         ],
       ),

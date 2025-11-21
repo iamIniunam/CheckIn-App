@@ -51,18 +51,12 @@ class AppDI {
         () => OnlineCodeViewModel());
 
     getIt.registerFactory<AttendanceLocationViewModel>(
-      () => AttendanceLocationViewModel(),
-    );
+        () => AttendanceLocationViewModel());
 
     // Services
-    getIt.registerLazySingleton<LocationProvider>(
-      () => LocationProvider(),
-    );
-
+    getIt.registerLazySingleton<LocationProvider>(() => LocationProvider());
     getIt.registerLazySingleton<AttendanceValidator>(
-      () => AttendanceValidator(),
-    );
-
+        () => AttendanceValidator());
     getIt.registerLazySingleton<LocalAuthService>(() => LocalAuthService());
   }
 }
