@@ -72,15 +72,14 @@ class LocationCheckContent extends StatelessWidget {
 
                 // Show distance if available
                 if (result.isSuccess && result.data != null) {
-                  final data = result.data!;
+                  final data =
+                      result.data ?? AttendanceResult(canAttend: false);
                   return Column(
                     children: [
                       const SizedBox(height: 24),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
+                            horizontal: 16, vertical: 12),
                         decoration: BoxDecoration(
                           color: data.canAttend
                               ? Colors.green.shade50
@@ -100,8 +99,8 @@ class LocationCheckContent extends StatelessWidget {
                                 Icon(
                                   Icons.location_on,
                                   color: data.canAttend
-                                      ? Colors.green.shade700
-                                      : Colors.orange.shade700,
+                                      ? Colors.green.shade600
+                                      : Colors.orange.shade600,
                                   size: 20,
                                 ),
                                 const SizedBox(width: 8),
@@ -111,8 +110,8 @@ class LocationCheckContent extends StatelessWidget {
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
                                     color: data.canAttend
-                                        ? Colors.green.shade700
-                                        : Colors.orange.shade700,
+                                        ? Colors.green.shade600
+                                        : Colors.orange.shade600,
                                   ),
                                 ),
                               ],

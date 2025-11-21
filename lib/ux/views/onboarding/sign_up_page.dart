@@ -1,5 +1,6 @@
 import 'package:attendance_app/platform/data_source/api/auth/models/auth_request.dart';
 import 'package:attendance_app/platform/di/dependency_injection.dart';
+import 'package:attendance_app/platform/utils/general_utils.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/components/app_buttons.dart';
 import 'package:attendance_app/ux/shared/components/app_dropdown_field.dart';
@@ -115,7 +116,7 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        FocusManager.instance.primaryFocus?.unfocus();
+        Utils.hideKeyboard();
       },
       child: Scaffold(
         resizeToAvoidBottomInset: false,

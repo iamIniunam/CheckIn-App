@@ -18,7 +18,7 @@ class _DropCoursesPageState extends State<DropCoursesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return AppPageScaffold(
+    return AppPage(
       title: 'Drop Courses',
       body: Column(
         children: [

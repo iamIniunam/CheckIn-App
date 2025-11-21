@@ -89,12 +89,12 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
   ];
   @override
   Widget build(BuildContext context) {
-    return AppPageScaffold(
+    return AppPage(
       hideAppBar: true,
       headerTitle: AppStrings.attendanceHistory,
       headerSubtitle: AppStrings.viewYourAttendanceHistory,
       body: ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         itemCount: periods.length,
         itemBuilder: (context, index) {
           return Column(

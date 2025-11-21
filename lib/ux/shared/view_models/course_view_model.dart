@@ -186,7 +186,7 @@ class CourseViewModel extends ChangeNotifier {
 
         try {
           final request = RegisterCourseRequest(
-            courseId: course.id!,
+            courseId: course.id ?? 0,
             studentId: studentId,
           );
 

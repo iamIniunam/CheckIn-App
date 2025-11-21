@@ -6,53 +6,56 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
 class CustomAppBar extends StatelessWidget {
+  const CustomAppBar({super.key, required this.title, required this.subtitle});
+
   final String title;
   final String subtitle;
 
-  const CustomAppBar({
-    super.key,
-    required this.title,
-    required this.subtitle,
-  });
-
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
       padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        color: AppColors.white,
+        border: Border(
+          bottom: BorderSide(color: Color.fromRGBO(246, 246, 246, 1)),
+        ),
+      ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        color: AppColors.defaultColor,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold)),
-                Text(subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.grey)),
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.defaultColor,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.grey,
+                  ),
+                ),
               ],
             ),
           ),
           const SizedBox(width: 10),
-          // AppBarActionWidget(
-          //     icon: Icons.notifications,
-          //     onTap: () {
-          //       Navigation.navigateToScreen(
-          //           context: context, screen: const NotificationsPage());
-          //     }),
-          // const SizedBox(width: 10),
           AppBarActionWidget(
             icon: Iconsax.setting_45,
             onTap: () {
               Navigation.navigateToScreen(
-                  context: context, screen: const SettingsPage());
+                context: context,
+                screen: const SettingsPage(),
+              );
             },
           ),
         ],
@@ -62,11 +65,8 @@ class CustomAppBar extends StatelessWidget {
 }
 
 class AppBarActionWidget extends StatelessWidget {
-  const AppBarActionWidget({
-    super.key,
-    required this.icon,
-    required this.onTap,
-  });
+  const AppBarActionWidget(
+      {super.key, required this.icon, required this.onTap});
 
   final IconData icon;
   final VoidCallback onTap;

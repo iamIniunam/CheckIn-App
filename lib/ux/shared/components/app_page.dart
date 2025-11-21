@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:attendance_app/platform/utils/general_utils.dart';
 import 'package:attendance_app/ux/shared/components/information_banner.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/components/custom_app_bar.dart';
@@ -5,7 +8,7 @@ import 'package:flutter/material.dart';
 
 typedef OnBackPressed = Function();
 
-class AppPageScaffold extends StatelessWidget {
+class AppPage extends StatelessWidget {
   final Widget body;
   final bool hideAppBar;
   final String? title;
@@ -27,8 +30,10 @@ class AppPageScaffold extends StatelessWidget {
   final bool showInformationBanner;
   final bool showDivider;
   final String? informationBannerText;
+  final bool canSwipeBackToPreviousScreen;
+  final bool? enableHorizontalDragUpdate;
 
-  const AppPageScaffold({
+  const AppPage({
     super.key,
     required this.body,
     this.hideAppBar = false,
@@ -51,81 +56,106 @@ class AppPageScaffold extends StatelessWidget {
     this.showInformationBanner = false,
     this.showDivider = false,
     this.informationBannerText,
+    this.canSwipeBackToPreviousScreen = true,
+    this.enableHorizontalDragUpdate = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (enableHorizontalDragUpdate == false) {
+      return GestureDetector(
+        onTap: () {
+          Utils.hideKeyboard();
+        },
+        child: AbsorbPointer(
+          absorbing: false,
+          child: scaffold(context),
+        ),
+      );
+    }
     return GestureDetector(
       onTap: () {
-        FocusManager.instance.primaryFocus?.unfocus();
+        Utils.hideKeyboard();
       },
-      child: AbsorbPointer(
-        absorbing: false,
-        child: Scaffold(
-          resizeToAvoidBottomInset: false,
-          backgroundColor: backgroundColor,
-          appBar: hideAppBar
-              ? null
-              : AppBar(
-                  backgroundColor: appBarColor,
-                  elevation: 0,
-                  centerTitle: true,
-                  title: Text(
-                    title ?? '',
-                    style: TextStyle(
-                        color: titleTextColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20),
-                  ),
-                  automaticallyImplyLeading: false,
-                  leading: showBackButton
-                      ? Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: InkResponse(
-                            radius: 28,
-                            onTap: () {
-                              if (onBackPressed != null) {
-                                onBackPressed?.call();
-                              } else {
-                                Navigator.pop(context);
-                              }
-                            },
-                            child: appBarLeadingIcon ??
-                                Icon(Icons.arrow_back, color: leadingIconColor),
-                          ),
-                        )
-                      : null,
-                  actions: actions,
-                  bottom: appBarBottom,
-                ),
-          body: useSafeArea
-              ? SafeArea(
-                  child: Column(
-                    children: [
-                      if (hideAppBar &&
-                          headerTitle != null &&
-                          headerSubtitle != null)
-                        CustomAppBar(
-                          title: headerTitle ?? '',
-                          subtitle: headerSubtitle ?? '',
-                        ),
-                      if (showInformationBanner == true)
-                        InformationBanner(
-                          text: informationBannerText ?? '',
-                        ),
-                      // else if (hideAppBar == false && showDivider == true)
-                      //   const AppDivider(),
-                      Expanded(
-                        child: body,
-                      ),
-                    ],
-                  ),
-                )
-              : body,
-          floatingActionButton: floatingActionButton,
-          floatingActionButtonLocation: floatingActionButtonLocation,
-          bottomNavigationBar: bottomNavigationBar,
-        ),
+      onHorizontalDragUpdate: (details) {
+        // Note: Sensitivity is integer used when you don't want to mess up vertical drag
+        int sensitivity = 28;
+        if (details.delta.dx > sensitivity) {
+          // Right Swipe
+          if (Platform.isIOS &&
+              Navigator.of(context).canPop() &&
+              canSwipeBackToPreviousScreen) {
+            Navigator.of(context).pop();
+          }
+        } else if (details.delta.dx < -sensitivity) {
+          //Left Swipe
+        }
+      },
+      child: scaffold(context),
+    );
+  }
+
+  Scaffold scaffold(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      backgroundColor: backgroundColor,
+      appBar: hideAppBar ? null : appBar(context),
+      body: useSafeArea ? appSafeArea() : body,
+      floatingActionButton: floatingActionButton,
+      floatingActionButtonLocation: floatingActionButtonLocation,
+      bottomNavigationBar: bottomNavigationBar,
+    );
+  }
+
+  SafeArea appSafeArea() {
+    return SafeArea(
+      child: Column(
+        children: [
+          if (hideAppBar && headerTitle != null && headerSubtitle != null)
+            CustomAppBar(
+              title: headerTitle ?? '',
+              subtitle: headerSubtitle ?? '',
+            ),
+          if (showInformationBanner == true)
+            InformationBanner(text: informationBannerText ?? ''),
+          Expanded(child: body),
+        ],
+      ),
+    );
+  }
+
+  AppBar appBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: appBarColor,
+      elevation: 0,
+      centerTitle: true,
+      title: Text(
+        title ?? '',
+        style: TextStyle(
+            color: titleTextColor, fontWeight: FontWeight.bold, fontSize: 20),
+      ),
+      automaticallyImplyLeading: false,
+      shadowColor: const Color.fromRGBO(246, 246, 246, 1),
+      leading: showBackButton ? backButton(context) : null,
+      actions: actions,
+      bottom: appBarBottom,
+    );
+  }
+
+  Padding backButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: InkResponse(
+        radius: 28,
+        onTap: () {
+          if (onBackPressed != null) {
+            onBackPressed?.call();
+          } else {
+            Navigator.pop(context);
+          }
+        },
+        child: appBarLeadingIcon ??
+            Icon(Icons.arrow_back, color: leadingIconColor),
       ),
     );
   }

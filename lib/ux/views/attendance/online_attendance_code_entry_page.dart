@@ -22,7 +22,7 @@ class _OnlineAttendanceCodeEntryPageState
 
   @override
   Widget build(BuildContext context) {
-    return AppPageScaffold(
+    return AppPage(
       title: AppStrings.enterClassCode,
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16),

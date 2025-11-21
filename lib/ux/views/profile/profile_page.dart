@@ -34,7 +34,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return AppPageScaffold(
+    return AppPage(
       title: AppStrings.studentProfile,
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16, bottom: 24),

@@ -145,7 +145,7 @@ class EnrolledCoursesEmptyState extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'Complete your course enrollment to see your courses here',
+                    'Tap here to enroll your courses for this semester.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: AppColors.grey,

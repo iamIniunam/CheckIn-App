@@ -82,10 +82,10 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
       'distance': result?.formattedDistance ?? 'Unknown',
       'rawDistance': result?.distance,
       'accuracy': position?.accuracy != null
-          ? LocationUtils.formatDistance(position!.accuracy)
+          ? LocationUtils.formatDistance(position?.accuracy ?? 0.0)
           : null,
       'formattedAccuracy': position?.accuracy != null
-          ? '±${LocationUtils.formatDistance(position!.accuracy)}'
+          ? '±${LocationUtils.formatDistance(position?.accuracy ?? 0.0)}'
           : 'Unknown',
       'method': result?.method ?? 'Unknown',
       'canAttend': result?.canAttend ?? false,
@@ -537,14 +537,16 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
     if (locationStatus == null) {
       return 'Verifying Location';
     }
-    return _messageProvider.getLocationStatusHeaderMessage(locationStatus!);
+    return _messageProvider.getLocationStatusHeaderMessage(locationStatus ??
+        LocationVerificationStatus.failed); //TODO: check this logic
   }
 
   String locationStatusMessage() {
     if (locationStatus == null) {
       return 'Checking if you\'re on campus...';
     }
-    return _messageProvider.getLocationStatusMessage(locationStatus!);
+    return _messageProvider.getLocationStatusMessage(locationStatus ??
+        LocationVerificationStatus.failed); //TODO: check this logic
   }
 
   @override

@@ -65,8 +65,9 @@ class AttendanceResult {
     this.method,
   });
 
-  String get formattedDistance =>
-      distance != null ? LocationUtils.formatDistance(distance!) : 'Unknown';
+  String get formattedDistance => distance != null
+      ? LocationUtils.formatDistance(distance ?? 0.0)
+      : 'Unknown';
 
   double? get accuracy => position?.accuracy;
 

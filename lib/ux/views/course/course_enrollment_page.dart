@@ -145,8 +145,7 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
       } else {
         widget.isEdit
             ? showSuccessDialog()
-            : Navigation.navigateToScreenAndClearOnePrevious(
-                context: context, screen: const NavigationHostPage());
+            : Navigation.navigateToHomePage(context: context);
       }
     } else if (courseViewModel.hasRegistrationError) {
       AppDialogs.showErrorDialog(
@@ -220,7 +219,7 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
 
   @override
   Widget build(BuildContext context) {
-    return AppPageScaffold(
+    return AppPage(
       showBackButton: widget.isEdit,
       title: AppStrings.courseEnrollment,
       actions: [

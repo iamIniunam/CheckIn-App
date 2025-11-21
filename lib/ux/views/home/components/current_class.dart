@@ -5,13 +5,13 @@ import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:flutter/material.dart';
 
-class CurrentClass extends StatelessWidget {
-  const CurrentClass({super.key});
+class MarkAttendanceQuickAccess extends StatelessWidget {
+  const MarkAttendanceQuickAccess({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 16, top: 8, right: 16, bottom: 16),
+      padding: const EdgeInsets.all(16),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -23,36 +23,24 @@ class CurrentClass extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              // AppStrings.currentClass,
               'Ready to check in?',
               style: TextStyle(
                 color: AppColors.grey,
                 fontSize: 16,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ),
             const Text(
-              // AppStrings.sampleCurrentClass,
               'Tap the button below to mark your attendance for today’s class',
               maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                  color: AppColors.defaultColor,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  overflow: TextOverflow.ellipsis),
+                color: AppColors.defaultColor,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 16),
-            // const Center(
-            //   child: Text(
-            //     AppStrings.sampleCurrentClassTime,
-            //     style: TextStyle(
-            //       color: AppColors.defaultColor,
-            //       fontSize: 34,
-            //       fontWeight: FontWeight.bold,
-            //     ),
-            //   ),
-            // ),
-            // const SizedBox(height: 12),
             PrimaryButton(
               onTap: () {
                 Navigation.navigateToScreen(
@@ -60,8 +48,6 @@ class CurrentClass extends StatelessWidget {
                   screen: const NavigationHostPage(index: 1),
                 );
               },
-              backgroundColor: AppColors.defaultColor,
-              foregroundColor: AppColors.white,
               child: const Text(AppStrings.markAttendance),
             ),
           ],

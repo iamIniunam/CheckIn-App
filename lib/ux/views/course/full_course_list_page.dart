@@ -21,7 +21,7 @@ class _FullCourseListPageState extends State<FullCourseListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return AppPageScaffold(
+    return AppPage(
       hideAppBar: false,
       title: AppStrings.allCourses,
       body: widget.courses.isEmpty

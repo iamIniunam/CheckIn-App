@@ -18,7 +18,7 @@ class VerificationSuccessPage extends StatefulWidget {
 class _VerificationSuccessPageState extends State<VerificationSuccessPage> {
   @override
   Widget build(BuildContext context) {
-    return AppPageScaffold(
+    return AppPage(
       hideAppBar: false,
       title: AppStrings.checkInComplete,
       showBackButton: false,

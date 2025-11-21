@@ -222,8 +222,8 @@ class AttendanceViewModel extends ChangeNotifier {
 
     try {
       final request = GetCourseAttendanceRequest(
-        courseId: _lastCourseId!,
-        studentId: _lastStudentId!,
+        courseId: _lastCourseId ?? 0,
+        studentId: _lastStudentId ?? '',
       );
 
       final response =

@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> {
     return RefreshIndicator(
       displacement: 60,
       onRefresh: refreshData,
-      child: AppPageScaffold(
+      child: AppPage(
         hideAppBar: true,
         headerTitle: UiUtils.getGreetingTitle(
             _authViewModel.appUser?.studentProfile?.firstName ?? ''),
@@ -60,7 +60,7 @@ class _HomePageState extends State<HomePage> {
         informationBannerText: AppStrings.qrCodeExpirationWarning,
         body: ListView(
           children: const [
-            CurrentClass(),
+            MarkAttendanceQuickAccess(),
             // AttendanceThresholdWidget(),
             SizedBox(height: 10),
             SemesterCoursesDashboardMetricView(),

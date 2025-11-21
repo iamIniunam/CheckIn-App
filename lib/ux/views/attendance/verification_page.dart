@@ -125,7 +125,7 @@ class _VerificationPageState extends State<VerificationPage> {
       child: PopScope(
         canPop: false,
         onPopInvoked: (_) => handleExit(),
-        child: AppPageScaffold(
+        child: AppPage(
           hideAppBar: true,
           body: Consumer<AttendanceVerificationViewModel>(
             builder: (context, verificationViewModel, _) {

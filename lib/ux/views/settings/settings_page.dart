@@ -14,7 +14,7 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppPageScaffold(
+    return AppPage(
       title: 'Settings',
       body: DashboardMetricGridView(
         crossAxisCount: 2,

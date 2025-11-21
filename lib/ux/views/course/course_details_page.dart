@@ -23,8 +23,8 @@ class CourseDetailsPage extends StatelessWidget {
     final studentId = authViewModel.appUser?.studentProfile?.idNumber ?? '';
 
     return ChangeNotifierProvider(
-      create: (_) =>
-          AttendanceViewModel()..loadAttendanceRecords(course.id!, studentId),
+      create: (_) => AttendanceViewModel()
+        ..loadAttendanceRecords(course.id ?? 0, studentId),
       child: CourseDetailsBody(course: course),
     );
   }
@@ -57,118 +57,121 @@ class CourseDetailsBody extends StatelessWidget {
         )
         .school;
 
-    return AppPageScaffold(
+    return AppPage(
       title: course.courseCode,
-      body: Consumer<AttendanceViewModel>(builder: (context, viewModel, _) {
-        return RefreshIndicator(
-          displacement: 20,
-          onRefresh: () async {
-            Future.microtask(() => viewModel.refresh());
-            return Future.value();
-          },
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            course.courseTitle ?? '',
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: AppColors.defaultColor,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            '${course.level ?? ''} level • ${course.semester}${semesterSuffix()} • ${course.creditHours ?? ''} credit hours',
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryTeal.withOpacity(0.4),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: AppColors.primaryTeal.withOpacity(0.7),
-                        ),
-                      ),
-                      child: Text(
-                        courseSchool ?? '',
-                        style: const TextStyle(
-                          color: AppColors.defaultColor,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              AttendanceSummaryCard(viewModel: viewModel),
-              const SizedBox(height: 12),
-              if (viewModel.isLoading || viewModel.isRefreshing)
-                const PageLoadingIndicator(useTopPadding: true)
-              else if (viewModel.hasError)
-                PageErrorIndicator(
-                  text: viewModel.errorMessage ??
-                      'Error loading attendance records',
-                  useTopPadding: true,
-                )
-              else if (viewModel.attendanceRecords.isEmpty)
-                const PageErrorIndicator(
-                  text: 'No attendance records found',
-                  useTopPadding: true,
-                )
-              else ...[
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+      body: Consumer<AttendanceViewModel>(
+        builder: (context, viewModel, _) {
+          return RefreshIndicator(
+            displacement: 20,
+            onRefresh: () async {
+              Future.microtask(() => viewModel.refresh());
+              return Future.value();
+            },
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(
-                          AppStrings.history,
-                          style: TextStyle(
-                            color: AppColors.defaultColor,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              course.courseTitle ?? '',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: AppColors.defaultColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              '${course.level ?? ''} level • ${course.semester}${semesterSuffix()} • ${course.creditHours ?? ''} credit hours',
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      Expanded(
-                        child: ListView(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          children: [
-                            ...viewModel.attendanceRecords
-                                .map((record) => SessionHistory(record: record))
-                                .toList(),
-                            const SizedBox(height: 14),
-                          ],
+                      const SizedBox(width: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryTeal.withOpacity(0.4),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppColors.primaryTeal.withOpacity(0.7),
+                          ),
+                        ),
+                        child: Text(
+                          courseSchool ?? '',
+                          style: const TextStyle(
+                            color: AppColors.defaultColor,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
+                AttendanceSummaryCard(viewModel: viewModel),
+                const SizedBox(height: 12),
+                if (viewModel.isLoading || viewModel.isRefreshing)
+                  const PageLoadingIndicator(useTopPadding: true)
+                else if (viewModel.hasError)
+                  PageErrorIndicator(
+                    text: viewModel.errorMessage ??
+                        'Error loading attendance records',
+                    useTopPadding: true,
+                  )
+                else if (viewModel.attendanceRecords.isEmpty)
+                  const PageErrorIndicator(
+                    text: 'No attendance records found',
+                    useTopPadding: true,
+                  )
+                else ...[
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            AppStrings.history,
+                            style: TextStyle(
+                              color: AppColors.defaultColor,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: ListView(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            children: [
+                              ...viewModel.attendanceRecords
+                                  .map((record) =>
+                                      SessionHistory(record: record))
+                                  .toList(),
+                              const SizedBox(height: 14),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
-            ],
-          ),
-        );
-      }),
+            ),
+          );
+        },
+      ),
     );
   }
 }

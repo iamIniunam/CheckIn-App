@@ -39,7 +39,7 @@ class Course extends Serializable {
 
     for (final c in courses) {
       final baseKey =
-          (c.id != null && (c.id ?? 0) > 0) ? c.id! : c.courseCode.hashCode;
+          (c.id != null && (c.id ?? 0) > 0) ? c.id ?? 0 : c.courseCode.hashCode;
       int idx = baseKey.abs() % paletteLen;
       final start = idx;
 

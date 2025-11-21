@@ -59,7 +59,7 @@ class _SelectAttendanceModePageState extends State<SelectAttendanceModePage> {
 
   @override
   Widget build(BuildContext context) {
-    return AppPageScaffold(
+    return AppPage(
       hideAppBar: true,
       headerTitle: AppStrings.selectAttendanceType,
       headerSubtitle: AppStrings.areYouAttendingInPersonOrOnline,

@@ -33,7 +33,7 @@ class ViewProfileImagePageState extends State<ViewProfileImagePage> {
 
   @override
   Widget build(BuildContext context) {
-    return AppPageScaffold(
+    return AppPage(
       useSafeArea: false,
       title: AppStrings.profilePicture,
       titleTextColor: AppColors.white,

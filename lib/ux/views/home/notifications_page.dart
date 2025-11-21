@@ -49,7 +49,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return AppPageScaffold(
+    return AppPage(
       title: AppStrings.notifications,
       body: notifications.isEmpty
           ? const NotificationsPageEmptyState()

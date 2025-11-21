@@ -1,5 +1,4 @@
 import 'package:attendance_app/ux/navigation/navigation.dart';
-import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/views/onboarding/sign_up_page.dart';
@@ -39,8 +38,7 @@ class AttendanceCancelDialog {
     );
     if (result == true) {
       if (context.mounted) {
-        Navigation.navigateToScreenAndClearAllPrevious(
-            context: context, screen: const NavigationHostPage());
+        Navigation.navigateToHomePage(context: context);
       }
     }
   }
@@ -62,8 +60,7 @@ class LocationCancelDialog {
     );
     if (result == true) {
       if (context.mounted) {
-        Navigation.navigateToScreenAndClearAllPrevious(
-            context: context, screen: const NavigationHostPage());
+        Navigation.navigateToHomePage(context: context);
       }
     }
   }

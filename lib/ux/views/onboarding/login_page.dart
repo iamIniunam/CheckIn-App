@@ -1,7 +1,7 @@
 import 'package:attendance_app/platform/data_source/api/auth/models/auth_request.dart';
 import 'package:attendance_app/platform/di/dependency_injection.dart';
+import 'package:attendance_app/platform/utils/general_utils.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
-import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
 import 'package:attendance_app/ux/shared/components/app_buttons.dart';
 import 'package:attendance_app/ux/shared/components/app_form_fields.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
@@ -36,10 +36,7 @@ class _LoginPageState extends State<LoginPage> {
   void handleLoginResult() {
     final result = authViewModel.loginResult.value;
     if (result.isSuccess) {
-      Navigation.navigateToScreenAndClearOnePrevious(
-        context: context,
-        screen: const NavigationHostPage(),
-      );
+      Navigation.navigateToHomePage(context: context);
     } else if (result.isError) {
       final errorMessage = result.message ??
           'Login failed. Please check your credentials and try again.';
@@ -82,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        FocusManager.instance.primaryFocus?.unfocus();
+        Utils.hideKeyboard();
       },
       child: Scaffold(
         resizeToAvoidBottomInset: false,

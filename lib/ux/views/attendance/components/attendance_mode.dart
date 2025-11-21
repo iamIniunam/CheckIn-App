@@ -6,33 +6,28 @@ class AttendanceMode extends StatelessWidget {
   const AttendanceMode({super.key, required this.mode, this.onTap});
 
   final String mode;
-  final VoidCallback? onTap; // Made nullable
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final isEnabled = onTap != null;
-    
     return Expanded(
-      child: Opacity(
-        opacity: isEnabled ? 1.0 : 0.5, // Visual feedback when disabled
-        child: AppMaterial(
-          color: AppColors.primaryTeal,
-          borderRadius: BorderRadius.circular(30),
-          inkwellBorderRadius: BorderRadius.circular(30),
-          onTap: onTap, // Will be null when disabled
-          child: Container(
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(30),
-              border: Border.all(color: AppColors.defaultColor),
-            ),
-            child: Text(
-              mode,
-              style: const TextStyle(
-                color: AppColors.defaultColor,
-                fontSize: 32,
-                fontWeight: FontWeight.w600,
-              ),
+      child: AppMaterial(
+        color: AppColors.primaryTeal,
+        borderRadius: BorderRadius.circular(30),
+        inkwellBorderRadius: BorderRadius.circular(30),
+        onTap: onTap,
+        child: Container(
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: AppColors.defaultColor),
+          ),
+          child: Text(
+            mode,
+            style: const TextStyle(
+              color: AppColors.defaultColor,
+              fontSize: 32,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
