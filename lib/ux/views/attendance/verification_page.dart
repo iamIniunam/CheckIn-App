@@ -5,7 +5,7 @@ import 'package:attendance_app/ux/shared/view_models/attendance_verification_vie
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/views/attendance/alert_dialogs/cancel_dialog.dart';
 import 'package:attendance_app/ux/views/attendance/components/attendance_type_indicator.dart';
-import 'package:attendance_app/ux/views/attendance/components/face_verification_buttons.dart';
+import 'package:attendance_app/ux/views/attendance/components/verification_page_buttons.dart';
 import 'package:attendance_app/ux/views/attendance/components/step_content.dart';
 import 'package:attendance_app/ux/views/attendance/components/step_indicator_widget.dart';
 import 'package:flutter/material.dart';
