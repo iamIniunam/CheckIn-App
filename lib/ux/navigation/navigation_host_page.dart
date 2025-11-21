@@ -1,4 +1,5 @@
 import 'package:attendance_app/ux/shared/components/app_material.dart';
+import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/views/attendance_history/attendance_history_page.dart';
@@ -40,7 +41,8 @@ class _NavigationHostPageState extends State<NavigationHostPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppPage(
+      hideAppBar: true,
       body: pages[currentPageIndex],
       bottomNavigationBar: BottomAppBar(
         child: Row(

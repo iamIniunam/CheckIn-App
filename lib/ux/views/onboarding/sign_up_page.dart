@@ -1,10 +1,10 @@
 import 'package:attendance_app/platform/data_source/api/auth/models/auth_request.dart';
 import 'package:attendance_app/platform/di/dependency_injection.dart';
-import 'package:attendance_app/platform/utils/general_utils.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/components/app_buttons.dart';
 import 'package:attendance_app/ux/shared/components/app_dropdown_field.dart';
 import 'package:attendance_app/ux/shared/components/app_form_fields.dart';
+import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/components/back_and_next_button_row.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
@@ -114,212 +114,208 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Utils.hideKeyboard();
-      },
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: Column(
-          children: [
-            Container(
-              height: MediaQuery.of(context).size.height * 0.30,
-              alignment: Alignment.center,
-              color: AppColors.defaultColor,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image(
-                    image: AppImages.appLogo,
-                    fit: BoxFit.cover,
-                    height: 120,
-                    width: 120,
+    return AppPage(
+      hideAppBar: true,
+      useSafeArea: false,
+      body: Column(
+        children: [
+          Container(
+            height: MediaQuery.of(context).size.height * 0.30,
+            alignment: Alignment.center,
+            color: AppColors.defaultColor,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image(
+                  image: AppImages.appLogo,
+                  fit: BoxFit.cover,
+                  height: 120,
+                  width: 120,
+                ),
+                const Text(
+                  AppStrings.appName,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: AppColors.white,
+                    fontSize: 45,
+                    fontWeight: FontWeight.bold,
                   ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Container(
+              color: AppColors.white,
+              child: Column(
+                children: [
+                  const SizedBox(height: 12),
                   const Text(
-                    AppStrings.appName,
+                    AppStrings.signUp,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: AppColors.white,
-                      fontSize: 45,
+                      color: AppColors.defaultColor,
+                      fontSize: 25,
                       fontWeight: FontWeight.bold,
                     ),
+                  ),
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                    child: PageIndicator(index: currentIndex, length: 3),
+                  ),
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.all(16),
+                      children: [
+                        if (currentIndex == 0) ...[
+                          PrimaryTextFormField(
+                            controller: firstNameController,
+                            labelText: 'First Name',
+                            hintText: 'e.g John',
+                            bottomPadding: 0,
+                            keyboardType: TextInputType.name,
+                            textCapitalization: TextCapitalization.words,
+                            textInputAction: TextInputAction.next,
+                          ),
+                          PrimaryTextFormField(
+                            controller: lastNameController,
+                            labelText: 'Last Name',
+                            hintText: 'e.g Doe',
+                            bottomPadding: 0,
+                            keyboardType: TextInputType.name,
+                            textCapitalization: TextCapitalization.words,
+                            textInputAction: TextInputAction.done,
+                          ),
+                        ],
+                        if (currentIndex == 1) ...[
+                          PrimaryTextFormField(
+                            controller: idNumberController,
+                            labelText: AppStrings.studentIdNumber,
+                            keyboardType: TextInputType.visiblePassword,
+                            hintText: AppStrings.idNumberHintText,
+                            textInputAction: TextInputAction.next,
+                            textCapitalization: TextCapitalization.characters,
+                            bottomPadding: 0,
+                          ),
+                          AppDropdownField(
+                            labelText: 'Programs',
+                            hintText: 'e.g BEng. Computer Engineering',
+                            items: AppConstants.programs,
+                            valueHolder: selectedProgram,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedProgram = value;
+                              });
+                            },
+                          ),
+                        ],
+                        if (currentIndex == 2) ...[
+                          PrimaryTextFormField(
+                            controller: passwordController,
+                            labelText: AppStrings.password,
+                            hintText: AppStrings.enterAPassword,
+                            obscureText: isPasswordObscured,
+                            keyboardType: TextInputType.visiblePassword,
+                            textInputAction: TextInputAction.next,
+                            suffixWidget: IconButton(
+                              icon: Icon(
+                                isPasswordObscured
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: AppColors.defaultColor,
+                              ),
+                              onPressed: togglePasswordVisibility,
+                            ),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.deny(
+                                  RegExp(r'\s')), // ✅ Blocks all whitespace
+                            ],
+                            bottomPadding: 0,
+                          ),
+                          PrimaryTextFormField(
+                            controller: confirmPasswordController,
+                            labelText: AppStrings.confirmPassword,
+                            hintText: AppStrings.reenterYourPassword,
+                            obscureText: isConfirmPasswordObscured,
+                            keyboardType: TextInputType.visiblePassword,
+                            textInputAction: TextInputAction.done,
+                            suffixWidget: IconButton(
+                              icon: Icon(
+                                isConfirmPasswordObscured
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: AppColors.defaultColor,
+                              ),
+                              onPressed: toggleConfirmPasswordVisibility,
+                            ),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.deny(
+                                  RegExp(r'\s')), // ✅ Blocks all whitespace
+                            ],
+                            bottomPadding: 0,
+                          ),
+                        ]
+                      ],
+                    ),
+                  ),
+                  Visibility(
+                    visible: currentIndex < 1,
+                    replacement: BackAndNextButtonRow(
+                      hasBottomPadding: true,
+                      secondText: currentIndex == 2 ? 'Sign Up' : 'Continue',
+                      onTapFirstButton: () {
+                        setState(() {
+                          currentIndex--;
+                        });
+                      },
+                      onTapNextButton: () {
+                        if (currentIndex < 2) {
+                          if (idNumberController.text.trim().isEmpty ||
+                              (selectedProgram?.trim().isEmpty ?? true)) {
+                            AppDialogs.showErrorDialog(
+                              context: context,
+                              message: 'Please fill in all fields.',
+                            );
+                            return;
+                          }
+                          setState(() {
+                            currentIndex++;
+                          });
+                        } else {
+                          handleSignUp();
+                        }
+                      },
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: PrimaryButton(
+                        onTap: () {
+                          if (firstNameController.text.trim().isEmpty ||
+                              lastNameController.text.trim().isEmpty) {
+                            AppDialogs.showErrorDialog(
+                              context: context,
+                              message: 'Please fill in all fields.',
+                            );
+                            return;
+                          }
+                          setState(() {
+                            currentIndex++;
+                          });
+                        },
+                        child: const Text('Continue'),
+                      ),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(left: 16, right: 16, bottom: 24),
+                    child: AuthRedirectionWidget(isLogin: false),
                   ),
                 ],
               ),
             ),
-            Expanded(
-              child: Container(
-                color: AppColors.white,
-                child: Column(
-                  children: [
-                    const SizedBox(height: 12),
-                    const Text(
-                      AppStrings.signUp,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: AppColors.defaultColor,
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          left: 16, right: 16, bottom: 16),
-                      child: PageIndicator(index: currentIndex, length: 3),
-                    ),
-                    Expanded(
-                      child: ListView(
-                        padding: const EdgeInsets.all(16),
-                        children: [
-                          if (currentIndex == 0) ...[
-                            PrimaryTextFormField(
-                              controller: firstNameController,
-                              labelText: 'First Name',
-                              hintText: 'e.g John',
-                              bottomPadding: 0,
-                              keyboardType: TextInputType.name,
-                              textCapitalization: TextCapitalization.words,
-                              textInputAction: TextInputAction.next,
-                            ),
-                            PrimaryTextFormField(
-                              controller: lastNameController,
-                              labelText: 'Last Name',
-                              hintText: 'e.g Doe',
-                              bottomPadding: 0,
-                              keyboardType: TextInputType.name,
-                              textCapitalization: TextCapitalization.words,
-                              textInputAction: TextInputAction.done,
-                            ),
-                          ],
-                          if (currentIndex == 1) ...[
-                            PrimaryTextFormField(
-                              controller: idNumberController,
-                              labelText: AppStrings.studentIdNumber,
-                              keyboardType: TextInputType.visiblePassword,
-                              hintText: AppStrings.idNumberHintText,
-                              textInputAction: TextInputAction.next,
-                              textCapitalization: TextCapitalization.characters,
-                              bottomPadding: 0,
-                            ),
-                            AppDropdownField(
-                              labelText: 'Programs',
-                              hintText: 'e.g BEng. Computer Engineering',
-                              items: AppConstants.programs,
-                              valueHolder: selectedProgram,
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedProgram = value;
-                                });
-                              },
-                            ),
-                          ],
-                          if (currentIndex == 2) ...[
-                            PrimaryTextFormField(
-                              controller: passwordController,
-                              labelText: AppStrings.password,
-                              hintText: AppStrings.enterAPassword,
-                              obscureText: isPasswordObscured,
-                              keyboardType: TextInputType.visiblePassword,
-                              textInputAction: TextInputAction.next,
-                              suffixWidget: IconButton(
-                                icon: Icon(
-                                  isPasswordObscured
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                  color: AppColors.defaultColor,
-                                ),
-                                onPressed: togglePasswordVisibility,
-                              ),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.deny(
-                                    RegExp(r'\s')), // ✅ Blocks all whitespace
-                              ],
-                              bottomPadding: 0,
-                            ),
-                            PrimaryTextFormField(
-                              controller: confirmPasswordController,
-                              labelText: AppStrings.confirmPassword,
-                              hintText: AppStrings.reenterYourPassword,
-                              obscureText: isConfirmPasswordObscured,
-                              keyboardType: TextInputType.visiblePassword,
-                              textInputAction: TextInputAction.done,
-                              suffixWidget: IconButton(
-                                icon: Icon(
-                                  isConfirmPasswordObscured
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                  color: AppColors.defaultColor,
-                                ),
-                                onPressed: toggleConfirmPasswordVisibility,
-                              ),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.deny(
-                                    RegExp(r'\s')), // ✅ Blocks all whitespace
-                              ],
-                              bottomPadding: 0,
-                            ),
-                          ]
-                        ],
-                      ),
-                    ),
-                    Visibility(
-                      visible: currentIndex < 1,
-                      replacement: BackAndNextButtonRow(
-                        hasBottomPadding: true,
-                        secondText: currentIndex == 2 ? 'Sign Up' : 'Continue',
-                        onTapFirstButton: () {
-                          setState(() {
-                            currentIndex--;
-                          });
-                        },
-                        onTapNextButton: () {
-                          if (currentIndex < 2) {
-                            if (idNumberController.text.trim().isEmpty ||
-                                (selectedProgram?.trim().isEmpty ?? true)) {
-                              AppDialogs.showErrorDialog(
-                                context: context,
-                                message: 'Please fill in all fields.',
-                              );
-                              return;
-                            }
-                            setState(() {
-                              currentIndex++;
-                            });
-                          } else {
-                            handleSignUp();
-                          }
-                        },
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: PrimaryButton(
-                          onTap: () {
-                            if (firstNameController.text.trim().isEmpty ||
-                                lastNameController.text.trim().isEmpty) {
-                              AppDialogs.showErrorDialog(
-                                context: context,
-                                message: 'Please fill in all fields.',
-                              );
-                              return;
-                            }
-                            setState(() {
-                              currentIndex++;
-                            });
-                          },
-                          child: const Text('Continue'),
-                        ),
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 16, right: 16, bottom: 24),
-                      child: AuthRedirectionWidget(isLogin: false),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

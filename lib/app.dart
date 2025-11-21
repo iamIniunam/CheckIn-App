@@ -5,8 +5,8 @@ import 'package:attendance_app/platform/data_source/persistence/manager_extensio
 import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
-import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
+import 'package:attendance_app/ux/shared/resources/app_theme.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
 import 'package:attendance_app/ux/views/onboarding/login_page.dart';
@@ -21,6 +21,7 @@ class CheckInApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: AppStrings.appName,
+      navigatorKey: Navigation.navigatorKey,
       scrollBehavior: const MaterialScrollBehavior().copyWith(
         dragDevices: {
           PointerDeviceKind.touch,
@@ -28,21 +29,7 @@ class CheckInApp extends StatelessWidget {
           PointerDeviceKind.trackpad,
         },
       ),
-      theme: ThemeData(
-        useMaterial3: false,
-        primarySwatch: Colors.blueGrey,
-        fontFamily: 'Nunito',
-        pageTransitionsTheme: const PageTransitionsTheme(builders: {
-          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
-          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-        }),
-        bottomAppBarTheme: const BottomAppBarTheme(
-          elevation: 0,
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          color: AppColors.white,
-          surfaceTintColor: AppColors.white,
-        ),
-      ),
+      theme: AppTheme.appTheme,
       home: const EntryPage(),
     );
   }

@@ -1,3 +1,4 @@
+import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_images.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
@@ -10,41 +11,40 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.ltr,
-      child: Scaffold(
+      child: AppPage(
+        hideAppBar: true,
         backgroundColor: AppColors.white,
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                height: 100,
-                width: 100,
-                decoration: BoxDecoration(
-                  image: DecorationImage(image: AppImages.appLogoIos),
-                  borderRadius: BorderRadius.circular(20),
-                ),
+        body: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              height: 100,
+              width: 100,
+              decoration: BoxDecoration(
+                image: DecorationImage(image: AppImages.appLogoIos),
+                borderRadius: BorderRadius.circular(20),
               ),
-              const SizedBox(height: 10),
-              const Text(
-                AppStrings.appName,
-                style: TextStyle(
-                  color: AppColors.defaultColor,
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              AppStrings.appName,
+              style: TextStyle(
+                color: AppColors.defaultColor,
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(height: 6),
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TagLineText(text: 'Scan. '),
-                  TagLineText(text: 'Verify. '),
-                  TagLineText(text: 'Done.'),
-                ],
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 6),
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TagLineText(text: 'Scan. '),
+                TagLineText(text: 'Verify. '),
+                TagLineText(text: 'Done.'),
+              ],
+            ),
+          ],
         ),
       ),
     );
