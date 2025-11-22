@@ -21,6 +21,7 @@ class CheckInApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: AppStrings.appName,
+      theme: AppTheme.appTheme,
       navigatorKey: Navigation.navigatorKey,
       scrollBehavior: const MaterialScrollBehavior().copyWith(
         dragDevices: {
@@ -29,7 +30,6 @@ class CheckInApp extends StatelessWidget {
           PointerDeviceKind.trackpad,
         },
       ),
-      theme: AppTheme.appTheme,
       home: const EntryPage(),
     );
   }

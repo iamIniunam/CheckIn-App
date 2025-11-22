@@ -3,18 +3,12 @@ import 'package:attendance_app/platform/data_source/api/api.dart';
 import 'package:attendance_app/platform/data_source/api/api_end_point.dart';
 import 'package:attendance_app/platform/data_source/api/network_strings.dart';
 import 'package:attendance_app/platform/data_source/api/requester_response.dart';
-import 'package:attendance_app/platform/data_source/persistence/manager_extensions.dart';
 import 'package:attendance_app/platform/extensions/map_extensions.dart';
 import 'package:attendance_app/platform/extensions/string_extensions.dart';
 import 'package:attendance_app/platform/utils/general_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:attendance_app/platform/data_source/persistence/manager.dart';
-import 'package:attendance_app/platform/di/dependency_injection.dart';
-import 'package:attendance_app/ux/navigation/navigation.dart';
-import 'package:attendance_app/ux/views/onboarding/login_page.dart';
-import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
-import 'package:flutter/material.dart';
 
 class Requester {
   PreferenceManager manager;
@@ -96,27 +90,6 @@ class Requester {
 
       responseInBytes = _response?.contentLength ?? 0;
       var code = _response?.statusCode ?? 0;
-      // If unauthorized, clear stored credentials and navigate to login.
-      if (code == 401) {
-        try {
-          // Clear persistent user data
-          await manager.clearUserData();
-
-          // Notify AuthViewModel if available
-          try {
-            final authVm = AppDI.getIt<AuthViewModel>();
-            await authVm.logout();
-          } catch (_) {}
-
-          // Navigate to login screen if navigator is available
-          try {
-            Navigation.navigatorKey.currentState?.pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const LoginPage()),
-                (route) => false);
-          } catch (_) {}
-        } catch (_) {}
-      }
-
       if (code >= 200 && code <= 300) {
         syncStatus = ApiResponseStatus.Success;
       } else if (code >= 500) {
