@@ -23,7 +23,6 @@ class ProfileDetailCard extends StatelessWidget {
         ),
       ),
       child: Row(
-        // crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
@@ -40,7 +39,9 @@ class ProfileDetailCard extends StatelessWidget {
                 textDirection: textDirection ?? TextDirection.ltr,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                    color: AppColors.defaultColor, fontWeight: FontWeight.bold),
+                  color: AppColors.defaultColor,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),

@@ -8,7 +8,7 @@ import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/components/app_buttons.dart';
 import 'package:attendance_app/ux/views/onboarding/login_page.dart';
-import 'package:attendance_app/ux/views/profile/components/profile_detail_item.dart';
+import 'package:attendance_app/ux/views/profile/components/profile_detail_card.dart';
 import 'package:attendance_app/ux/views/profile/logout_confirmation_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 
