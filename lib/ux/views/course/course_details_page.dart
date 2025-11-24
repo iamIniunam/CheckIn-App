@@ -59,6 +59,7 @@ class CourseDetailsBody extends StatelessWidget {
 
     return AppPage(
       title: course.courseCode,
+      hasBottomPadding: false,
       body: Consumer<AttendanceViewModel>(
         builder: (context, viewModel, _) {
           return RefreshIndicator(

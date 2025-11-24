@@ -11,8 +11,6 @@ class AppPage extends StatelessWidget {
   final Widget body;
   final bool hideAppBar;
   final String? title;
-  final String? headerTitle;
-  final String? headerSubtitle;
   final List<Widget>? actions;
   final Color backgroundColor;
   final Color appBarColor;
@@ -26,7 +24,6 @@ class AppPage extends StatelessWidget {
   final bool useSafeArea;
   final bool showBackButton;
   final Widget? appBarLeadingIcon;
-  final bool showDivider;
   final bool canSwipeBackToPreviousScreen;
   final bool? enableHorizontalDragUpdate;
   final bool hasBottomPadding;
@@ -36,8 +33,6 @@ class AppPage extends StatelessWidget {
     required this.body,
     this.hideAppBar = false,
     this.title,
-    this.headerTitle,
-    this.headerSubtitle,
     this.actions,
     this.backgroundColor = AppColors.white,
     this.appBarColor = AppColors.white,
@@ -51,7 +46,6 @@ class AppPage extends StatelessWidget {
     this.useSafeArea = true,
     this.showBackButton = true,
     this.appBarLeadingIcon,
-    this.showDivider = false,
     this.canSwipeBackToPreviousScreen = true,
     this.enableHorizontalDragUpdate = true,
     this.hasBottomPadding = true,
@@ -101,7 +95,8 @@ class AppPage extends StatelessWidget {
           ? AppSafeArea(
               hasBottomPadding:
                   (hasBottomPadding && bottomNavigationBar == null),
-              child: body)
+              child: body,
+            )
           : body,
       floatingActionButton: floatingActionButton,
       floatingActionButtonLocation: floatingActionButtonLocation,

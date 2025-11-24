@@ -37,14 +37,13 @@ class _ProfilePageState extends State<ProfilePage> {
     return AppPage(
       title: AppStrings.studentProfile,
       body: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Container(
-              padding: const EdgeInsets.only(
-                  left: 36, top: 24, right: 36, bottom: 36),
+              padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
                   color: AppColors.transparent,
                   borderRadius: BorderRadius.circular(28),
@@ -68,12 +67,11 @@ class _ProfilePageState extends State<ProfilePage> {
                     title: AppStrings.program,
                     value:
                         authViewModel.appUser?.studentProfile?.program ?? 'N/A',
-                    textDirection: TextDirection.rtl,
+                    showDivider: false,
                   ),
                 ],
               ),
             ),
-            const Spacer(),
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: PrimaryButton(

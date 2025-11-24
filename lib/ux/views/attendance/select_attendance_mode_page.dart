@@ -32,8 +32,9 @@ class _SelectAttendanceModePageState extends State<SelectAttendanceModePage> {
       final authService = AppDI.getIt<LocalAuthService>();
       final success = await authService.authenticate();
 
+      Navigation.navigatorKey.currentState?.pop();
+
       if (!mounted) return;
-      Navigation.back(context: context);
 
       if (success) {
         Navigation.navigateToScreen(
@@ -46,6 +47,15 @@ class _SelectAttendanceModePageState extends State<SelectAttendanceModePage> {
           message: 'Authentication failed. Please try again.',
         );
       }
+    } catch (e) {
+      Navigation.navigatorKey.currentState?.pop();
+
+      if (!mounted) return;
+
+      AppDialogs.showErrorDialog(
+        context: context,
+        message: 'Authentication error. Please try again.',
+      );
     } finally {
       if (mounted) {
         setState(() {
