@@ -1,6 +1,7 @@
 import 'package:attendance_app/ux/shared/components/app_buttons.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
+import 'package:attendance_app/ux/views/attendance/components/padded_column.dart';
 import 'package:flutter/material.dart';
 
 class ConfirmationSection extends StatelessWidget {
@@ -15,18 +16,16 @@ class ConfirmationSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return PaddedColumn(
       padding: const EdgeInsets.only(left: 16, top: 8, right: 16),
-      child: Column(
-        children: [
-          CreditHoursDisplay(totalCreditHours: totalCreditHours),
-          const SizedBox(height: 10),
-          PrimaryButton(
-            onTap: onConfirmPressed,
-            child: const Text('Confirm'),
-          ),
-        ],
-      ),
+      children: [
+        CreditHoursDisplay(totalCreditHours: totalCreditHours),
+        const SizedBox(height: 10),
+        PrimaryButton(
+          onTap: onConfirmPressed,
+          child: const Text('Confirm'),
+        ),
+      ],
     );
   }
 }

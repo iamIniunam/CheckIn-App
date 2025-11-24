@@ -18,7 +18,7 @@ class LocalAuthService {
       }
 
       return await _auth.authenticate(
-        localizedReason: 'Enter device password to continue',
+        localizedReason: 'Authenticate to continue',
         options: const AuthenticationOptions(biometricOnly: false),
       );
     } catch (e) {

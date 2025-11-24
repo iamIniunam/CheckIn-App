@@ -7,6 +7,7 @@ import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/components/app_buttons.dart';
+import 'package:attendance_app/ux/views/attendance/components/padded_column.dart';
 import 'package:attendance_app/ux/views/onboarding/login_page.dart';
 import 'package:attendance_app/ux/views/profile/components/profile_detail_card.dart';
 import 'package:attendance_app/ux/views/profile/logout_confirmation_bottom_sheet.dart';
@@ -36,70 +37,68 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return AppPage(
       title: AppStrings.studentProfile,
-      body: Padding(
+      body: PaddedColumn(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                  color: AppColors.transparent,
-                  borderRadius: BorderRadius.circular(28),
-                  border: Border.all(color: AppColors.defaultColor)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+                color: AppColors.transparent,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: AppColors.defaultColor)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ProfileDetailCard(
+                    title: AppStrings.firstName,
+                    value: authViewModel.appUser?.studentProfile?.firstName ??
+                        'N/A'),
+                ProfileDetailCard(
+                    title: AppStrings.lastName,
+                    value: authViewModel.appUser?.studentProfile?.lastName ??
+                        'N/A'),
+                ProfileDetailCard(
+                    title: AppStrings.idNumber,
+                    value: authViewModel.appUser?.studentProfile?.idNumber ??
+                        'N/A'),
+                ProfileDetailCard(
+                  title: AppStrings.program,
+                  value:
+                      authViewModel.appUser?.studentProfile?.program ?? 'N/A',
+                  showDivider: false,
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: PrimaryButton(
+              backgroundColor: AppColors.transparent,
+              foregroundColor: AppColors.red500,
+              overlayColor: AppColors.red500.withOpacity(0.05),
+              onTap: () async {
+                bool? result = await showAppBottomSheet(
+                  context: context,
+                  showCloseButton: false,
+                  child: const LogoutConfirmationBottomSheet(),
+                );
+                if (result == true && context.mounted) {
+                  logOut(context);
+                }
+              },
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ProfileDetailCard(
-                      title: AppStrings.firstName,
-                      value: authViewModel.appUser?.studentProfile?.firstName ??
-                          'N/A'),
-                  ProfileDetailCard(
-                      title: AppStrings.lastName,
-                      value: authViewModel.appUser?.studentProfile?.lastName ??
-                          'N/A'),
-                  ProfileDetailCard(
-                      title: AppStrings.idNumber,
-                      value: authViewModel.appUser?.studentProfile?.idNumber ??
-                          'N/A'),
-                  ProfileDetailCard(
-                    title: AppStrings.program,
-                    value:
-                        authViewModel.appUser?.studentProfile?.program ?? 'N/A',
-                    showDivider: false,
-                  ),
+                  Icon(Icons.logout_rounded, size: 20),
+                  SizedBox(width: 4),
+                  Text('Logout'),
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: PrimaryButton(
-                backgroundColor: AppColors.transparent,
-                foregroundColor: AppColors.red500,
-                overlayColor: AppColors.red500.withOpacity(0.05),
-                onTap: () async {
-                  bool? result = await showAppBottomSheet(
-                    context: context,
-                    showCloseButton: false,
-                    child: const LogoutConfirmationBottomSheet(),
-                  );
-                  if (result == true && context.mounted) {
-                    logOut(context);
-                  }
-                },
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.logout_rounded, size: 20),
-                    SizedBox(width: 4),
-                    Text('Logout'),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

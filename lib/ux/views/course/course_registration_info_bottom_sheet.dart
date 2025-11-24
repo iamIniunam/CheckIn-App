@@ -1,4 +1,5 @@
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
+import 'package:attendance_app/ux/views/attendance/components/padded_column.dart';
 import 'package:flutter/material.dart';
 
 class CourseRegistrationInfoBottomSheet extends StatelessWidget {
@@ -6,39 +7,37 @@ class CourseRegistrationInfoBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return PaddedColumn(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: RichText(
-              text: const TextSpan(
-                text: 'Please note that this process is ',
-                style: TextStyle(
-                  color: AppColors.defaultColor,
-                  fontFamily: 'Nunito',
-                  height: 2,
-                ),
-                children: <TextSpan>[
-                  TextSpan(
-                    text:
-                        'only for confirming your registered courses for the semester',
-                    style: TextStyle(
-                      color: AppColors.defaultColor,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  TextSpan(
-                    text:
-                        ', not for official course registration. \nEnsure that the courses you select match your academic registration records before proceeding.',
-                  ),
-                ],
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: RichText(
+            text: const TextSpan(
+              text: 'Please note that this process is ',
+              style: TextStyle(
+                color: AppColors.defaultColor,
+                fontFamily: 'Nunito',
+                height: 2,
               ),
+              children: <TextSpan>[
+                TextSpan(
+                  text:
+                      'only for confirming your registered courses for the semester',
+                  style: TextStyle(
+                    color: AppColors.defaultColor,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                TextSpan(
+                  text:
+                      ', not for official course registration. \nEnsure that the courses you select match your academic registration records before proceeding.',
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

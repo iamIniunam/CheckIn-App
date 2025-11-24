@@ -2,6 +2,7 @@ import 'package:attendance_app/platform/data_source/api/course/models/course_res
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/components/app_material.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
+import 'package:attendance_app/ux/views/attendance/components/padded_column.dart';
 import 'package:attendance_app/ux/views/course/course_details_page.dart';
 import 'package:flutter/material.dart';
 
@@ -23,33 +24,31 @@ class SingleCourseCard extends StatelessWidget {
           screen: CourseDetailsPage(course: course),
         );
       },
-      child: Padding(
+      child: PaddedColumn(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              course.creditHours.toString(),
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppColors.defaultColor,
-                fontSize: 25,
-                fontWeight: FontWeight.w300,
-              ),
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            course.creditHours.toString(),
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: AppColors.defaultColor,
+              fontSize: 25,
+              fontWeight: FontWeight.w300,
             ),
-            Text(
-              course.courseCode,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppColors.defaultColor,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+          ),
+          Text(
+            course.courseCode,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: AppColors.defaultColor,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

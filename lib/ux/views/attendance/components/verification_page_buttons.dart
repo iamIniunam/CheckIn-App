@@ -47,16 +47,16 @@ class ExitButton extends StatelessWidget {
               Text(
                 'Exit',
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 18,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.black,
+                  color: AppColors.defaultColor,
                 ),
               ),
               SizedBox(width: 5),
               Icon(
-                Icons.close_sharp,
-                size: 25,
-                color: AppColors.black,
+                Icons.close_rounded,
+                size: 22,
+                color: AppColors.defaultColor,
               ),
             ],
           ),

@@ -12,6 +12,7 @@ import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
 import 'package:attendance_app/ux/shared/resources/app_images.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
+import 'package:attendance_app/ux/views/attendance/components/padded_column.dart';
 import 'package:attendance_app/ux/views/attendance/components/page_indicator.dart';
 import 'package:attendance_app/ux/views/course/course_enrollment_page.dart';
 import 'package:attendance_app/ux/views/onboarding/components/auth_redirection_widget.dart';
@@ -287,29 +288,31 @@ class _SignUpPageState extends State<SignUpPage> {
                         }
                       },
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: PrimaryButton(
-                        onTap: () {
-                          if (firstNameController.text.trim().isEmpty ||
-                              lastNameController.text.trim().isEmpty) {
-                            AppDialogs.showErrorDialog(
-                              context: context,
-                              message: 'Please fill in all fields.',
-                            );
-                            return;
-                          }
-                          setState(() {
-                            currentIndex++;
-                          });
-                        },
-                        child: const Text('Continue'),
-                      ),
+                    child: PaddedColumn(
+                      padding: const EdgeInsets.only(
+                          left: 16, top: 16, right: 16, bottom: 24),
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        PrimaryButton(
+                          onTap: () {
+                            if (firstNameController.text.trim().isEmpty ||
+                                lastNameController.text.trim().isEmpty) {
+                              AppDialogs.showErrorDialog(
+                                context: context,
+                                message: 'Please fill in all fields.',
+                              );
+                              return;
+                            }
+                            setState(() {
+                              currentIndex++;
+                            });
+                          },
+                          child: const Text('Continue'),
+                        ),
+                        const SizedBox(height: 16),
+                        const AuthRedirectionWidget(isLogin: false)
+                      ],
                     ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.only(left: 16, right: 16, bottom: 24),
-                    child: AuthRedirectionWidget(isLogin: false),
                   ),
                 ],
               ),

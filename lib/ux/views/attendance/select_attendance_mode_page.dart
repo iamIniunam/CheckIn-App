@@ -4,6 +4,7 @@ import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
 import 'package:attendance_app/ux/views/attendance/components/attendance_mode.dart';
+import 'package:attendance_app/ux/views/attendance/components/padded_column.dart';
 import 'package:attendance_app/ux/views/attendance/verification_page.dart';
 import 'package:flutter/material.dart';
 
@@ -67,36 +68,34 @@ class _SelectAttendanceModePageState extends State<SelectAttendanceModePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return PaddedColumn(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          AttendanceMode(
-            mode: 'In-person',
-            onTap: _isAuthenticating
-                ? null
-                : () {
-                    authenticateAndNavigate(
-                      context,
-                      AttendanceType.inPerson,
-                    );
-                  },
-          ),
-          const SizedBox(height: 20),
-          AttendanceMode(
-            mode: 'Online',
-            onTap: _isAuthenticating
-                ? null
-                : () {
-                    authenticateAndNavigate(
-                      context,
-                      AttendanceType.online,
-                    );
-                  },
-          ),
-        ],
-      ),
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        AttendanceMode(
+          mode: 'In-person',
+          onTap: _isAuthenticating
+              ? null
+              : () {
+                  authenticateAndNavigate(
+                    context,
+                    AttendanceType.inPerson,
+                  );
+                },
+        ),
+        const SizedBox(height: 20),
+        AttendanceMode(
+          mode: 'Online',
+          onTap: _isAuthenticating
+              ? null
+              : () {
+                  authenticateAndNavigate(
+                    context,
+                    AttendanceType.online,
+                  );
+                },
+        ),
+      ],
     );
   }
 }
