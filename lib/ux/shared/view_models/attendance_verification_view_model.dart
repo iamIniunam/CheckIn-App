@@ -1,5 +1,6 @@
 import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/platform/utils/location_utils.dart';
+import 'package:attendance_app/platform/utils/multi_campus_location_helper.dart';
 import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/platform/services/message_providers.dart';
 import 'package:attendance_app/ux/shared/models/models.dart';
@@ -11,8 +12,6 @@ import 'package:attendance_app/ux/shared/view_models/attendance/attendance_locat
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:flutter/material.dart';
 
-enum AutoFlowResult { success, unauthorized, failed }
-
 class AttendanceVerificationViewModel extends ChangeNotifier {
   final AuthViewModel _authViewModel = AppDI.getIt<AuthViewModel>();
   final AttendanceViewModel _attendanceViewModel =
@@ -22,6 +21,8 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
   final QrScanViewModel _qrScanViewModel = AppDI.getIt<QrScanViewModel>();
   final OnlineCodeViewModel _onlineCodeViewModel =
       AppDI.getIt<OnlineCodeViewModel>();
+  final MultiCampusLocationHelper _multiCampusHelper =
+      AppDI.getIt<MultiCampusLocationHelper>();
   final VerificationMessageProvider _messageProvider;
 
   VerificationState _verificationState = const VerificationState();
@@ -219,20 +220,18 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
   // ============================================================================
 
   /// Check location - returns true if within range
-  Future<bool> checkLocation({String campusId = 'house'}) async {
+  Future<bool> checkLocation(
+      {List<String> campusIds = const ['seaview', 'kcc']}) async {
     if (!requiresLocationCheck) return true;
 
     updateState(_verificationState.copyWith(isLoading: true, clearError: true));
 
     try {
-      await _attendanceLocationViewModel.checkAttendance(
-        campusId: campusId,
-        showSettingsOption: true,
-      );
-
-      // UIResult updates are handled by listener
-      final result = currentLocationUIResult;
-      return result.isSuccess && (result.data?.canAttend ?? false);
+      if (campusIds.length > 1) {
+        return await checkLocationAdvanced(campusIds: campusIds);
+      } else {
+        return await checkLocationSimple(campusIds: campusIds);
+      }
     } catch (e) {
       updateState(_verificationState.copyWith(
         isLoading: false,
@@ -242,23 +241,95 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
     }
   }
 
+  Future<bool> checkLocationSimple({required List<String> campusIds}) async {
+    for (final campusId in campusIds) {
+      await _attendanceLocationViewModel.checkAttendance(
+        campusId: campusId,
+        showSettingsOption: campusIds.indexOf(campusId) == 0,
+      );
+      final result = currentLocationUIResult;
+
+      // If this campus is in range, we're done
+      if (result.isSuccess && (result.data?.canAttend ?? false)) {
+        return true;
+      }
+    }
+
+    final result = currentLocationUIResult;
+    if (result.data != null) {
+      updateState(
+        _verificationState.copyWith(
+          isLoading: false,
+          errorMessage:
+              'You are ${result.data?.formattedDistance} from the nearest campus',
+        ),
+      );
+    }
+
+    return false;
+  }
+
+  Future<bool> checkLocationAdvanced({required List<String> campusIds}) async {
+    final result = await _multiCampusHelper.checkMultipleCampuses(
+      campusIds: campusIds,
+      showSettingsOption: true,
+    );
+
+    debugPrint(
+        'AttendanceVerification: multi-campus result -> isWithinRange=${result.isWithinRange}, matched=${result.matchedCampusId}, error=${result.error}');
+
+    if (result.isWithinRange) {
+      // Success! Show which campus matched
+      updateState(_verificationState.copyWith(
+        isLoading: false,
+        clearError: true,
+      ));
+      return true;
+    } else {
+      // Not in range - show nearest campus info
+      updateState(_verificationState.copyWith(
+        isLoading: false,
+        errorMessage: result.getErrorMessage(),
+      ));
+      return false;
+    }
+  }
+
   /// Retry location check
   Future<bool> retryLocationCheck({
     bool useNetworkOnly = false,
-    String campusId = 'house',
+    List<String> campusIds = const ['seaview', 'kcc', 'house'],
   }) async {
     if (!requiresLocationCheck) return true;
 
     updateState(_verificationState.copyWith(isLoading: true, clearError: true));
 
     try {
-      await _attendanceLocationViewModel.checkAttendance(
-        campusId: campusId,
-        showSettingsOption: !useNetworkOnly,
-      );
+      for (final campusId in campusIds) {
+        await _attendanceLocationViewModel.checkAttendance(
+          campusId: campusId,
+          showSettingsOption:
+              !useNetworkOnly && campusIds.indexOf(campusId) == 0,
+        );
+
+        final result = currentLocationUIResult;
+
+        // If this campus is in range, we're done!
+        if (result.isSuccess && (result.data?.canAttend ?? false)) {
+          return true;
+        }
+      }
 
       final result = currentLocationUIResult;
-      return result.isSuccess && (result.data?.canAttend ?? false);
+      if (result.data != null) {
+        updateState(_verificationState.copyWith(
+          isLoading: false,
+          errorMessage:
+              'You are ${result.data!.formattedDistance} from the nearest campus',
+        ));
+      }
+
+      return false;
     } catch (e) {
       updateState(_verificationState.copyWith(
         isLoading: false,
@@ -322,19 +393,23 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
       if (result.success) {
         return true;
       } else {
-        updateState(
-            _verificationState.copyWith(errorMessage: result.errorMessage));
+        final errorMsg = result.errorMessage ?? 'Failed to mark attendance';
+        updateState(_verificationState.copyWith(errorMessage: errorMsg));
         return false;
       }
     } else if (locStatus == LocationVerificationStatus.outOfRange) {
       // Send unauthorized mark but don't advance UI
-      await _attendanceViewModel.markAttendanceUnauthorized(
+      final result = await _attendanceViewModel.markAttendanceUnauthorized(
         code: qrCode,
         studentId: _studentId ?? '',
         location: userLocation,
         latitude: position?.latitude,
         longitude: position?.longitude,
       );
+      if (!result.success) {
+        final errorMsg = result.errorMessage ?? 'Location verification failed';
+        updateState(_verificationState.copyWith(errorMessage: errorMsg));
+      }
       return false;
     } else {
       updateState(_verificationState.copyWith(

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:attendance_app/ux/navigation/navigation.dart';
+import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance_verification_view_model.dart';
 import 'package:provider/provider.dart';

@@ -10,18 +10,28 @@ class OnlineCodeEntryContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: TextField(
-        autofocus: true,
-        decoration: const InputDecoration(
-            border: InputBorder.none, hintText: 'Enter Attendance Code'),
-        style: const TextStyle(color: AppColors.defaultColor, fontSize: 32),
-        textInputAction: TextInputAction.done,
-        textAlign: TextAlign.center,
-        textCapitalization: TextCapitalization.characters,
-        keyboardType: TextInputType.visiblePassword,
-        onChanged: (value) => viewModel.onOnlineCodeEntered(value),
-        onSubmitted: (value) => viewModel.onOnlineCodeEntered(value),
-        maxLength: 6,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 36),
+        child: TextField(
+          autofocus: true,
+          maxLength: 6,
+          decoration: const InputDecoration(
+            border: InputBorder.none,
+            hintText: 'Enter Attendance Code',
+            counterStyle: TextStyle(
+              color: AppColors.defaultColor,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: AppColors.defaultColor, fontSize: 32),
+          textInputAction: TextInputAction.done,
+          textCapitalization: TextCapitalization.characters,
+          keyboardType: TextInputType.visiblePassword,
+          onChanged: (value) => viewModel.onOnlineCodeEntered(value),
+          onSubmitted: (value) => viewModel.onOnlineCodeEntered(value),
+        ),
       ),
     );
   }

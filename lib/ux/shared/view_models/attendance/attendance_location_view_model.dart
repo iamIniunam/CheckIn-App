@@ -15,10 +15,8 @@ class AttendanceLocationViewModel extends ChangeNotifier {
   ValueNotifier<UIResult<AttendanceResult>> checkAttendanceResult =
       ValueNotifier(UIResult.empty());
 
-  Future<void> checkAttendance({
-    required String campusId,
-    bool showSettingsOption = true,
-  }) async {
+  Future<void> checkAttendance(
+      {required String campusId, bool showSettingsOption = true}) async {
     checkAttendanceResult.value = UIResult.loading();
 
     try {
@@ -26,6 +24,7 @@ class AttendanceLocationViewModel extends ChangeNotifier {
       if (campus == null) {
         checkAttendanceResult.value =
             UIResult.error(message: 'Invalid campus ID: $campusId');
+        debugPrint('AttendanceLocation: Invalid campus id: $campusId');
         return;
       }
 
@@ -54,17 +53,19 @@ class AttendanceLocationViewModel extends ChangeNotifier {
             ),
             message: 'Location verified',
           );
+          debugPrint(
+              'AttendanceLocation: withinRange=TRUE for $campusId (GPS)');
           return;
         }
 
         if (gpsPosition.accuracy >
             AttendanceConstants.poorGPSAccuracyThreshold) {
-          Position? netwoekPosition =
+          Position? networkPosition =
               await _locationProvider.getNetworkPosition();
 
-          if (netwoekPosition != null) {
+          if (networkPosition != null) {
             bool withinNetworkRange = _attendanceValidator.isWithinNetworkRange(
-              position: netwoekPosition,
+              position: networkPosition,
               campusLat: campus.latitude,
               campusLong: campus.longitude,
               maxDistanceMeters: campus.maxDistanceMeters,
@@ -74,9 +75,9 @@ class AttendanceLocationViewModel extends ChangeNotifier {
               checkAttendanceResult.value = UIResult.success(
                 data: AttendanceResult(
                   canAttend: true,
-                  position: netwoekPosition,
+                  position: networkPosition,
                   distance: LocationUtils.calculateDistance(
-                    from: netwoekPosition,
+                    from: networkPosition,
                     toLat: campus.latitude,
                     toLong: campus.longitude,
                   ),
@@ -84,6 +85,8 @@ class AttendanceLocationViewModel extends ChangeNotifier {
                 ),
                 message: 'Location verified via network (GPS signal poor)',
               );
+              debugPrint(
+                  'AttendanceLocation: withinRange=TRUE for $campusId (Network)');
               return;
             }
           }
@@ -106,14 +109,20 @@ class AttendanceLocationViewModel extends ChangeNotifier {
             method: 'GPS',
           ),
         );
+        debugPrint(
+            'AttendanceLocation: withinRange=FALSE for $campusId; distance=${distance}m, accuracy=${gpsPosition.accuracy}');
         return;
       }
 
       checkAttendanceResult.value = UIResult.error(
           message:
               'Unable to get your location. Please ensure location services are enabled.');
+      debugPrint(
+          'AttendanceLocation: Unable to obtain GPS position for $campusId');
     } catch (e) {
       checkAttendanceResult.value = UIResult.error(message: e.toString());
+      debugPrint(
+          'AttendanceLocation: exception for $campusId -> ${e.toString()}');
     }
   }
 

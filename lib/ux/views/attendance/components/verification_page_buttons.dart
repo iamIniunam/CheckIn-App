@@ -28,7 +28,9 @@ class ExitButton extends StatelessWidget {
         viewModel.verificationState.currentStep !=
             VerificationStep.qrCodeScan &&
         viewModel.verificationState.currentStep !=
-            VerificationStep.onlineCodeEntry) {
+            VerificationStep.onlineCodeEntry &&
+        viewModel.verificationState.currentStep !=
+            VerificationStep.locationCheck) {
       return const SizedBox.shrink();
     }
 

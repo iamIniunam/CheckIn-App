@@ -6,6 +6,7 @@ import 'package:attendance_app/platform/data_source/api/requester.dart';
 import 'package:attendance_app/platform/data_source/persistence/manager.dart';
 import 'package:attendance_app/platform/services/local_auth_service.dart';
 import 'package:attendance_app/platform/utils/location_provider.dart';
+import 'package:attendance_app/platform/utils/multi_campus_location_helper.dart';
 import 'package:attendance_app/ux/shared/resources/constants/attendance_validator.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance/attendance_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance/online_code_view_model.dart';
@@ -49,8 +50,7 @@ class AppDI {
     getIt.registerLazySingleton<QrScanViewModel>(() => QrScanViewModel());
     getIt.registerLazySingleton<OnlineCodeViewModel>(
         () => OnlineCodeViewModel());
-
-    getIt.registerFactory<AttendanceLocationViewModel>(
+    getIt.registerLazySingleton<AttendanceLocationViewModel>(
         () => AttendanceLocationViewModel());
 
     // Services
@@ -58,6 +58,11 @@ class AppDI {
     getIt.registerLazySingleton<AttendanceValidator>(
         () => AttendanceValidator());
     getIt.registerLazySingleton<LocalAuthService>(() => LocalAuthService());
+    getIt.registerLazySingleton<MultiCampusLocationHelper>(
+      () => MultiCampusLocationHelper(
+        locationViewModel: getIt<AttendanceLocationViewModel>(),
+      ),
+    );
   }
 }
 
