@@ -1,40 +1,6 @@
 import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:geolocator/geolocator.dart';
 
-class VerificationState {
-  final VerificationStep currentStep;
-  final bool isLoading;
-  final String? errorMessage;
-  final bool faceVerificationPassed;
-  final AttendanceType? attendanceType;
-
-  const VerificationState({
-    this.currentStep = VerificationStep.qrCodeScan,
-    this.isLoading = false,
-    this.errorMessage,
-    this.faceVerificationPassed = false,
-    this.attendanceType,
-  });
-
-  VerificationState copyWith({
-    VerificationStep? currentStep,
-    bool? isLoading,
-    String? errorMessage,
-    bool? faceVerificationPassed,
-    AttendanceType? attendanceType,
-    bool clearError = false,
-  }) {
-    return VerificationState(
-      currentStep: currentStep ?? this.currentStep,
-      isLoading: isLoading ?? this.isLoading,
-      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
-      faceVerificationPassed:
-          faceVerificationPassed ?? this.faceVerificationPassed,
-      attendanceType: attendanceType ?? this.attendanceType,
-    );
-  }
-}
-
 class LocationState {
   final Position? currentPosition;
   final double? distanceFromCampus;

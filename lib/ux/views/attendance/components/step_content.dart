@@ -14,7 +14,7 @@ class StepContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    switch (viewModel.verificationState.currentStep) {
+    switch (viewModel.currentStep) {
       case VerificationStep.qrCodeScan:
         return const ScanView();
 

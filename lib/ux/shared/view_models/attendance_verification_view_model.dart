@@ -3,7 +3,6 @@ import 'package:attendance_app/platform/utils/location_utils.dart';
 import 'package:attendance_app/platform/utils/multi_campus_location_helper.dart';
 import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/platform/services/message_providers.dart';
-import 'package:attendance_app/ux/shared/models/models.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance/attendance_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance/online_code_view_model.dart';
@@ -25,7 +24,14 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
       AppDI.getIt<MultiCampusLocationHelper>();
   final VerificationMessageProvider _messageProvider;
 
-  VerificationState _verificationState = const VerificationState();
+  ValueNotifier<UIResult<bool>> locationCheckResult =
+      ValueNotifier<UIResult<bool>>(UIResult.empty());
+
+  ValueNotifier<UIResult<bool>> attendanceSubmissionResult =
+      ValueNotifier<UIResult<bool>>(UIResult.empty());
+
+  AttendanceType _attendanceType = AttendanceType.inPerson;
+  VerificationStep _currentStep = VerificationStep.qrCodeScan;
 
   AttendanceVerificationViewModel({
     required AuthViewModel authViewModel,
@@ -36,18 +42,20 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
         .addListener(_onLocationResultChanged);
   }
 
+  AttendanceType get attendanceType => _attendanceType;
+  VerificationStep get currentStep => _currentStep;
+
   // ============================================================================
   // STATE ACCESSORS
   // ============================================================================
 
-  VerificationState get verificationState => _verificationState;
   String? get scannedQrCode => _qrScanViewModel.scannedCode;
   String? get enteredOnlineCode => _onlineCodeViewModel.enteredCode;
   bool get isMarkingAttendance => _attendanceViewModel.isMarkingAttendance;
   String? get _studentId => _authViewModel.appUser?.studentProfile?.idNumber;
 
   /// Direct access to the location check result ValueNotifier
-  ValueNotifier<UIResult<AttendanceResult>> get locationCheckResult =>
+  ValueNotifier<UIResult<AttendanceResult>> get attendanceLocationResult =>
       _attendanceLocationViewModel.checkAttendanceResult;
 
   // ============================================================================
@@ -122,20 +130,19 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
   // STEP STATE CHECKS
   // ============================================================================
 
-  bool get requiresLocationCheck =>
-      _verificationState.attendanceType == AttendanceType.inPerson;
+  bool get requiresLocationCheck => _attendanceType == AttendanceType.inPerson;
 
   bool get isQrScanning =>
-      _verificationState.currentStep == VerificationStep.qrCodeScan &&
-      _verificationState.isLoading;
+      _currentStep == VerificationStep.qrCodeScan &&
+      locationCheckResult.value.isLoading;
 
   bool get isLocationChecking =>
-      _verificationState.currentStep == VerificationStep.locationCheck &&
-      _verificationState.isLoading;
+      _currentStep == VerificationStep.locationCheck &&
+      locationCheckResult.value.isLoading;
 
   bool get isSubmittingAttendance =>
-      _verificationState.currentStep == VerificationStep.attendanceSubmission &&
-      _verificationState.isLoading;
+      _currentStep == VerificationStep.attendanceSubmission &&
+      attendanceSubmissionResult.value.isLoading;
 
   // ============================================================================
   // LOCATION RESULT LISTENER
@@ -146,17 +153,18 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
     final result = currentLocationUIResult;
 
     if (result.isLoading) {
-      updateState(
-          _verificationState.copyWith(isLoading: true, clearError: true));
+      locationCheckResult.value = UIResult.loading();
     } else if (result.isSuccess) {
-      updateState(
-          _verificationState.copyWith(isLoading: false, clearError: true));
+      final canAttend = result.data?.canAttend ?? false;
+      locationCheckResult.value = UIResult.success(
+        data: canAttend,
+        message: result.message,
+      );
     } else if (result.isError) {
-      updateState(_verificationState.copyWith(
-        isLoading: false,
-        errorMessage: result.message,
-      ));
+      locationCheckResult.value = UIResult.error(message: result.message);
     }
+
+    notifyListeners();
   }
 
   // ============================================================================
@@ -191,20 +199,19 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
 
   /// Set attendance type and reset flow
   void setAttendanceType(AttendanceType type) {
-    final startStep = type == AttendanceType.online
+    _attendanceType = type;
+    _currentStep = type == AttendanceType.online
         ? VerificationStep.onlineCodeEntry
         : VerificationStep.qrCodeScan;
 
-    updateState(_verificationState.copyWith(
-      attendanceType: type,
-      currentStep: startStep,
-      clearError: true,
-    ));
-
-    // Reset all sub-ViewModels
+    // Reset all sub-ViewModels and results
     _qrScanViewModel.reset();
     _onlineCodeViewModel.reset();
     _attendanceLocationViewModel.resetResult();
+    locationCheckResult.value = UIResult.empty();
+    attendanceSubmissionResult.value = UIResult.empty();
+
+    notifyListeners();
   }
 
   void onQrCodeScanned(String code) {
@@ -221,10 +228,14 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
 
   /// Check location - returns true if within range
   Future<bool> checkLocation(
-      {List<String> campusIds = const ['seaview', 'kcc']}) async {
+      {List<String> campusIds = const [
+        'seaview',
+        'kcc',
+      ]}) async {
     if (!requiresLocationCheck) return true;
 
-    updateState(_verificationState.copyWith(isLoading: true, clearError: true));
+    locationCheckResult.value = UIResult.loading();
+    notifyListeners();
 
     try {
       if (campusIds.length > 1) {
@@ -233,10 +244,9 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
         return await checkLocationSimple(campusIds: campusIds);
       }
     } catch (e) {
-      updateState(_verificationState.copyWith(
-        isLoading: false,
-        errorMessage: 'Location check failed: ${e.toString()}',
-      ));
+      locationCheckResult.value =
+          UIResult.error(message: 'Location check failed: ${e.toString()}');
+      notifyListeners();
       return false;
     }
   }
@@ -251,19 +261,19 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
 
       // If this campus is in range, we're done
       if (result.isSuccess && (result.data?.canAttend ?? false)) {
+        locationCheckResult.value = UIResult.success(data: true);
+        notifyListeners();
         return true;
       }
     }
 
     final result = currentLocationUIResult;
     if (result.data != null) {
-      updateState(
-        _verificationState.copyWith(
-          isLoading: false,
-          errorMessage:
-              'You are ${result.data?.formattedDistance} from the nearest campus',
-        ),
+      locationCheckResult.value = UIResult.error(
+        message:
+            'You are ${result.data?.formattedDistance} from the nearest campus',
       );
+      notifyListeners();
     }
 
     return false;
@@ -280,29 +290,26 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
 
     if (result.isWithinRange) {
       // Success! Show which campus matched
-      updateState(_verificationState.copyWith(
-        isLoading: false,
-        clearError: true,
-      ));
+      locationCheckResult.value = UIResult.success(data: true);
+      notifyListeners();
       return true;
     } else {
       // Not in range - show nearest campus info
-      updateState(_verificationState.copyWith(
-        isLoading: false,
-        errorMessage: result.getErrorMessage(),
-      ));
+      locationCheckResult.value =
+          UIResult.error(message: result.getErrorMessage());
+      notifyListeners();
       return false;
     }
   }
 
   /// Retry location check
-  Future<bool> retryLocationCheck({
-    bool useNetworkOnly = false,
-    List<String> campusIds = const ['seaview', 'kcc', 'house'],
-  }) async {
+  Future<bool> retryLocationCheck(
+      {bool useNetworkOnly = false,
+      List<String> campusIds = const ['seaview', 'kcc', 'house']}) async {
     if (!requiresLocationCheck) return true;
 
-    updateState(_verificationState.copyWith(isLoading: true, clearError: true));
+    locationCheckResult.value = UIResult.loading();
+    notifyListeners();
 
     try {
       for (final campusId in campusIds) {
@@ -316,25 +323,25 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
 
         // If this campus is in range, we're done!
         if (result.isSuccess && (result.data?.canAttend ?? false)) {
+          locationCheckResult.value = UIResult.success(data: true);
+          notifyListeners();
           return true;
         }
       }
 
       final result = currentLocationUIResult;
       if (result.data != null) {
-        updateState(_verificationState.copyWith(
-          isLoading: false,
-          errorMessage:
-              'You are ${result.data!.formattedDistance} from the nearest campus',
-        ));
+        locationCheckResult.value = UIResult.error(
+            message:
+                'You are ${result.data?.formattedDistance} from the nearest campus');
+        notifyListeners();
       }
 
       return false;
     } catch (e) {
-      updateState(_verificationState.copyWith(
-        isLoading: false,
-        errorMessage: 'Location retry failed: ${e.toString()}',
-      ));
+      locationCheckResult.value =
+          UIResult.error(message: 'Location retry failed: ${e.toString()}');
+      notifyListeners();
       return false;
     }
   }
@@ -345,25 +352,25 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
 
   Future<bool> submitAttendance() async {
     if (_studentId == null) {
-      updateState(_verificationState.copyWith(
-        isLoading: false,
-        errorMessage: 'Student ID not found',
-      ));
+      attendanceSubmissionResult.value =
+          UIResult.error(message: 'Student ID not found');
+      notifyListeners();
       return false;
     }
 
-    updateState(_verificationState.copyWith(clearError: true));
+    attendanceSubmissionResult.value = UIResult.loading();
+    notifyListeners();
 
     try {
-      if (_verificationState.attendanceType == AttendanceType.inPerson) {
+      if (_attendanceType == AttendanceType.inPerson) {
         return await submitInPersonAttendance();
       } else {
         return await submitOnlineAttendance();
       }
     } catch (e) {
-      updateState(_verificationState.copyWith(
-        errorMessage: 'Failed to submit attendance: ${e.toString()}',
-      ));
+      attendanceSubmissionResult.value = UIResult.error(
+          message: 'Failed to submit attendance: ${e.toString()}');
+      notifyListeners();
       return false;
     }
   }
@@ -371,9 +378,9 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
   Future<bool> submitInPersonAttendance() async {
     final qrCode = _qrScanViewModel.scannedCode;
     if (qrCode == null) {
-      updateState(_verificationState.copyWith(
-        errorMessage: 'QR code not scanned',
-      ));
+      attendanceSubmissionResult.value =
+          UIResult.error(message: 'QR code not scanned');
+      notifyListeners();
       return false;
     }
 
@@ -391,10 +398,14 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
       );
 
       if (result.success) {
+        attendanceSubmissionResult.value =
+            UIResult.success(data: true, message: result.message);
+        notifyListeners();
         return true;
       } else {
-        final errorMsg = result.errorMessage ?? 'Failed to mark attendance';
-        updateState(_verificationState.copyWith(errorMessage: errorMsg));
+        attendanceSubmissionResult.value = UIResult.error(
+            message: result.errorMessage ?? 'Failed to mark attendance');
+        notifyListeners();
         return false;
       }
     } else if (locStatus == LocationVerificationStatus.outOfRange) {
@@ -407,14 +418,18 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
         longitude: position?.longitude,
       );
       if (!result.success) {
-        final errorMsg = result.errorMessage ?? 'Location verification failed';
-        updateState(_verificationState.copyWith(errorMessage: errorMsg));
+        attendanceSubmissionResult.value = UIResult.error(
+            message: result.errorMessage ?? 'Location verification failed');
+      } else {
+        attendanceSubmissionResult.value =
+            UIResult.error(message: 'You are too far from campus');
       }
+      notifyListeners();
       return false;
     } else {
-      updateState(_verificationState.copyWith(
-        errorMessage: 'Location verification required',
-      ));
+      attendanceSubmissionResult.value =
+          UIResult.error(message: 'Location verification required');
+      notifyListeners();
       return false;
     }
   }
@@ -422,9 +437,9 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
   Future<bool> submitOnlineAttendance() async {
     final onlineCode = _onlineCodeViewModel.enteredCode;
     if (onlineCode == null) {
-      updateState(_verificationState.copyWith(
-        errorMessage: 'Online code not entered',
-      ));
+      attendanceSubmissionResult.value =
+          UIResult.error(message: 'Online code not entered');
+      notifyListeners();
       return false;
     }
 
@@ -437,6 +452,9 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
     );
 
     if (result.success) {
+      attendanceSubmissionResult.value =
+          UIResult.success(data: true, message: result.message);
+      notifyListeners();
       return true;
     } else {
       String message = result.errorMessage ?? 'Unable to submit attendance';
@@ -454,7 +472,8 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
             'You are not registered for the course linked to this attendance code. Check your enrollment and try again.';
       }
 
-      updateState(_verificationState.copyWith(errorMessage: message));
+      attendanceSubmissionResult.value = UIResult.error(message: message);
+      notifyListeners();
       return false;
     }
   }
@@ -464,30 +483,28 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
   // ============================================================================
 
   void moveToNextStep() {
-    VerificationStep nextStep;
-
-    switch (_verificationState.currentStep) {
+    switch (_currentStep) {
       case VerificationStep.qrCodeScan:
-        nextStep = VerificationStep.locationCheck;
+        _currentStep = VerificationStep.locationCheck;
         break;
       case VerificationStep.onlineCodeEntry:
-        nextStep = VerificationStep.attendanceSubmission;
+        _currentStep = VerificationStep.attendanceSubmission;
         break;
       case VerificationStep.locationCheck:
-        nextStep = VerificationStep.attendanceSubmission;
+        _currentStep = VerificationStep.attendanceSubmission;
         break;
       case VerificationStep.attendanceSubmission:
-        nextStep = VerificationStep.completed;
+        _currentStep = VerificationStep.completed;
         break;
       case VerificationStep.completed:
         return;
     }
-    updateState(_verificationState.copyWith(currentStep: nextStep));
+    notifyListeners();
   }
 
   Future<AutoFlowResult> proceedWithAutomaticFlow() async {
     // LOCATION CHECK STEP
-    if (_verificationState.currentStep == VerificationStep.locationCheck) {
+    if (_currentStep == VerificationStep.locationCheck) {
       bool locationSuccess = await checkLocation();
 
       if (!locationSuccess) {
@@ -518,8 +535,7 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
     }
 
     // SUBMISSION STEP
-    if (_verificationState.currentStep ==
-        VerificationStep.attendanceSubmission) {
+    if (_currentStep == VerificationStep.attendanceSubmission) {
       bool submissionSuccess = await submitAttendance();
       if (submissionSuccess) {
         moveToNextStep();
@@ -537,13 +553,13 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
 
   double getProgressPercentage() {
     final steps = getRequiredSteps();
-    final currentIndex = steps.indexOf(_verificationState.currentStep);
+    final currentIndex = steps.indexOf(_currentStep);
     if (currentIndex == -1) return 0.0;
     return (currentIndex + 1) / steps.length;
   }
 
   List<VerificationStep> getRequiredSteps() {
-    if (_verificationState.attendanceType == AttendanceType.online) {
+    if (_attendanceType == AttendanceType.online) {
       return [
         VerificationStep.onlineCodeEntry,
         VerificationStep.attendanceSubmission,
@@ -563,16 +579,17 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
   // STATE MANAGEMENT
   // ============================================================================
 
-  void updateState(VerificationState newState) {
-    _verificationState = newState;
-    notifyListeners();
-  }
-
   void resetVerification() {
-    _verificationState = const VerificationState();
+    _attendanceType = AttendanceType.inPerson;
+    _currentStep = VerificationStep.qrCodeScan;
+
     _attendanceLocationViewModel.resetResult();
     _qrScanViewModel.reset();
     _onlineCodeViewModel.reset();
+
+    locationCheckResult.value = UIResult.empty();
+    attendanceSubmissionResult.value = UIResult.empty();
+
     notifyListeners();
   }
 
@@ -581,30 +598,24 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
   // ============================================================================
 
   bool shouldEnableButton() {
-    return !_verificationState.isLoading &&
-            _verificationState.currentStep ==
-                VerificationStep.onlineCodeEntry ||
+    return !attendanceSubmissionResult.value.isLoading &&
+            _currentStep == VerificationStep.onlineCodeEntry ||
         locationStatus == LocationVerificationStatus.outOfRange ||
         locationStatus == LocationVerificationStatus.failed ||
-        _verificationState.currentStep == VerificationStep.completed;
+        _currentStep == VerificationStep.completed ||
+        attendanceSubmissionResult.value.isError;
   }
 
   bool shouldShowButton() {
-    return _verificationState.currentStep == VerificationStep.onlineCodeEntry ||
+    return _currentStep == VerificationStep.onlineCodeEntry ||
         locationStatus == LocationVerificationStatus.outOfRange ||
         locationStatus == LocationVerificationStatus.failed ||
-        _verificationState.currentStep == VerificationStep.completed;
+        _currentStep == VerificationStep.completed ||
+        attendanceSubmissionResult.value.isError;
   }
 
-  // bool shouldShowRetryButton() {
-  //   return _verificationState.currentStep == VerificationStep.locationCheck &&
-  //       !_verificationState.isLoading &&
-  //       _verificationState.errorMessage != null &&
-  //       requiresLocationCheck;
-  // }
-
   String getButtonText() => _messageProvider.getButtonText(
-        _verificationState.currentStep,
+        _currentStep,
         locationStatus: locationStatus,
       );
 

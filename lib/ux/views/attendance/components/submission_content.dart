@@ -47,27 +47,37 @@ class SubmissionContent extends StatelessWidget {
             const SizedBox(height: 16),
             const Text(
               'Please wait while we record your attendance...',
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey,
               ),
-              textAlign: TextAlign.center,
             ),
-            Visibility(
-              visible: viewModel.isSubmittingAttendance,
-              child: const Column(
-                children: [
-                  SizedBox(height: 24),
-                  CircularProgressIndicator(
-                    valueColor:
-                        AlwaysStoppedAnimation<Color>(AppColors.defaultColor),
-                  ),
-                ],
-              ),
+
+            // Loading indicator
+            ValueListenableBuilder(
+              valueListenable: viewModel.attendanceSubmissionResult,
+              builder: (context, result, child) {
+                if (result.isLoading || viewModel.isSubmittingAttendance) {
+                  return const Column(
+                    children: [
+                      SizedBox(height: 24),
+                      CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.defaultColor,
+                        ),
+                      ),
+                    ],
+                  );
+                }
+                return const SizedBox.shrink();
+              },
             ),
+
+            // Location badge for in-person attendance
             if (viewModel.requiresLocationCheck)
               ValueListenableBuilder<UIResult<AttendanceResult>>(
-                valueListenable: viewModel.locationCheckResult,
+                valueListenable: viewModel.attendanceLocationResult,
                 builder: (context, result, child) {
                   if (result.isSuccess && result.data != null) {
                     final data = result.data;
@@ -79,9 +89,17 @@ class SubmissionContent extends StatelessWidget {
                   return const SizedBox.shrink();
                 },
               ),
-            if (viewModel.verificationState.errorMessage != null)
-              ErrorMessage(
-                  message: viewModel.verificationState.errorMessage ?? ''),
+
+            // Error message from submission
+            ValueListenableBuilder(
+              valueListenable: viewModel.attendanceSubmissionResult,
+              builder: (context, result, child) {
+                if (result.isError && result.message != null) {
+                  return ErrorMessage(message: result.message ?? '');
+                }
+                return const SizedBox.shrink();
+              },
+            ),
           ],
         ),
       ),

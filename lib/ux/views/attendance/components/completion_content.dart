@@ -54,7 +54,7 @@ class CompletionContent extends StatelessWidget {
             ),
             if (viewModel.requiresLocationCheck)
               ValueListenableBuilder<UIResult<AttendanceResult>>(
-                valueListenable: viewModel.locationCheckResult,
+                valueListenable: viewModel.attendanceLocationResult,
                 builder: (context, result, child) {
                   if (result.isSuccess && result.data != null) {
                     final data = result.data;

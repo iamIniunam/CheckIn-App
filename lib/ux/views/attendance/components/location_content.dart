@@ -55,7 +55,7 @@ class LocationCheckContent extends StatelessWidget {
 
             // Real-time location updates using ValueListenableBuilder
             ValueListenableBuilder<UIResult<AttendanceResult>>(
-              valueListenable: viewModel.locationCheckResult,
+              valueListenable: viewModel.attendanceLocationResult,
               builder: (context, result, child) {
                 // Show loading spinner
                 if (result.isLoading || viewModel.isLocationChecking) {
@@ -137,11 +137,15 @@ class LocationCheckContent extends StatelessWidget {
               },
             ),
 
-            // Show error message if exists
-            if (viewModel.verificationState.errorMessage != null)
-              ErrorMessage(
-                message: viewModel.verificationState.errorMessage ?? '',
-              ),
+            ValueListenableBuilder(
+              valueListenable: viewModel.locationCheckResult,
+              builder: (context, result, child) {
+                if (result.isError && result.message != null) {
+                  return ErrorMessage(message: result.message ?? '');
+                }
+                return const SizedBox.shrink();
+              },
+            ),
           ],
         ),
       ),

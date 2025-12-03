@@ -53,14 +53,12 @@ class _VerificationPageState extends State<VerificationPage> {
   }
 
   bool shouldShowStepIndicator() {
-    final type =
-        viewModel.verificationState.attendanceType ?? widget.attendanceType;
+    final type = viewModel.attendanceType;
     return type == AttendanceType.inPerson || type == AttendanceType.online;
   }
 
   bool isAttendanceMode() {
-    final type =
-        viewModel.verificationState.attendanceType ?? widget.attendanceType;
+    final type = viewModel.attendanceType;
     return type == AttendanceType.inPerson || type == AttendanceType.online;
   }
 
@@ -86,18 +84,13 @@ class _VerificationPageState extends State<VerificationPage> {
     if (success) {
       viewModel.moveToNextStep();
 
-      viewModel.updateState(viewModel.verificationState
-          .copyWith(isLoading: true, clearError: true));
-
       await Future.delayed(const Duration(milliseconds: 800));
 
       if (!mounted) return;
 
-      viewModel.updateState(viewModel.verificationState
-          .copyWith(isLoading: false, clearError: true));
       viewModel.moveToNextStep();
     } else {
-      final message = viewModel.verificationState.errorMessage ??
+      final message = viewModel.attendanceSubmissionResult.value.message ??
           'Unable to submit attendance. Please check your code and try again.';
       AppDialogs.showErrorDialog(
         context: context,
@@ -130,46 +123,41 @@ class _VerificationPageState extends State<VerificationPage> {
           body: Consumer<AttendanceVerificationViewModel>(
             builder: (context, verificationViewModel, _) {
               final locationStatus = verificationViewModel.locationStatus;
-              final verificationStep =
-                  verificationViewModel.verificationState.currentStep;
+              final verificationStep = verificationViewModel.currentStep;
 
               return Stack(
                 children: [
                   // Main content
                   StepContent(viewModel: verificationViewModel),
 
-                  // Step indicator for attendance mode
                   if (shouldShowStepIndicator())
                     StepIndicatorWidget(viewModel: verificationViewModel),
 
-                  // Attendance type indicator - driven by view model's state
-                  if (isAttendanceMode() &&
-                      verificationViewModel.verificationState.attendanceType !=
-                          null)
+                  if (isAttendanceMode())
                     AttendanceTypeIndicator(
-                      attendanceType: verificationViewModel
-                              .verificationState.attendanceType ??
-                          widget.attendanceType,
-                    ),
+                        attendanceType: verificationViewModel.attendanceType),
 
-                  // Exit button: prefer VM attendanceType, fallback to widget
-                  ExitButton(
-                    attendanceType: verificationViewModel
-                            .verificationState.attendanceType ??
-                        widget.attendanceType,
-                    viewModel: verificationViewModel,
-                    onExit: widget.onExit ?? handleExit,
-                  ),
+                  ExitButton(onExit: widget.onExit ?? handleExit),
 
-                  // Verification button
                   VerificationButton(
                     viewModel: verificationViewModel,
-                    onVerify: getOnVerify(
-                      locationStatus ??
-                          LocationVerificationStatus.successInRange,
-                      verificationStep,
-                    ),
+                    onVerify: viewModel.attendanceSubmissionResult.value.isError
+                        ? retrySubmissionCallback()
+                        : getOnVerify(
+                            verificationStep,
+                            locationStatus ??
+                                LocationVerificationStatus.successInRange,
+                          ),
                   ),
+
+                  if (verificationStep == VerificationStep.locationCheck &&
+                      (locationStatus == LocationVerificationStatus.failed))
+                    BackAndNextVerificationButton(
+                      viewModel: verificationViewModel,
+                      onTap: () {
+                        viewModel.proceedWithAutomaticFlow();
+                      },
+                    ),
                 ],
               );
             },
@@ -179,11 +167,12 @@ class _VerificationPageState extends State<VerificationPage> {
     );
   }
 
-  VoidCallback getOnVerify(LocationVerificationStatus locationStatus,
-      VerificationStep verificationStep) {
+  VoidCallback getOnVerify(VerificationStep verificationStep,
+      LocationVerificationStatus locationStatus) {
     if (locationStatus == LocationVerificationStatus.outOfRange) {
       return () => handleOutOfRange(locationStatus);
     }
+
     if (verificationStep == VerificationStep.onlineCodeEntry) {
       return () => handleOnlineCodeSubmission();
     }
@@ -192,5 +181,19 @@ class _VerificationPageState extends State<VerificationPage> {
     }
 
     return () {};
+  }
+
+  VoidCallback retrySubmissionCallback() {
+    return () {
+      viewModel.submitAttendance().then((success) {
+        if (success) {
+          viewModel.moveToNextStep();
+        } else {
+          final message = viewModel.attendanceSubmissionResult.value.message ??
+              'Unable to submit attendance. Please try again.';
+          AppDialogs.showErrorDialog(context: context, message: message);
+        }
+      });
+    };
   }
 }

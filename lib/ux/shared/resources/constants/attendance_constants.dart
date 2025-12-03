@@ -12,11 +12,13 @@ class AttendanceConstants {
 
   static const double houseLat = 5.5328015;
   static const double houseLong = -0.3264844;
-  static const double seaviewLat = 5.5355513;
-  static const double seaviewLong = -0.331639;
+  // static const double seaviewLat = 5.5355513;
+  // static const double seaviewLong = -0.331639;
+  static const double seaviewLat = 5.5375;
+  static const double seaviewLong = -0.3328;
   static const double kccLat = 5.6037;
   static const double kccLong = -0.1870;
-  static const double maxDistanceMeters = 50.0;
+  static const double maxDistanceMeters = 13.38;
 }
 
 class CampusLocation {
