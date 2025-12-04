@@ -103,7 +103,7 @@ class AttendanceApi extends ApiCore {
     );
   }
 
-  Future<ApiResponse<List<AttendanceHistory>>> getAttendanceHistory(
+  Future<ApiResponse<ListDataResponse<AttendanceHistory>>> getAttendanceHistory(
       GetAttendanceHistoryRequest request) async {
     final response = await requester.makeAppRequest(
       apiEndPoint: ApiEndPoint.createApiEndpoint(
@@ -115,20 +115,17 @@ class AttendanceApi extends ApiCore {
 
     if (response.status == ApiResponseStatus.Success) {
       try {
-        final data = response.response['data'];
-        if (data != null && data is List) {
-          final history = (data)
-              .map((json) =>
-                  AttendanceHistory.fromJson(json as Map<String, dynamic>))
-              .toList();
+        final listResponse = ListDataResponse<AttendanceHistory>.fromJson(
+          response.response,
+          (json) => AttendanceHistory.fromJson(json),
+        );
 
-          return ApiResponse(
-            response: history,
-            status: response.status,
-            statusCode: response.statusCode,
-            message: response.message,
-          );
-        }
+        return ApiResponse(
+          response: listResponse,
+          status: response.status,
+          statusCode: response.statusCode,
+          message: response.message,
+        );
       } catch (e) {
         return ApiResponse(
           status: ApiResponseStatus.Error,

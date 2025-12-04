@@ -1,124 +1,35 @@
 import 'dart:convert';
 import 'package:attendance_app/platform/data_source/api/api.dart';
+import 'package:attendance_app/platform/data_source/api/api_base_models.dart';
 import 'package:attendance_app/platform/data_source/api/attendance/models/attedance_response.dart';
 import 'package:attendance_app/platform/data_source/api/attendance/models/attendance_request.dart';
 import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:flutter/material.dart';
-
-class AttendanceMarkResult {
-  final bool success;
-  final String? message;
-  final String? errorMessage;
-
-  const AttendanceMarkResult({
-    required this.success,
-    this.message,
-    this.errorMessage,
-  });
-
-  factory AttendanceMarkResult.success([String? message]) {
-    return AttendanceMarkResult(
-      success: true,
-      message: message ?? 'Attendance marked successfully',
-    );
-  }
-
-  factory AttendanceMarkResult.failure(String errorMessage) {
-    return AttendanceMarkResult(
-      success: false,
-      errorMessage: errorMessage,
-    );
-  }
-}
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 class AttendanceViewModel extends ChangeNotifier {
   final Api _api = AppDI.getIt<Api>();
 
-  ValueNotifier<UIResult<List<AttendanceHistory>>> attendanceHistoryResult =
+  final Map<int, List<CourseAttendanceRecord>> _courseAttendanceCache = {};
+  ValueNotifier<UIResult<List<CourseAttendanceRecord>>> courseAttendanceResult =
+      ValueNotifier(UIResult.empty());
+  int? _lastCourseId;
+  String? _lastStudentIdForCourse;
+  final PagingController<int, AttendanceHistory>
+      attendanceHistoryPagingController = PagingController(firstPageKey: 1);
+  int _currentPageForAttendanceHistory = 1;
+  bool _isListenerAttachedForAttendanceHistory = false;
+  String? _lastStudentIdForHistory;
+  ValueNotifier<UIResult<String>> markAttendanceResult =
       ValueNotifier(UIResult.empty());
 
-  List<AttendanceHistory> _attendanceHistory = [];
-  String? _lastLoadedStudentId;
-
-  List<AttendanceHistory> get attendanceHistory =>
-      List.unmodifiable(_attendanceHistory);
-
-  List<CourseAttendanceRecord> _attendanceRecords = [];
-  bool _isMarkingAttendance = false;
-  bool _isLoading = false;
-  bool _isRefreshing = false;
-  String? _errorMessage;
-  String? _markAttendanceError;
-  int? _lastCourseId;
-  String? _lastStudentId;
-
-  List<CourseAttendanceRecord> get attendanceRecords => _attendanceRecords;
-  bool get isMarkingAttendance => _isMarkingAttendance;
-  bool get isLoading => _isLoading;
-  bool get isRefreshing => _isRefreshing;
-  String? get errorMessage => _errorMessage;
-  String? get markAttendanceError => _markAttendanceError;
-  bool get hasError => _errorMessage != null;
-  bool get hasMarkAttendanceError => _markAttendanceError != null;
-
-  // Attendance statistics
-  int get totalClasses => _attendanceRecords.length;
-  int get attendedClasses =>
-      _attendanceRecords.where((record) => record.isPresent).length;
-  int get missedClasses => totalClasses - attendedClasses;
-  double get attendancePercentage =>
-      totalClasses > 0 ? (attendedClasses / totalClasses) * 100 : 0.0;
-
-  Map<String, List<AttendanceHistory>> get groupedByDate {
-    final Map<String, List<AttendanceHistory>> grouped = {
-      'Today': [],
-      'Yesterday': [],
-      'Past Week': [],
-      'Older': [],
-    };
-
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-    final pastWeek = today.subtract(const Duration(days: 7));
-
-    for (final historyRecord in _attendanceHistory) {
-      final recordDate = historyRecord.attendanceDate;
-      if (recordDate == null) {
-        grouped['Older']?.add(historyRecord);
-        continue;
-      }
-
-      final recordDay = DateTime(
-        recordDate.year,
-        recordDate.month,
-        recordDate.day,
-      );
-
-      if (recordDay == today) {
-        grouped['Today']?.add(historyRecord);
-      } else if (recordDay == yesterday) {
-        grouped['Yesterday']?.add(historyRecord);
-      } else if (recordDay == pastWeek) {
-        grouped['Past Week']?.add(historyRecord);
-      } else {
-        grouped['Older']?.add(historyRecord);
-      }
-    }
-
-    grouped.removeWhere((key, value) => value.isEmpty);
-
-    return grouped;
-  }
-
-  Future<void> loadAttendanceRecords(int courseId, String studentId) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+  Future<void> fetchCourseAttendanceRecords(
+      int courseId, String studentId) async {
+    courseAttendanceResult.value = UIResult.loading();
 
     _lastCourseId = courseId;
-    _lastStudentId = studentId;
+    _lastStudentIdForCourse = studentId;
 
     try {
       final request = GetCourseAttendanceRequest(
@@ -131,34 +42,137 @@ class AttendanceViewModel extends ChangeNotifier {
 
       if (response.status == ApiResponseStatus.Success &&
           response.response != null) {
-        _attendanceRecords = response.response as List<CourseAttendanceRecord>;
-        _errorMessage = null;
-        debugPrint('Successfully loaded ${_attendanceRecords.length} records');
+        final records = response.response as List<CourseAttendanceRecord>;
+        _courseAttendanceCache[courseId] = records;
+
+        courseAttendanceResult.value =
+            UIResult.success(data: records, message: response.message);
+        notifyListeners();
       } else {
-        _errorMessage = response.message ?? 'Failed to load attendance records';
-        _attendanceRecords = [];
-        debugPrint('Failed to load: $_errorMessage');
+        _courseAttendanceCache[courseId] = [];
+        courseAttendanceResult.value = UIResult.error(
+          message: response.message ?? 'Failed to load attendance records',
+        );
       }
     } catch (e) {
-      _errorMessage = 'An unexpected error occurred: ${e.toString()}';
-      _attendanceRecords = [];
-      debugPrint('Exception in loadAttendanceRecords: $e');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      _courseAttendanceCache[courseId] = [];
+      courseAttendanceResult.value = UIResult.error(
+        message: 'An unexpected error occurred: ${e.toString()}',
+      );
     }
   }
 
-  Future<AttendanceMarkResult> markAttendanceAuthorized({
+  List<CourseAttendanceRecord> getCourseAttendanceRecords(int courseId) {
+    return _courseAttendanceCache[courseId] ?? [];
+  }
+
+  int totalClasses(int courseId) {
+    return getCourseAttendanceRecords(courseId).length;
+  }
+
+  int attendedClasses(int courseId) {
+    return getCourseAttendanceRecords(courseId)
+        .where((record) => record.isPresent)
+        .length;
+  }
+
+  int missedClasses(int courseId) {
+    return totalClasses(courseId) - attendedClasses(courseId);
+  }
+
+  int attendancePercentage(int courseId) {
+    final total = totalClasses(courseId);
+    final attended = attendedClasses(courseId);
+    return total > 0 ? ((attended / total) * 100).toInt() : 0;
+  }
+
+  Future<void> refreshCourseAttendance() async {
+    if (_lastCourseId == null || _lastStudentIdForCourse == null) return;
+    await fetchCourseAttendanceRecords(
+        _lastCourseId ?? 0, _lastStudentIdForCourse ?? '');
+  }
+
+  Future<ApiResponse<ListDataResponse<AttendanceHistory>>>
+      getPagedAttendanceHistory({
+    required String studentId,
+    required int pageIndex,
+    int pageSize = 10,
+  }) async {
+    final request = GetAttendanceHistoryRequest(
+      studentId: studentId,
+      pageIndex: pageIndex,
+      pageSize: pageSize,
+    );
+
+    return await _api.attendanceApi.getAttendanceHistory(request);
+  }
+
+  void initializeAttendanceHistoryPagination(String studentId) {
+    if (_isListenerAttachedForAttendanceHistory &&
+        _lastStudentIdForHistory == studentId) {
+      return;
+    }
+
+    _lastStudentIdForHistory = studentId;
+    _currentPageForAttendanceHistory = 1;
+
+    if (_isListenerAttachedForAttendanceHistory) {
+      attendanceHistoryPagingController
+          .removePageRequestListener(_fetchAttendanceHistoryPage);
+    }
+
+    attendanceHistoryPagingController.refresh();
+    attendanceHistoryPagingController
+        .addPageRequestListener(_fetchAttendanceHistoryPage);
+    _isListenerAttachedForAttendanceHistory = true;
+  }
+
+  Future<void> _fetchAttendanceHistoryPage(int pageKey) async {
+    if (_lastStudentIdForHistory == null) return;
+
+    try {
+      final response = await getPagedAttendanceHistory(
+        studentId: _lastStudentIdForHistory ?? '',
+        pageIndex: pageKey,
+        pageSize: 10,
+      );
+
+      if (response.status == ApiResponseStatus.Success) {
+        final listResponse = response.response;
+        final isLastPage = listResponse?.isLastPage() ?? true;
+        final newItems = listResponse?.data ?? [];
+
+        if (isLastPage) {
+          attendanceHistoryPagingController.appendLastPage(newItems);
+        } else {
+          _currentPageForAttendanceHistory = pageKey + 1;
+          attendanceHistoryPagingController.appendPage(
+            newItems,
+            _currentPageForAttendanceHistory,
+          );
+        }
+      } else {
+        attendanceHistoryPagingController.error =
+            response.message ?? 'Failed to load attendance history';
+      }
+    } catch (e) {
+      attendanceHistoryPagingController.error = e;
+    }
+  }
+
+  void refreshAttendanceHistory() async {
+    _currentPageForAttendanceHistory = 1;
+    attendanceHistoryPagingController.refresh();
+  }
+
+  Future<void> markAttendanceAuthorized({
     required String code,
     required String studentId,
     required String location,
     double? latitude,
     double? longitude,
   }) async {
-    _isMarkingAttendance = true;
-    _markAttendanceError = null;
-    notifyListeners();
+    markAttendanceResult.value = UIResult.loading();
 
     try {
       String codeToSend = _extractSessionId(code);
@@ -174,34 +188,32 @@ class AttendanceViewModel extends ChangeNotifier {
 
       final response = await _api.attendanceApi.markAttendance(request);
 
-      _isMarkingAttendance = false;
-      notifyListeners();
+      if (!markAttendanceResult.value.isLoading) return;
 
       if (response.status == ApiResponseStatus.Success) {
-        return AttendanceMarkResult.success(response.message);
+        markAttendanceResult.value = UIResult.success(
+          data: response.message ?? 'Attendance marked successfully',
+          message: response.message,
+        );
       } else {
-        _markAttendanceError = response.message ?? 'Failed to mark attendance';
-        return AttendanceMarkResult.failure(_markAttendanceError ?? '');
+        markAttendanceResult.value = UIResult.error(
+          message: response.message ?? 'Failed to mark attendance',
+        );
       }
     } catch (e) {
-      _markAttendanceError = 'An unexpected error occurred: ${e.toString()}';
-      _isMarkingAttendance = false;
-      notifyListeners();
-      return AttendanceMarkResult.failure(_markAttendanceError ?? '');
+      markAttendanceResult.value = UIResult.error(
+        message: 'An unexpected error occurred: ${e.toString()}',
+      );
     }
   }
 
-  Future<AttendanceMarkResult> markAttendanceUnauthorized({
+  Future<void> markAttendanceUnauthorized({
     required String code,
     required String studentId,
     required String? location,
     double? latitude,
     double? longitude,
   }) async {
-    _isMarkingAttendance = true;
-    _markAttendanceError = null;
-    notifyListeners();
-
     try {
       String codeToSend = _extractSessionId(code);
 
@@ -217,20 +229,22 @@ class AttendanceViewModel extends ChangeNotifier {
       debugPrint('markAttendanceUnauthorized - Request: ${request.toMap()}');
       final response = await _api.attendanceApi.markAttendance(request);
 
-      _isMarkingAttendance = false;
-      notifyListeners();
+      if (!markAttendanceResult.value.isLoading) return;
 
       if (response.status == ApiResponseStatus.Success) {
-        return AttendanceMarkResult.success(response.message);
+        markAttendanceResult.value = UIResult.success(
+          data: response.message ?? 'Attendance marked successfully',
+          message: response.message,
+        );
       } else {
-        _markAttendanceError = response.message ?? 'Failed to mark attendance';
-        return AttendanceMarkResult.failure(_markAttendanceError ?? '');
+        markAttendanceResult.value = UIResult.error(
+          message: response.message ?? 'Failed to mark attendance',
+        );
       }
     } catch (e) {
-      _markAttendanceError = 'An unexpected error occurred: ${e.toString()}';
-      _isMarkingAttendance = false;
-      notifyListeners();
-      return AttendanceMarkResult.failure(_markAttendanceError ?? '');
+      markAttendanceResult.value = UIResult.error(
+        message: 'An unexpected error occurred: ${e.toString()}',
+      );
     }
   }
 
@@ -265,132 +279,73 @@ class AttendanceViewModel extends ChangeNotifier {
     return code;
   }
 
-  Future<void> refresh() async {
-    if (_lastCourseId == null || _lastStudentId == null) return;
-    if (_isRefreshing) return;
+  Map<String, List<AttendanceHistory>> groupHistoryByDate(
+      List<AttendanceHistory> hsitory) {
+    final Map<String, List<AttendanceHistory>> grouped = {
+      'Today': [],
+      'Yesterday': [],
+      'Past Week': [],
+      'Older': [],
+    };
 
-    _isRefreshing = true;
-    notifyListeners();
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final sevenDaysAgo = today.subtract(const Duration(days: 7));
 
-    try {
-      final request = GetCourseAttendanceRequest(
-        courseId: _lastCourseId ?? 0,
-        studentId: _lastStudentId ?? '',
-      );
-
-      final response =
-          await _api.attendanceApi.getCourseAttendanceRecord(request);
-
-      if (response.status == ApiResponseStatus.Success &&
-          response.response != null) {
-        _attendanceRecords = response.response as List<CourseAttendanceRecord>;
-        _errorMessage = null;
-        debugPrint(
-            'Successfully refreshed ${_attendanceRecords.length} records');
-      } else {
-        _errorMessage =
-            response.message ?? 'Failed to refresh attendance records';
-        _attendanceRecords = [];
-        debugPrint('Failed to refresh: $_errorMessage');
+    for (final record in hsitory) {
+      final recordDate = record.attendanceDate;
+      if (recordDate == null) {
+        grouped['Older']?.add(record);
+        continue;
       }
-    } catch (e) {
-      _errorMessage = 'An unexpected error occurred: ${e.toString()}';
-      _attendanceRecords = [];
-      debugPrint('Exception in refresh: $e');
-    } finally {
-      _isRefreshing = false;
-      notifyListeners();
-    }
-  }
 
-  Future<UIResult<List<AttendanceHistory>>> loadAttendanceHistory(
-    String studentId, {
-    bool forceRefresh = false,
-  }) async {
-    // Check if we need to load
-    if (!forceRefresh && _lastLoadedStudentId == studentId) {
-      return attendanceHistoryResult.value;
-    }
-
-    if (studentId.trim().isEmpty) {
-      attendanceHistoryResult.value = UIResult.error(
-        message: 'No student id provided',
+      final recordDay = DateTime(
+        recordDate.year,
+        recordDate.month,
+        recordDate.day,
       );
-      _attendanceHistory = [];
-      notifyListeners();
-      return attendanceHistoryResult.value;
-    }
 
-    attendanceHistoryResult.value = UIResult.loading();
-
-    try {
-      final request = GetAttendanceHistoryRequest(studentId: studentId);
-      final response = await _api.attendanceApi.getAttendanceHistory(request);
-
-      if (response.status == ApiResponseStatus.Success &&
-          response.response != null) {
-        _attendanceHistory = response.response as List<AttendanceHistory>;
-        _lastLoadedStudentId = studentId;
-
-        attendanceHistoryResult.value = UIResult.success(
-          data: _attendanceHistory,
-          message: response.message,
-        );
-        notifyListeners();
-        return attendanceHistoryResult.value;
+      if (recordDay.isAtSameMomentAs(today)) {
+        grouped['Today']?.add(record);
+      } else if (recordDay.isAtSameMomentAs(yesterday)) {
+        grouped['Yesterday']?.add(record);
+      } else if (recordDay.isAfter(sevenDaysAgo) &&
+          recordDay.isBefore(yesterday)) {
+        grouped['Past Week']?.add(record);
       } else {
-        _attendanceHistory = [];
-        _lastLoadedStudentId = studentId;
-
-        attendanceHistoryResult.value = UIResult.error(
-          message: response.message ?? 'Failed to load attendance history',
-        );
-        notifyListeners();
-        return attendanceHistoryResult.value;
+        grouped['Older']?.add(record);
       }
-    } catch (e) {
-      _attendanceHistory = [];
-      _lastLoadedStudentId = studentId;
-
-      attendanceHistoryResult.value = UIResult.error(
-        message: 'An unexpected error occurred: ${e.toString()}',
-      );
-      notifyListeners();
-      return attendanceHistoryResult.value;
     }
-  }
 
-  Future<UIResult<List<AttendanceHistory>>> reloadAttendanceHistory(
-    String studentId,
-  ) async {
-    return loadAttendanceHistory(studentId, forceRefresh: true);
-  }
+    grouped.removeWhere((key, value) => value.isEmpty);
 
-  void clearError() {
-    _errorMessage = null;
-    notifyListeners();
-  }
-
-  void clearMarkAttendanceError() {
-    _markAttendanceError = null;
-    notifyListeners();
-  }
-
-  void clearAttendanceHistoryError() {
-    if (attendanceHistoryResult.value.state == UIState.error) {
-      attendanceHistoryResult.value = UIResult.empty();
-    }
+    return grouped;
   }
 
   void clear() {
-    _attendanceRecords = [];
-    _errorMessage = null;
-    _markAttendanceError = null;
-    _isLoading = false;
-    _isMarkingAttendance = false;
-    _attendanceHistory = [];
-    _lastLoadedStudentId = null;
-    attendanceHistoryResult.value = UIResult.empty();
+    _courseAttendanceCache.clear();
+    _lastCourseId = null;
+    _lastStudentIdForCourse = null;
+    courseAttendanceResult.value = UIResult.empty();
+
+    if (_isListenerAttachedForAttendanceHistory) {
+      attendanceHistoryPagingController
+          .removePageRequestListener(_fetchAttendanceHistoryPage);
+    }
+    _isListenerAttachedForAttendanceHistory = false;
+    _currentPageForAttendanceHistory = 1;
+    _lastStudentIdForHistory = null;
+
+    markAttendanceResult.value = UIResult.empty();
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    attendanceHistoryPagingController.dispose();
+    courseAttendanceResult.dispose();
+    markAttendanceResult.dispose();
+    super.dispose();
   }
 }

@@ -69,8 +69,8 @@ class _EntryPageState extends State<EntryPage> {
           try {
             await AppDI.getIt<CourseViewModel>()
                 .loadRegisteredCourses(studentId);
-            await AppDI.getIt<AttendanceViewModel>()
-                .loadAttendanceHistory(studentId);
+            AppDI.getIt<AttendanceViewModel>()
+                .initializeAttendanceHistoryPagination(studentId);
           } catch (e) {
             // ignore background errors; UI can surface retries
           }

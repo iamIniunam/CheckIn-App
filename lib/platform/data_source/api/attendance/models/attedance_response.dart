@@ -144,6 +144,32 @@ class MarkAttendanceResponse extends Serializable {
   }
 }
 
+class AttendanceMarkResult {
+  final bool success;
+  final String? message;
+  final String? errorMessage;
+
+  const AttendanceMarkResult({
+    required this.success,
+    this.message,
+    this.errorMessage,
+  });
+
+  factory AttendanceMarkResult.success([String? message]) {
+    return AttendanceMarkResult(
+      success: true,
+      message: message ?? 'Attendance marked successfully',
+    );
+  }
+
+  factory AttendanceMarkResult.failure(String errorMessage) {
+    return AttendanceMarkResult(
+      success: false,
+      errorMessage: errorMessage,
+    );
+  }
+}
+
 class AttendanceHistory extends Serializable {
   final int? classId;
   final String? className;

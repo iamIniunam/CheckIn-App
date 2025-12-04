@@ -59,11 +59,19 @@ class MarkAttendanceRequest {
 
 class GetAttendanceHistoryRequest {
   final String studentId;
+  final num? pageIndex;
+  final num? pageSize;
 
-  GetAttendanceHistoryRequest({required this.studentId});
+  GetAttendanceHistoryRequest({
+    required this.studentId,
+    this.pageIndex = 1,
+    this.pageSize = 10,
+  });
 
   Map<String, dynamic> toJson() => {
         'student_id': studentId,
+        'page': pageIndex,
+        'per_page': pageSize,
       };
 }
 

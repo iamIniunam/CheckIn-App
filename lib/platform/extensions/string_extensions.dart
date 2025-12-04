@@ -7,6 +7,10 @@ extension StringExtension on String {
     if (isEmpty) return this;
     return '${this[0].toUpperCase()}${substring(1).toLowerCase()}';
   }
+
+  int toInt() {
+    return int.tryParse(this) ?? 0;
+  }
 }
 
 extension NullableStringExtension on String? {

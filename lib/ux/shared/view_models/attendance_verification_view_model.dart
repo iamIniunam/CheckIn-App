@@ -51,7 +51,6 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
 
   String? get scannedQrCode => _qrScanViewModel.scannedCode;
   String? get enteredOnlineCode => _onlineCodeViewModel.enteredCode;
-  bool get isMarkingAttendance => _attendanceViewModel.isMarkingAttendance;
   String? get _studentId => _authViewModel.appUser?.studentProfile?.idNumber;
 
   /// Direct access to the location check result ValueNotifier
@@ -231,6 +230,7 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
       {List<String> campusIds = const [
         'seaview',
         'kcc',
+        'house',
       ]}) async {
     if (!requiresLocationCheck) return true;
 
@@ -389,7 +389,7 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
     final position = currentLocationResult?.position;
 
     if (locStatus == LocationVerificationStatus.successInRange) {
-      final result = await _attendanceViewModel.markAttendanceAuthorized(
+      await _attendanceViewModel.markAttendanceAuthorized(
         code: qrCode,
         studentId: _studentId ?? '',
         location: userLocation,
@@ -397,29 +397,33 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
         longitude: position?.longitude,
       );
 
-      if (result.success) {
+      final result = _attendanceViewModel.markAttendanceResult.value;
+
+      if (result.isSuccess) {
         attendanceSubmissionResult.value =
             UIResult.success(data: true, message: result.message);
         notifyListeners();
         return true;
       } else {
         attendanceSubmissionResult.value = UIResult.error(
-            message: result.errorMessage ?? 'Failed to mark attendance');
+            message: result.message ?? 'Failed to mark attendance');
         notifyListeners();
         return false;
       }
     } else if (locStatus == LocationVerificationStatus.outOfRange) {
       // Send unauthorized mark but don't advance UI
-      final result = await _attendanceViewModel.markAttendanceUnauthorized(
+      await _attendanceViewModel.markAttendanceUnauthorized(
         code: qrCode,
         studentId: _studentId ?? '',
         location: userLocation,
         latitude: position?.latitude,
         longitude: position?.longitude,
       );
-      if (!result.success) {
+      final result = _attendanceViewModel.markAttendanceResult.value;
+
+      if (!result.isSuccess) {
         attendanceSubmissionResult.value = UIResult.error(
-            message: result.errorMessage ?? 'Location verification failed');
+            message: result.message ?? 'Location verification failed');
       } else {
         attendanceSubmissionResult.value =
             UIResult.error(message: 'You are too far from campus');
@@ -445,19 +449,21 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
 
     const userLocation = 'Online';
 
-    final result = await _attendanceViewModel.markAttendanceAuthorized(
+    await _attendanceViewModel.markAttendanceAuthorized(
       code: onlineCode,
       studentId: _studentId ?? '',
       location: userLocation,
     );
 
-    if (result.success) {
+    final result = _attendanceViewModel.markAttendanceResult.value;
+
+    if (result.isSuccess) {
       attendanceSubmissionResult.value =
           UIResult.success(data: true, message: result.message);
       notifyListeners();
       return true;
     } else {
-      String message = result.errorMessage ?? 'Unable to submit attendance';
+      String message = result.message ?? 'Unable to submit attendance';
       final lower = message.toLowerCase();
       final onlineCodeValue = onlineCode.trim();
       final isPlainCode =

@@ -1,6 +1,7 @@
 import 'package:attendance_app/platform/data_source/api/course/models/course_response.dart';
 import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/ux/shared/components/page_state_indicator.dart';
+import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
@@ -12,21 +13,37 @@ import 'package:attendance_app/ux/views/course/components/attendance_summary_car
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class CourseDetailsPage extends StatelessWidget {
+class CourseDetailsPage extends StatefulWidget {
   const CourseDetailsPage({super.key, required this.course});
 
   final Course course;
 
   @override
-  Widget build(BuildContext context) {
-    final authViewModel = AppDI.getIt<AuthViewModel>();
-    final studentId = authViewModel.appUser?.studentProfile?.idNumber ?? '';
+  State<CourseDetailsPage> createState() => _CourseDetailsPageState();
+}
 
-    return ChangeNotifierProvider(
-      create: (_) => AttendanceViewModel()
-        ..loadAttendanceRecords(course.id ?? 0, studentId),
-      child: CourseDetailsBody(course: course),
-    );
+class _CourseDetailsPageState extends State<CourseDetailsPage> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authViewModel = AppDI.getIt<AuthViewModel>();
+      final studentId = authViewModel.appUser?.studentProfile?.idNumber ?? '';
+      final attendanceViewModel = context.read<AttendanceViewModel>();
+
+      if (studentId.isNotEmpty && widget.course.id != null) {
+        attendanceViewModel.fetchCourseAttendanceRecords(
+          widget.course.id!,
+          studentId,
+        );
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CourseDetailsBody(course: widget.course);
   }
 }
 
@@ -37,6 +54,7 @@ class CourseDetailsBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final courseViewModel = context.read<CourseViewModel>();
+    final attendanceViewModel = context.read<AttendanceViewModel>();
     final semester = course.semester;
 
     String? semesterSuffix() {
@@ -60,13 +78,17 @@ class CourseDetailsBody extends StatelessWidget {
     return AppPage(
       title: course.courseCode,
       hasBottomPadding: false,
-      body: Consumer<AttendanceViewModel>(
-        builder: (context, viewModel, _) {
+      body: ValueListenableBuilder(
+        valueListenable: attendanceViewModel.courseAttendanceResult,
+        builder: (context, result, _) {
+          final records =
+              attendanceViewModel.getCourseAttendanceRecords(course.id ?? 0);
+
           return RefreshIndicator(
             displacement: 20,
             onRefresh: () async {
-              Future.microtask(() => viewModel.refresh());
-              return Future.value();
+              await attendanceViewModel.refreshCourseAttendance();
+              // return Future.value();
             },
             child: Column(
               children: [
@@ -121,17 +143,17 @@ class CourseDetailsBody extends StatelessWidget {
                     ],
                   ),
                 ),
-                AttendanceSummaryCard(viewModel: viewModel),
+                AttendanceSummaryCard(
+                    courseId: course.id ?? 0, viewModel: attendanceViewModel),
                 const SizedBox(height: 12),
-                if (viewModel.isLoading || viewModel.isRefreshing)
+                if (result.state == UIState.loading)
                   const PageLoadingIndicator(useTopPadding: true)
-                else if (viewModel.hasError)
+                else if (result.state == UIState.error)
                   PageErrorIndicator(
-                    text: viewModel.errorMessage ??
-                        'Error loading attendance records',
+                    text: result.message ?? 'Error loading attendance records',
                     useTopPadding: true,
                   )
-                else if (viewModel.attendanceRecords.isEmpty)
+                else if (records.isEmpty)
                   const PageErrorIndicator(
                     text: 'No attendance records found',
                     useTopPadding: true,
@@ -156,7 +178,7 @@ class CourseDetailsBody extends StatelessWidget {
                           child: ListView(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             children: [
-                              ...viewModel.attendanceRecords
+                              ...records
                                   .map((record) =>
                                       SessionHistory(record: record))
                                   .toList(),

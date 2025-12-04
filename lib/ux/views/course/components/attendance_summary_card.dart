@@ -3,12 +3,22 @@ import 'package:attendance_app/ux/shared/view_models/attendance/attendance_view_
 import 'package:flutter/material.dart';
 
 class AttendanceSummaryCard extends StatelessWidget {
-  const AttendanceSummaryCard({super.key, required this.viewModel});
+  const AttendanceSummaryCard({
+    super.key,
+    required this.courseId,
+    required this.viewModel,
+  });
 
+  final int courseId;
   final AttendanceViewModel viewModel;
 
   @override
   Widget build(BuildContext context) {
+    final totalClasses = viewModel.totalClasses(courseId);
+    final attendedClasses = viewModel.attendedClasses(courseId);
+    final missedClasses = viewModel.missedClasses(courseId);
+    final attendancePercentage = viewModel.attendancePercentage(courseId);
+
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -23,7 +33,7 @@ class AttendanceSummaryCard extends StatelessWidget {
           Column(
             children: [
               Text(
-                '${viewModel.attendancePercentage.toStringAsFixed(1)}%',
+                '$attendancePercentage%',
                 style: const TextStyle(
                   fontSize: 48,
                   fontWeight: FontWeight.bold,
@@ -42,19 +52,19 @@ class AttendanceSummaryCard extends StatelessWidget {
           const SizedBox(width: 8),
           StatColumn(
             icon: Icons.class_rounded,
-            value: viewModel.totalClasses.toString(),
+            value: totalClasses.toString(),
             label: 'Total',
             color: AppColors.totalClassesColor,
           ),
           StatColumn(
             icon: Icons.check_circle_rounded,
-            value: viewModel.attendedClasses.toString(),
+            value: attendedClasses.toString(),
             label: 'Present',
             color: AppColors.presentColor,
           ),
           StatColumn(
             icon: Icons.cancel_rounded,
-            value: viewModel.missedClasses.toString(),
+            value: missedClasses.toString(),
             label: 'Absent',
             color: AppColors.absentColor,
           ),
