@@ -47,7 +47,7 @@ class RegisteredCourseListContent extends StatelessWidget {
                   isSearching ? Icons.search_off_rounded : Icons.school_rounded,
               message: isSearching
                   ? 'No courses found'
-                  : 'You have no registered courses',
+                  : 'You have no enrolled courses',
             ),
           );
         }

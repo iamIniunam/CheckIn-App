@@ -288,12 +288,12 @@ class CourseViewModel extends ChangeNotifier {
 
       if (response.status == ApiResponseStatus.Success) {
         // Reload registered courses
+        // await loadRegisteredCourses(studentId, forceRefresh: true);
 
         dropCourseResult.value = UIResult.success(
           data: true,
           message: 'Course dropped successfully',
         );
-        await loadRegisteredCourses(studentId, forceRefresh: true);
         return dropCourseResult.value;
       } else {
         dropCourseResult.value = UIResult.error(

@@ -44,10 +44,11 @@ class _DropCoursesPageState extends State<DropCoursesPage> {
     courseViewModel = context.read<CourseViewModel>();
   }
 
-  Future<void> loadRegisteredCourses() async {
+  Future<void> loadRegisteredCourses({bool? forceRefresh}) async {
     final studentId = _authViewModel.appUser?.studentProfile?.idNumber;
     if (studentId != null) {
-      await courseViewModel.loadRegisteredCourses(studentId);
+      await courseViewModel.loadRegisteredCourses(studentId,
+          forceRefresh: forceRefresh ?? false);
     }
   }
 
@@ -100,17 +101,37 @@ class _DropCoursesPageState extends State<DropCoursesPage> {
       return;
     }
 
+    // Build a readable list of selected course names for the confirmation
+    final selectedCourses = courseViewModel.registeredCourses
+        .where((c) => _selectedCourseIds.contains(c.id))
+        .toList();
+    final names = selectedCourses.map((c) => c.courseCode).toList();
+
+    String courseListPreview;
+    if (names.isEmpty) {
+      courseListPreview =
+          '${_selectedCourseIds.length} course${_selectedCourseIds.length == 1 ? '' : 's'}';
+    } else if (names.length == 1) {
+      courseListPreview = names.first;
+    } else if (names.length <= 3) {
+      courseListPreview = names.join(', ');
+    } else {
+      final remaining = names.length - 3;
+      courseListPreview =
+          '${names.sublist(0, 3).join(', ')} and $remaining more';
+    }
+
     final confirmed = await AppDialogs.showWarningDialog(
       context: context,
       title: 'Confirm Drop',
-      message:
-          'Are you sure you want to drop ${_selectedCourseIds.length} course${_selectedCourseIds.length == 1 ? '' : 's'}?',
+      message: 'Are you sure you want to drop $courseListPreview?',
       secondOption: 'Yes, drop',
       onSecondOptionTap: () {
         Navigation.back(context: context, result: true);
       },
     );
-    if (!confirmed) return;
+
+    if (confirmed != true) return;
 
     final studentId = _authViewModel.appUser?.studentProfile?.idNumber;
     if (studentId == null && mounted) {
@@ -121,6 +142,7 @@ class _DropCoursesPageState extends State<DropCoursesPage> {
       return;
     }
     await dropSelectedCourses(studentId ?? '');
+    loadRegisteredCourses(forceRefresh: true);
   }
 
   Future<void> dropSelectedCourses(String studentId) async {
@@ -166,6 +188,7 @@ class _DropCoursesPageState extends State<DropCoursesPage> {
         context: context,
         message:
             'Successfully dropped $successCount course${successCount == 1 ? '' : 's'}',
+        action: () => Navigation.back(context: context),
       );
     } else if (successCount > 0) {
       showPartialSuccessDialog(successCount, failedCourses);
@@ -225,7 +248,9 @@ class _DropCoursesPageState extends State<DropCoursesPage> {
     return AppPage(
       title: 'Drop Courses',
       body: RefreshIndicator(
-        onRefresh: loadRegisteredCourses,
+        onRefresh: () async {
+          loadRegisteredCourses(forceRefresh: true);
+        },
         child: Column(
           children: [
             Padding(
