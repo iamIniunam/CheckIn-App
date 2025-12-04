@@ -63,6 +63,7 @@ class CustomAppBar extends StatelessWidget {
     );
   }
 }
+// icon: Iconsax.setting_45,
 
 class AppBarActionWidget extends StatelessWidget {
   const AppBarActionWidget(

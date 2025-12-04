@@ -11,6 +11,7 @@ class CourseApi extends ApiCore {
   final _coursesForLevelBasePath = '/courses/getCoursesForLevelAndSemester';
   final _registerCoursesBasePath = '/student/registerCourse';
   final _registeredCoursesBasePath = '/student/getRegisteredCourses';
+  final _dropCourseBasePath = '/student/dropCourse';
 
   Future<ApiResponse<List<Course>>> getAllCourses() async {
     final response = await requester.makeAppRequest(
@@ -56,8 +57,7 @@ class CourseApi extends ApiCore {
   }
 
   Future<ApiResponse<List<Course>>> getCoursesForLevelAndSemester(
-    GetCoursesForLevelAndSemesterRequest request,
-  ) async {
+      GetCoursesForLevelAndSemesterRequest request) async {
     final response = await requester.makeAppRequest(
       apiEndPoint: ApiEndPoint.createApiEndpoint(
         path:
@@ -101,8 +101,7 @@ class CourseApi extends ApiCore {
   }
 
   Future<ApiResponse<RegisterCourseResponse>> registerCourse(
-    RegisterCourseRequest request,
-  ) async {
+      RegisterCourseRequest request) async {
     final response = await requester.makeAppRequest(
       apiEndPoint: ApiEndPoint.createApiEndpoint(
         path: _registerCoursesBasePath,
@@ -138,8 +137,7 @@ class CourseApi extends ApiCore {
   }
 
   Future<ApiResponse<List<Course>>> getRegisteredCourses(
-    GetRegisteredCoursesRequest request,
-  ) async {
+      GetRegisteredCoursesRequest request) async {
     final response = await requester.makeAppRequest(
       apiEndPoint: ApiEndPoint.createApiEndpoint(
         path: '$_registeredCoursesBasePath/${request.studentId}',
@@ -177,6 +175,40 @@ class CourseApi extends ApiCore {
       status: response.status,
       statusCode: response.statusCode,
       message: response.message ?? 'Failed to get registered courses',
+    );
+  }
+
+  Future<ApiResponse<DropCourseResponse>> dropCourse(
+      DropCourseRequest request) async {
+    final response = await requester.makeAppRequest(
+      apiEndPoint: ApiEndPoint.createApiEndpoint(
+        path: _dropCourseBasePath,
+        requestType: HttpVerb.POST,
+        body: request.toMap(),
+      ),
+    );
+
+    if (response.status == ApiResponseStatus.Success) {
+      try {
+        final dropResponse = DropCourseResponse.fromJson(response.response);
+
+        return ApiResponse(
+          response: dropResponse,
+          status: response.status,
+          statusCode: response.statusCode,
+          message: response.message ?? 'Course dropped successfully',
+        );
+      } catch (e) {
+        return ApiResponse(
+          status: ApiResponseStatus.Error,
+          message: 'Failed to parse drop course response',
+        );
+      }
+    }
+    return ApiResponse(
+      status: response.status,
+      statusCode: response.statusCode,
+      message: response.message ?? 'Failed to drop course',
     );
   }
 }

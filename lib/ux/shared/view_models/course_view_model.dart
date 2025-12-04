@@ -4,44 +4,27 @@ import 'package:attendance_app/platform/data_source/api/course/models/course_req
 import 'package:attendance_app/platform/data_source/api/course/models/course_response.dart';
 import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/platform/extensions/string_extensions.dart';
+import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:flutter/material.dart';
 
 class CourseViewModel extends ChangeNotifier {
   final Api _api = AppDI.getIt<Api>();
 
+  ValueNotifier<UIResult<List<Course>>> registeredCoursesResult =
+      ValueNotifier(UIResult.empty());
+  ValueNotifier<UIResult<RegisterCoursesProgress>> registerCoursesResult =
+      ValueNotifier(UIResult.empty());
+  ValueNotifier<UIResult<bool>> dropCourseResult =
+      ValueNotifier(UIResult.empty());
+
   List<Course> _registeredCourses = [];
   String? _lastLoadedStudentId;
-  bool _isLoadingRegisteredCourses = false;
-  bool _isRegisteringCourses = false;
-  String? _registeredCoursesError;
-  String? _registrationError;
-  bool _hasLoadedRegisteredCourses = false;
-
-  int _totalCoursesToRegister = 0;
-  int _coursesRegistered = 0;
-  List<String> _failedCourses = [];
-
   String _searchQuery = '';
 
   // Getters
   List<Course> get registeredCourses => List.unmodifiable(_registeredCourses);
-  bool get isLoadingRegisteredCourses => _isLoadingRegisteredCourses;
-  bool get isRegisteringCourses => _isRegisteringCourses;
-  String? get registeredCoursesError => _registeredCoursesError;
-  String? get registrationError => _registrationError;
-  bool get hasRegisteredCoursesError => _registeredCoursesError != null;
-  bool get hasRegistrationError => _registrationError != null;
-  bool get hasLoadedRegisteredCourses => _hasLoadedRegisteredCourses;
-
   String get searchQuery => _searchQuery;
-
-  int get totalCoursesToRegister => _totalCoursesToRegister;
-  int get coursesRegistered => _coursesRegistered;
-  double get registrationProgress => _totalCoursesToRegister > 0
-      ? _coursesRegistered / _totalCoursesToRegister
-      : 0.0;
-  List<String> get failedCourses => List.unmodifiable(_failedCourses);
 
   int get totalRegisteredCredits {
     return _registeredCourses.fold(
@@ -89,24 +72,32 @@ class CourseViewModel extends ChangeNotifier {
         .toSet();
   }
 
-  Future<void> loadRegisteredCourses(String studentId,
-      {bool forceRefresh = false}) async {
-    if (_hasLoadedRegisteredCourses &&
-        !forceRefresh &&
-        _lastLoadedStudentId == studentId) return;
+  void updateSearchQuery(String query) {
+    _searchQuery = query;
+    notifyListeners();
+  }
 
-    if (studentId.trim().isEmpty) {
-      _registeredCoursesError = 'No student id provided';
-      _registeredCourses = [];
-      _isLoadingRegisteredCourses = false;
-      _hasLoadedRegisteredCourses = false;
-      notifyListeners();
-      return;
+  void clearSearch() {
+    _searchQuery = '';
+    notifyListeners();
+  }
+
+  Future<UIResult<List<Course>>> loadRegisteredCourses(String studentId,
+      {bool forceRefresh = false}) async {
+    final hasLoaded = registeredCoursesResult.value.state == UIState.success;
+    if (hasLoaded && !forceRefresh && _lastLoadedStudentId == studentId) {
+      return registeredCoursesResult.value;
     }
 
-    _isLoadingRegisteredCourses = true;
-    _registeredCoursesError = null;
-    notifyListeners();
+    if (studentId.trim().isEmpty) {
+      registeredCoursesResult.value =
+          UIResult.error(message: 'No student id provided');
+      _registeredCourses = [];
+      notifyListeners();
+      return registeredCoursesResult.value;
+    }
+
+    registeredCoursesResult.value = UIResult.loading();
 
     try {
       final request = GetRegisteredCoursesRequest(studentId: studentId);
@@ -115,26 +106,37 @@ class CourseViewModel extends ChangeNotifier {
       if (response.status == ApiResponseStatus.Success &&
           response.response != null) {
         _registeredCourses = response.response as List<Course>;
-        _registeredCoursesError = null;
-        _hasLoadedRegisteredCourses = true;
         _lastLoadedStudentId = studentId;
+
+        registeredCoursesResult.value = UIResult.success(
+          data: _registeredCourses,
+          message: response.message,
+        );
+        notifyListeners();
+        return registeredCoursesResult.value;
       } else {
-        _registeredCoursesError =
-            response.message ?? 'Failed to load registered courses';
         _registeredCourses = [];
         _lastLoadedStudentId = studentId;
+
+        registeredCoursesResult.value = UIResult.error(
+          message: response.message ?? 'Failed to load registered courses',
+        );
+        notifyListeners();
+        return registeredCoursesResult.value;
       }
     } catch (e) {
-      _registeredCoursesError = 'An unexpected error occurred: ${e.toString()}';
       _registeredCourses = [];
       _lastLoadedStudentId = studentId;
-    } finally {
-      _isLoadingRegisteredCourses = false;
+
+      registeredCoursesResult.value = UIResult.error(
+        message: 'An unexpected error occurred: ${e.toString()}',
+      );
       notifyListeners();
+      return registeredCoursesResult.value;
     }
   }
 
-  Future<bool> registerCourses({
+  Future<UIResult<RegisterCoursesProgress>> registerCourses({
     required String studentId,
     required List<Course> courses,
     bool isAdding = false,
@@ -144,43 +146,45 @@ class CourseViewModel extends ChangeNotifier {
     if (duplicateDetails.isNotEmpty) {
       final details = duplicateDetails.join('\n');
       final count = duplicateDetails.length;
-      _registrationError =
+      final errorMessage =
           'Duplicate ${'course'.pluralize(count)} found:\n$details\n\nRemove ${count == 1 ? 'it' : 'them'} to continue.';
-      _isRegisteringCourses = false;
-      notifyListeners();
-      return false;
+
+      registerCoursesResult.value = UIResult.error(message: errorMessage);
+      return registerCoursesResult.value;
     }
 
     // Validate credit hours
     final creditValidation = _validateCredits(courses, isAdding);
     if (creditValidation != null) {
-      _registrationError = creditValidation;
-      _isRegisteringCourses = false;
-      notifyListeners();
-      return false;
+      registerCoursesResult.value = UIResult.error(message: creditValidation);
+      return registerCoursesResult.value;
     }
 
     // Validate course code conflicts
     final conflictValidation = _validateCourseCodeConflicts(courses);
     if (conflictValidation != null) {
-      _registrationError = conflictValidation;
-      _isRegisteringCourses = false;
-      notifyListeners();
-      return false;
+      registerCoursesResult.value = UIResult.error(message: conflictValidation);
+      return registerCoursesResult.value;
     }
 
-    _isRegisteringCourses = true;
-    _registrationError = null;
-    _totalCoursesToRegister = courses.length;
-    _coursesRegistered = 0;
-    _failedCourses = [];
-    notifyListeners();
+    // Start registration
+    final totalCourses = courses.length;
+    int coursesRegistered = 0;
+    List<String> failedCourses = [];
+
+    registerCoursesResult.value = UIResult.loading(
+      data: RegisterCoursesProgress(
+        total: totalCourses,
+        completed: coursesRegistered,
+        failed: failedCourses,
+      ),
+    );
 
     try {
       for (final course in courses) {
         if (course.id == null) {
           debugPrint('Skipping ${course.courseCode} - no ID');
-          _failedCourses.add('${course.courseCode} (No ID)');
+          failedCourses.add('${course.courseCode} (No ID)');
           continue;
         }
 
@@ -193,43 +197,140 @@ class CourseViewModel extends ChangeNotifier {
           final response = await _api.courseApi.registerCourse(request);
 
           if (response.status == ApiResponseStatus.Success) {
-            _coursesRegistered++;
+            coursesRegistered++;
             debugPrint('Successfully registered ${course.courseCode}');
           } else {
-            _failedCourses
+            failedCourses
                 .add('${course.courseCode} (Error: ${response.message})');
             debugPrint(
                 'Failed to register ${course.courseCode}: ${response.message}');
           }
         } catch (e) {
-          _failedCourses.add('${course.courseCode} (Error: $e)');
+          failedCourses.add('${course.courseCode} (Error: $e)');
           debugPrint('Error registering ${course.courseCode}: $e');
         }
-        notifyListeners();
+
+        // Update progress
+        registerCoursesResult.value = UIResult.loading(
+          data: RegisterCoursesProgress(
+            total: totalCourses,
+            completed: coursesRegistered,
+            failed: failedCourses,
+          ),
+        );
       }
 
-      final allSuccess = _failedCourses.isEmpty;
+      final allSuccess = failedCourses.isEmpty;
+
+      // Reload registered courses
+      await loadRegisteredCourses(studentId, forceRefresh: true);
 
       if (allSuccess) {
-        await loadRegisteredCourses(studentId, forceRefresh: true);
-        _isRegisteringCourses = false;
-        notifyListeners();
-        return true;
+        registerCoursesResult.value = UIResult.success(
+          data: RegisterCoursesProgress(
+            total: totalCourses,
+            completed: coursesRegistered,
+            failed: failedCourses,
+          ),
+          message: 'Successfully registered all courses',
+        );
+        return registerCoursesResult.value;
       } else {
-        _registrationError = _failedCourses.length == courses.length
+        final message = failedCourses.length == totalCourses
             ? 'Failed to register all courses'
-            : 'Successfully registered $_coursesRegistered of $_totalCoursesToRegister courses';
+            : 'Successfully registered $coursesRegistered of $totalCourses courses';
 
-        await loadRegisteredCourses(studentId, forceRefresh: true);
-        _isRegisteringCourses = false;
-        notifyListeners();
-        return _coursesRegistered > 0;
+        if (coursesRegistered > 0) {
+          registerCoursesResult.value = UIResult.success(
+            data: RegisterCoursesProgress(
+              total: totalCourses,
+              completed: coursesRegistered,
+              failed: failedCourses,
+            ),
+            message: message,
+          );
+        } else {
+          registerCoursesResult.value = UIResult.error(
+            message: message,
+            data: RegisterCoursesProgress(
+              total: totalCourses,
+              completed: coursesRegistered,
+              failed: failedCourses,
+            ),
+          );
+        }
+        return registerCoursesResult.value;
       }
     } catch (e) {
-      _registrationError = 'An unexpected error occurred: ${e.toString()}';
-      _isRegisteringCourses = false;
-      notifyListeners();
-      return false;
+      registerCoursesResult.value = UIResult.error(
+        message: 'An unexpected error occurred: ${e.toString()}',
+        data: RegisterCoursesProgress(
+          total: totalCourses,
+          completed: coursesRegistered,
+          failed: failedCourses,
+        ),
+      );
+      return registerCoursesResult.value;
+    }
+  }
+
+  Future<UIResult<bool>> dropCourse({
+    required String studentId,
+    required int courseId,
+  }) async {
+    dropCourseResult.value = UIResult.loading();
+
+    try {
+      final request =
+          DropCourseRequest(courseId: courseId, studentId: studentId);
+
+      final response = await _api.courseApi.dropCourse(request);
+
+      if (response.status == ApiResponseStatus.Success) {
+        // Reload registered courses
+
+        dropCourseResult.value = UIResult.success(
+          data: true,
+          message: 'Course dropped successfully',
+        );
+        await loadRegisteredCourses(studentId, forceRefresh: true);
+        return dropCourseResult.value;
+      } else {
+        dropCourseResult.value = UIResult.error(
+          message: response.message ?? 'Failed to drop course',
+        );
+        return dropCourseResult.value;
+      }
+
+      // if (response.status == ApiResponseStatus.Success) {
+      //   final isError = response.response?['error'] == true;
+
+      //   if (isError) {
+      //     dropCourseResult.value = UIResult.error(
+      //       message: response.response?.message ?? 'Failed to drop course',
+      //     );
+      //     return dropCourseResult.value;
+      //   }
+
+      //   // Reload registered courses
+      //   await loadRegisteredCourses(studentId, forceRefresh: true);
+
+      //   dropCourseResult.value = UIResult.success(
+      //     data: true,
+      //     message: response.message ?? 'Course dropped successfully',
+      //   );
+      //   return dropCourseResult.value;
+      // }
+
+      // dropCourseResult.value = UIResult.error(
+      //   message: response.message ?? 'Failed to drop course',
+      // );
+      // return dropCourseResult.value;
+    } catch (e) {
+      dropCourseResult.value = UIResult.error(
+        message: 'An unexpected error occurred: ${e.toString()}',
+      );
+      return dropCourseResult.value;
     }
   }
 
@@ -318,33 +419,46 @@ class CourseViewModel extends ChangeNotifier {
     return null;
   }
 
-  Future<void> reloadRegisteredCourses(String studentId) async {
+  Future<Future<UIResult<List<Course>>>> reloadRegisteredCourses(
+      String studentId) async {
     return loadRegisteredCourses(studentId, forceRefresh: true);
   }
 
   void clearRegisteredCoursesError() {
-    _registeredCoursesError = null;
-    notifyListeners();
+    if (registeredCoursesResult.value.state == UIState.error) {
+      registeredCoursesResult.value = UIResult.empty();
+    }
   }
 
   void clearRegistrationError() {
-    _registrationError = null;
-    notifyListeners();
+    if (registerCoursesResult.value.state == UIState.error) {
+      registerCoursesResult.value = UIResult.empty();
+    }
   }
 
   // Clear all in-memory course state (useful on logout)
   void clear() {
     _registeredCourses = [];
     _lastLoadedStudentId = null;
-    _isLoadingRegisteredCourses = false;
-    _isRegisteringCourses = false;
-    _registeredCoursesError = null;
-    _registrationError = null;
-    _hasLoadedRegisteredCourses = false;
-    _totalCoursesToRegister = 0;
-    _coursesRegistered = 0;
-    _failedCourses = [];
     _searchQuery = '';
+    registeredCoursesResult.value = UIResult.empty();
+    registerCoursesResult.value = UIResult.empty();
     notifyListeners();
   }
+}
+
+class RegisterCoursesProgress {
+  final int total;
+  final int completed;
+  final List<String> failed;
+
+  RegisterCoursesProgress({
+    required this.total,
+    required this.completed,
+    required this.failed,
+  });
+
+  double get progress => total > 0 ? completed / total : 0.0;
+  bool get hasFailures => failed.isNotEmpty;
+  bool get isComplete => completed + failed.length >= total;
 }

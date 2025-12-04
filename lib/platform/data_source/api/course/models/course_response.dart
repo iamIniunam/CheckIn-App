@@ -160,3 +160,46 @@ class RegisterCourseResponse extends Serializable {
     };
   }
 }
+
+
+class DropCourseResponse extends Serializable {
+  final bool success;
+  final String? message;
+  final Map<String, dynamic>? data;
+
+  DropCourseResponse({
+    required this.success,
+    this.message,
+    this.data,
+  });
+
+  factory DropCourseResponse.fromJson(Map<String, dynamic> json) {
+    final errorFlag = json['error'];
+    final message = json['message'] as String?;
+    final data = json['data'];
+
+    bool success = false;
+    if (data != null) {
+      success = true;
+    } else if (errorFlag != null && errorFlag == false) {
+      success = true;
+    } else if (message != null && message.toLowerCase().contains('success')) {
+      success = true;
+    }
+
+    return DropCourseResponse(
+      success: success,
+      message: message,
+      data: data is Map<String, dynamic> ? data : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'success': success,
+      'message': message,
+      'data': data,
+    };
+  }
+}

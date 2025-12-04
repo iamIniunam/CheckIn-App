@@ -3,6 +3,7 @@ import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
 import 'package:attendance_app/ux/shared/bottom_sheets/show_app_bottom_sheet.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
+import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
@@ -72,9 +73,6 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
   }
 
   Future<void> onConfirmPressed() async {
-    // final authViewModel = context.read<AuthViewModel>();
-    // final studentId = authViewModel.currentStudent?.idNumber;
-    // final studentId = 'ENG23A00028Y';
     final studentId = _authViewModel.appUser?.studentProfile?.idNumber;
 
     if (studentId == null) {
@@ -118,16 +116,13 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
     return true;
   }
 
-  Future<bool> registerCourses(String studentId) async {
-    try {
-      return await courseViewModel.registerCourses(
-        studentId: studentId,
-        courses: searchViewModel.selectedCourses.toList(),
-        isAdding: widget.isEdit,
-      );
-    } catch (e) {
-      return false;
-    }
+  Future<UIResult<RegisterCoursesProgress>> registerCourses(
+      String studentId) async {
+    return await courseViewModel.registerCourses(
+      studentId: studentId,
+      courses: searchViewModel.selectedCourses.toList(),
+      isAdding: widget.isEdit,
+    );
   }
 
   void dismissLoadingDialog() {
@@ -136,22 +131,22 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
     } catch (_) {}
   }
 
-  void handleRegistrationResult(bool success) {
-    if (success) {
+  void handleRegistrationResult(UIResult<RegisterCoursesProgress> result) {
+    if (result.state == UIState.success) {
       searchViewModel.clearSelectedCourses();
 
-      if (courseViewModel.failedCourses.isNotEmpty) {
-        showPartialSuccessDialog();
+      final progress = result.data;
+      if (progress != null && progress.hasFailures) {
+        showPartialSuccessDialog(progress);
       } else {
         widget.isEdit
             ? showSuccessDialog()
             : Navigation.navigateToHomePage(context: context);
       }
-    } else if (courseViewModel.hasRegistrationError) {
+    } else if (result.state == UIState.error) {
       AppDialogs.showErrorDialog(
         context: context,
-        message:
-            courseViewModel.registrationError ?? 'Failed to register courses',
+        message: result.message ?? 'Failed to register courses',
       );
     }
   }
@@ -166,7 +161,7 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
     );
   }
 
-  void showPartialSuccessDialog() {
+  void showPartialSuccessDialog(RegisterCoursesProgress progress) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -176,14 +171,14 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Registered ${courseViewModel.coursesRegistered} of ${courseViewModel.totalCoursesToRegister} courses',
+              'Registered ${progress.completed} of ${progress.total} courses',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            if (courseViewModel.failedCourses.isNotEmpty) ...[
+            if (progress.failed.isNotEmpty) ...[
               const Text('Failed courses:'),
               const SizedBox(height: 8),
-              ...courseViewModel.failedCourses.map(
+              ...progress.failed.map(
                 (course) => Padding(
                   padding: const EdgeInsets.only(left: 8, bottom: 4),
                   child: Text('• $course'),
@@ -277,8 +272,9 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
                   child: Column(
                     children: [
                       CourseListContent(
-                          viewModel: searchViewModel,
-                          courseViewModel: courseViewModel),
+                        viewModel: searchViewModel,
+                        courseViewModel: courseViewModel,
+                      ),
                       ConfirmationSection(
                         totalCreditHours: searchViewModel.totalCreditHours,
                         onConfirmPressed: onConfirmPressed,

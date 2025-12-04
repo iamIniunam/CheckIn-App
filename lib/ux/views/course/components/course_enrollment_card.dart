@@ -8,33 +8,25 @@ class CourseEnrollmentCard extends StatelessWidget {
   const CourseEnrollmentCard({
     super.key,
     required this.semesterCourse,
-    required this.selectedCourse,
+    this.isSelected = false,
     required this.onTap,
   });
 
   final Course semesterCourse;
-  final String? selectedCourse;
-  final ValueChanged<String> onTap;
+  final bool isSelected;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return AppMaterial(
       inkwellBorderRadius: BorderRadius.circular(10),
-      onTap: () {
-        // if (selectedSchool != null) {
-        onTap(selectedCourse ?? '');
-        // }
-      },
+      onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: (selectedCourse != null)
-              ? AppColors.primaryTeal
-              : AppColors.white,
+          color: (isSelected) ? AppColors.primaryTeal : AppColors.white,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: (selectedCourse != null)
-                ? AppColors.defaultColor
-                : AppColors.grey,
+            color: (isSelected) ? AppColors.defaultColor : AppColors.grey,
           ),
         ),
         child: PaddedColumn(
@@ -50,7 +42,6 @@ class CourseEnrollmentCard extends StatelessWidget {
             ),
             Text(
               semesterCourse.courseTitle ?? '',
-              // maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 color: AppColors.defaultColor,

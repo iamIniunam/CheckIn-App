@@ -3,6 +3,7 @@ import 'package:attendance_app/ux/shared/components/dashboard_metric_grid_view.d
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/components/page_state_indicator.dart';
 import 'package:attendance_app/ux/shared/components/shimmer_widget.dart';
+import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
@@ -19,82 +20,86 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<CourseViewModel>(
       builder: (context, courseViewModel, _) {
-        if (courseViewModel.isLoadingRegisteredCourses) {
-          const int crossAxisCount = 3;
-          const double outerLeft = 16.0;
-          const double outerRight = 16.0;
-          const double crossAxisSpacing = 7.0;
-          const double estimatedCardHeight = 80.0;
+        return ValueListenableBuilder(
+          valueListenable: courseViewModel.registeredCoursesResult,
+          builder: (context, result, _) {
+            if (result.state == UIState.loading) {
+              return loadingState(context);
+            }
+            if (result.state == UIState.error) {
+              return Column(
+                children: [
+                  const SectionHeader(
+                      period: AppStrings.semesterCourses, hasAction: false),
+                  PageErrorIndicator(
+                    text: result.message ?? 'Error loading courses',
+                    useTopPadding: true,
+                  ),
+                ],
+              );
+            }
 
-          final screenWidth = MediaQuery.of(context).size.width;
-          final availableWidth = screenWidth -
-              outerLeft -
-              outerRight -
-              (crossAxisCount - 1) * crossAxisSpacing;
-          final cardWidth = availableWidth / crossAxisCount;
-          final aspectRatio = cardWidth / estimatedCardHeight;
+            final courses = result.data ?? [];
 
-          final shimmerBoxes = List.generate(9, (index) {
-            return ShimmerBox(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
-              borderRadius: BorderRadius.circular(12),
-              aspectRatio: aspectRatio,
-            );
-          });
-
-          return Column(
-            children: [
-              const SectionHeader(
-                  period: AppStrings.semesterCourses, hasAction: false),
-              Shimmer(
-                child: DashboardMetricGridView(
+            if (courses.isEmpty) {
+              return const EnrolledCoursesEmptyState();
+            }
+            return Column(
+              children: [
+                const SectionHeader(
+                    period: AppStrings.semesterCourses, hasAction: false),
+                DashboardMetricGridView(
                   padding: const EdgeInsets.only(
-                      left: 16, top: 10, right: 16, bottom: 0),
-                  crossAxisCount: crossAxisCount,
-                  children: shimmerBoxes,
+                      left: 16, top: 10, right: 16, bottom: 16),
+                  crossAxisCount: 3,
+                  children: courses
+                      .map((course) => SingleCourseCard(course: course))
+                      .toList(),
                 ),
-              ),
-            ],
-          );
-        }
-
-        if (courseViewModel.hasRegisteredCoursesError) {
-          return Column(
-            children: [
-              const SectionHeader(
-                  period: AppStrings.semesterCourses, hasAction: false),
-              PageErrorIndicator(
-                text: courseViewModel.registeredCoursesError ??
-                    'Error loading courses',
-                useTopPadding: true,
-              ),
-            ],
-          );
-        }
-
-        final courseInfo = courseViewModel.registeredCourses;
-
-        if (courseInfo.isEmpty) {
-          return const EnrolledCoursesEmptyState();
-        }
-
-        return Column(
-          children: [
-            const SectionHeader(
-              period: AppStrings.semesterCourses,
-              hasAction: false,
-            ),
-            DashboardMetricGridView(
-              padding: const EdgeInsets.only(
-                  left: 16, top: 10, right: 16, bottom: 16),
-              crossAxisCount: 3,
-              children: courseInfo
-                  .map((course) => SingleCourseCard(course: course))
-                  .toList(),
-            ),
-          ],
+              ],
+            );
+          },
         );
       },
+    );
+  }
+
+  Widget loadingState(BuildContext context) {
+    const int crossAxisCount = 3;
+    const double outerLeft = 16.0;
+    const double outerRight = 16.0;
+    const double crossAxisSpacing = 7.0;
+    const double estimatedCardHeight = 80.0;
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final availableWidth = screenWidth -
+        outerLeft -
+        outerRight -
+        (crossAxisCount - 1) * crossAxisSpacing;
+    final cardWidth = availableWidth / crossAxisCount;
+    final aspectRatio = cardWidth / estimatedCardHeight;
+
+    final shimmerBoxes = List.generate(9, (index) {
+      return ShimmerBox(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
+        borderRadius: BorderRadius.circular(12),
+        aspectRatio: aspectRatio,
+      );
+    });
+
+    return Column(
+      children: [
+        const SectionHeader(
+            period: AppStrings.semesterCourses, hasAction: false),
+        Shimmer(
+          child: DashboardMetricGridView(
+            padding:
+                const EdgeInsets.only(left: 16, top: 10, right: 16, bottom: 0),
+            crossAxisCount: crossAxisCount,
+            children: shimmerBoxes,
+          ),
+        ),
+      ],
     );
   }
 }

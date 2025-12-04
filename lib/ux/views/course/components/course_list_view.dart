@@ -28,12 +28,12 @@ class CourseListView extends StatelessWidget {
       mainAxisSpacing: 10,
       physics: const AlwaysScrollableScrollPhysics(),
       children: courses.map((course) {
-        final selectedCourse = viewModel.getChosenSchoolForCourse(course);
+        final isSelected = viewModel.isCourseSelected(course);
         return CourseEnrollmentCard(
           semesterCourse: course,
-          selectedCourse: selectedCourse,
-          onTap: (school) {
-            viewModel.updateChosenSchool(course, school);
+          isSelected: isSelected,
+          onTap: () {
+            viewModel.toggleCourseSelection(course);
           },
         );
       }).toList(),

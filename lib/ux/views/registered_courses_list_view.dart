@@ -1,5 +1,5 @@
+import 'package:attendance_app/platform/data_source/api/course/models/course_response.dart';
 import 'package:attendance_app/ux/shared/components/dashboard_metric_grid_view.dart';
-import 'package:attendance_app/ux/shared/view_models/course_search_view_model.dart';
 import 'package:attendance_app/ux/views/course/components/course_enrollment_card.dart';
 import 'package:flutter/material.dart';
 
@@ -7,11 +7,15 @@ class RegisteredCourseListView extends StatelessWidget {
   const RegisteredCourseListView({
     super.key,
     required this.courses,
-    required this.viewModel,
+    required this.selectedCourseIds,
+    required this.onCourseToggle,
+    required this.isCourseSelected,
   });
 
-  final List courses;
-  final CourseSearchViewModel viewModel;
+  final List<Course> courses;
+  final Set<int> selectedCourseIds;
+  final Function(int) onCourseToggle;
+  final bool Function(int) isCourseSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -21,12 +25,15 @@ class RegisteredCourseListView extends StatelessWidget {
       mainAxisSpacing: 10,
       physics: const AlwaysScrollableScrollPhysics(),
       children: courses.map((course) {
-        final selectedCourse = viewModel.getChosenSchoolForCourse(course);
+        final isSelected =
+            course.id != null && isCourseSelected(course.id ?? 0);
         return CourseEnrollmentCard(
           semesterCourse: course,
-          selectedCourse: selectedCourse,
-          onTap: (school) {
-            viewModel.updateChosenSchool(course, school);
+          isSelected: isSelected,
+          onTap: () {
+            if (course.id != null) {
+              onCourseToggle(course.id ?? 0);
+            }
           },
         );
       }).toList(),

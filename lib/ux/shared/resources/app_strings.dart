@@ -41,6 +41,7 @@ class AppStrings {
   static const home = 'Home';
   static const attendance = 'Attendance';
   static const history = 'History';
+  static const settings = 'Settings';
 
   //Profile
   static const studentProfile = 'Student Profile';

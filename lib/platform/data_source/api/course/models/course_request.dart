@@ -62,3 +62,30 @@ class GetRegisteredCoursesRequest {
     return null;
   }
 }
+
+class DropCourseRequest {
+  final String studentId;
+  final int courseId;
+
+  DropCourseRequest({
+    required this.studentId,
+    required this.courseId,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'course_id': courseId,
+      'idnumber': studentId,
+    };
+  }
+
+  String? validate() {
+    if (courseId <= 0) {
+      return 'Invalid course ID';
+    }
+    if (studentId.trim().isEmpty) {
+      return 'Student ID is required';
+    }
+    return null;
+  }
+}

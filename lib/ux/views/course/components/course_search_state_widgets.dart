@@ -1,5 +1,6 @@
 import 'package:attendance_app/ux/shared/components/empty_state_widget.dart';
 import 'package:attendance_app/ux/shared/components/page_state_indicator.dart';
+import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/view_models/course_search_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
@@ -15,63 +16,75 @@ class CourseListContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (viewModel.isLoadingCourses) {
-      return const Expanded(child: PageLoadingIndicator());
-    }
+    return ValueListenableBuilder(
+        valueListenable: viewModel.allCoursesResult,
+        builder: (context, result, _) {
+          if (result.state == UIState.loading) {
+            return const Expanded(child: PageLoadingIndicator());
+          }
 
-    if (viewModel.hasLoadError) {
-      return Expanded(
-        child: PageErrorIndicator(
-          text: viewModel.loadError ?? 'Error loading courses',
-        ),
-      );
-    }
+          if (result.state == UIState.error) {
+            return Expanded(
+              child: PageErrorIndicator(
+                text: viewModel.loadError ?? 'Error loading courses',
+              ),
+            );
+          }
 
-    final courses = viewModel.displayedCourses;
+          final courses = viewModel.displayedCourses;
 
-    if (courses.isEmpty) {
-      return Expanded(
-        child: EmptyStateWidget(
-          icon: viewModel.isSearching
-              ? Icons.search_off_rounded
-              : Icons.school_rounded,
-          message: viewModel.isSearching
-              ? 'No courses found'
-              : 'No courses found for the selected filters:\n${viewModel.filterSummary}',
-        ),
-      );
-    }
+          if (courses.isEmpty) {
+            return Expanded(
+              child: EmptyStateWidget(
+                icon: viewModel.isSearching
+                    ? Icons.search_off_rounded
+                    : Icons.school_rounded,
+                message: viewModel.isSearching
+                    ? 'No courses found'
+                    : 'No courses found for the selected filters:\n${viewModel.filterSummary}',
+              ),
+            );
+          }
+          return Expanded(
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    if (viewModel.isSearching || viewModel.hasActiveFilter)
+                      CoursesFoundHeader(courseCount: courses.length),
+                    const SizedBox(width: 8),
+                    ValueListenableBuilder(
+                      valueListenable: courseViewModel.registeredCoursesResult,
+                      builder: (context, result, _) {
+                        // Only show when successfully loaded
+                        if (result.state != UIState.success) {
+                          return const SizedBox.shrink();
+                        }
 
-    return Expanded(
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (viewModel.isSearching || viewModel.hasActiveFilter)
-                CoursesFoundHeader(courseCount: courses.length),
-              const SizedBox(width: 8),
-              Visibility(
-                visible: courseViewModel.hasLoadedRegisteredCourses,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 16, top: 8, right: 16),
-                  child: Text(
-                    'Total credits registered: ${courseViewModel.totalRegisteredCredits.toString()}',
-                    style: const TextStyle(color: AppColors.defaultColor),
+                        return Padding(
+                          padding: const EdgeInsets.only(
+                              left: 16, top: 8, right: 16),
+                          child: Text(
+                            'Total credits registered: ${courseViewModel.totalRegisteredCredits}',
+                            style:
+                                const TextStyle(color: AppColors.defaultColor),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                Expanded(
+                  child: CourseListView(
+                    courses: courses,
+                    viewModel: viewModel,
                   ),
                 ),
-              ),
-            ],
-          ),
-          Expanded(
-            child: CourseListView(
-              courses: courses,
-              viewModel: viewModel,
+              ],
             ),
-          ),
-        ],
-      ),
-    );
+          );
+        });
   }
 }
 
