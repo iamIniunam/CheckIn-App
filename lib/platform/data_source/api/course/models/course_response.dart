@@ -6,7 +6,7 @@ import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 
 class Course extends Serializable {
   final int? id;
-  final String courseCode;
+  final String? courseCode;
   final String? courseTitle;
   final int? creditHours;
   final String? level;
@@ -71,8 +71,8 @@ class Course extends Serializable {
 
   Course({
     this.id,
-    required this.courseCode,
-    required this.courseTitle,
+    this.courseCode,
+    this.courseTitle,
     this.creditHours,
     this.level,
     this.semester,

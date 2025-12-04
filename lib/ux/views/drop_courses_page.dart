@@ -112,7 +112,7 @@ class _DropCoursesPageState extends State<DropCoursesPage> {
       courseListPreview =
           '${_selectedCourseIds.length} course${_selectedCourseIds.length == 1 ? '' : 's'}';
     } else if (names.length == 1) {
-      courseListPreview = names.first;
+      courseListPreview = names.first ?? '';
     } else if (names.length <= 3) {
       courseListPreview = names.join(', ');
     } else {
@@ -166,7 +166,7 @@ class _DropCoursesPageState extends State<DropCoursesPage> {
           final course = courseViewModel.registeredCourses.firstWhere(
               (c) => c.id == courseId,
               orElse: () => null as dynamic);
-          failedCourses.add(course.courseCode);
+          failedCourses.add(course.courseCode ?? '');
         }
       } catch (e) {
         failCount++;

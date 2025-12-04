@@ -12,7 +12,7 @@ class CourseSearchHelper {
   }
 
   static bool matchesCourse(Course course, String searchQuery) {
-    final codeMatch = course.courseCode.toLowerCase();
+    final codeMatch = (course.courseCode ?? '').toLowerCase();
     final nameMatch = (course.courseTitle ?? '').toLowerCase();
     final schoolMatch = (course.school ?? '').toLowerCase();
 

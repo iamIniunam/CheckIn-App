@@ -3,6 +3,7 @@ import 'package:attendance_app/platform/data_source/api/api.dart';
 import 'package:attendance_app/platform/data_source/api/attendance/models/attedance_response.dart';
 import 'package:attendance_app/platform/data_source/api/attendance/models/attendance_request.dart';
 import 'package:attendance_app/platform/di/dependency_injection.dart';
+import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:flutter/material.dart';
 
 class AttendanceMarkResult {
@@ -34,6 +35,15 @@ class AttendanceMarkResult {
 class AttendanceViewModel extends ChangeNotifier {
   final Api _api = AppDI.getIt<Api>();
 
+  ValueNotifier<UIResult<List<AttendanceHistory>>> attendanceHistoryResult =
+      ValueNotifier(UIResult.empty());
+
+  List<AttendanceHistory> _attendanceHistory = [];
+  String? _lastLoadedStudentId;
+
+  List<AttendanceHistory> get attendanceHistory =>
+      List.unmodifiable(_attendanceHistory);
+
   List<CourseAttendanceRecord> _attendanceRecords = [];
   bool _isMarkingAttendance = false;
   bool _isLoading = false;
@@ -59,6 +69,48 @@ class AttendanceViewModel extends ChangeNotifier {
   int get missedClasses => totalClasses - attendedClasses;
   double get attendancePercentage =>
       totalClasses > 0 ? (attendedClasses / totalClasses) * 100 : 0.0;
+
+  Map<String, List<AttendanceHistory>> get groupedByDate {
+    final Map<String, List<AttendanceHistory>> grouped = {
+      'Today': [],
+      'Yesterday': [],
+      'Past Week': [],
+      'Older': [],
+    };
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final pastWeek = today.subtract(const Duration(days: 7));
+
+    for (final historyRecord in _attendanceHistory) {
+      final recordDate = historyRecord.attendanceDate;
+      if (recordDate == null) {
+        grouped['Older']?.add(historyRecord);
+        continue;
+      }
+
+      final recordDay = DateTime(
+        recordDate.year,
+        recordDate.month,
+        recordDate.day,
+      );
+
+      if (recordDay == today) {
+        grouped['Today']?.add(historyRecord);
+      } else if (recordDay == yesterday) {
+        grouped['Yesterday']?.add(historyRecord);
+      } else if (recordDay == pastWeek) {
+        grouped['Past Week']?.add(historyRecord);
+      } else {
+        grouped['Older']?.add(historyRecord);
+      }
+    }
+
+    grouped.removeWhere((key, value) => value.isEmpty);
+
+    return grouped;
+  }
 
   Future<void> loadAttendanceRecords(int courseId, String studentId) async {
     _isLoading = true;
@@ -251,6 +303,69 @@ class AttendanceViewModel extends ChangeNotifier {
     }
   }
 
+  Future<UIResult<List<AttendanceHistory>>> loadAttendanceHistory(
+    String studentId, {
+    bool forceRefresh = false,
+  }) async {
+    // Check if we need to load
+    if (!forceRefresh && _lastLoadedStudentId == studentId) {
+      return attendanceHistoryResult.value;
+    }
+
+    if (studentId.trim().isEmpty) {
+      attendanceHistoryResult.value = UIResult.error(
+        message: 'No student id provided',
+      );
+      _attendanceHistory = [];
+      notifyListeners();
+      return attendanceHistoryResult.value;
+    }
+
+    attendanceHistoryResult.value = UIResult.loading();
+
+    try {
+      final request = GetAttendanceHistoryRequest(studentId: studentId);
+      final response = await _api.attendanceApi.getAttendanceHistory(request);
+
+      if (response.status == ApiResponseStatus.Success &&
+          response.response != null) {
+        _attendanceHistory = response.response as List<AttendanceHistory>;
+        _lastLoadedStudentId = studentId;
+
+        attendanceHistoryResult.value = UIResult.success(
+          data: _attendanceHistory,
+          message: response.message,
+        );
+        notifyListeners();
+        return attendanceHistoryResult.value;
+      } else {
+        _attendanceHistory = [];
+        _lastLoadedStudentId = studentId;
+
+        attendanceHistoryResult.value = UIResult.error(
+          message: response.message ?? 'Failed to load attendance history',
+        );
+        notifyListeners();
+        return attendanceHistoryResult.value;
+      }
+    } catch (e) {
+      _attendanceHistory = [];
+      _lastLoadedStudentId = studentId;
+
+      attendanceHistoryResult.value = UIResult.error(
+        message: 'An unexpected error occurred: ${e.toString()}',
+      );
+      notifyListeners();
+      return attendanceHistoryResult.value;
+    }
+  }
+
+  Future<UIResult<List<AttendanceHistory>>> reloadAttendanceHistory(
+    String studentId,
+  ) async {
+    return loadAttendanceHistory(studentId, forceRefresh: true);
+  }
+
   void clearError() {
     _errorMessage = null;
     notifyListeners();
@@ -261,12 +376,21 @@ class AttendanceViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clearAttendanceHistoryError() {
+    if (attendanceHistoryResult.value.state == UIState.error) {
+      attendanceHistoryResult.value = UIResult.empty();
+    }
+  }
+
   void clear() {
     _attendanceRecords = [];
     _errorMessage = null;
     _markAttendanceError = null;
     _isLoading = false;
     _isMarkingAttendance = false;
+    _attendanceHistory = [];
+    _lastLoadedStudentId = null;
+    attendanceHistoryResult.value = UIResult.empty();
     notifyListeners();
   }
 }

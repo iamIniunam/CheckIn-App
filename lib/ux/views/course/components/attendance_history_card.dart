@@ -1,27 +1,26 @@
-import 'package:attendance_app/platform/data_source/api/course/models/course_response.dart';
+import 'package:attendance_app/platform/data_source/api/attendance/models/attedance_response.dart';
 import 'package:attendance_app/ux/shared/components/app_material.dart';
 import 'package:attendance_app/platform/extensions/date_time_extensions.dart';
-import 'package:attendance_app/ux/navigation/navigation.dart';
+import 'package:attendance_app/platform/extensions/string_extensions.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
-import 'package:attendance_app/ux/views/course/course_details_page.dart';
 import 'package:flutter/material.dart';
 
-class CourseCard extends StatelessWidget {
-  const CourseCard({super.key, required this.course});
+class AttendanceHistoryCard extends StatelessWidget {
+  const AttendanceHistoryCard({super.key, required this.history});
 
-  final Course course;
+  final AttendanceHistory history;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
       child: AppMaterial(
-        onTap: () {
-          Navigation.navigateToScreen(
-            context: context,
-            screen: CourseDetailsPage(course: course),
-          );
-        },
+        // onTap: () {
+        //   Navigation.navigateToScreen(
+        //     context: context,
+        //     screen: CourseDetailsPage(course: course),
+        //   );
+        // },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
@@ -35,7 +34,10 @@ class CourseCard extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      DateTime.now().friendlyMonthShort().toUpperCase(),
+                      history.attendanceDate
+                              ?.friendlyMonthShort()
+                              .toUpperCase() ??
+                          '',
                       style: const TextStyle(
                           color: AppColors.defaultColor,
                           fontSize: 13,
@@ -43,7 +45,7 @@ class CourseCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      DateTime.now().day.toString(),
+                      history.attendanceDate?.day.toString() ?? '',
                       style: const TextStyle(
                         color: AppColors.defaultColor,
                         fontSize: 16,
@@ -59,25 +61,37 @@ class CourseCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      course.courseCode,
+                      history.code ?? '',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                          color: AppColors.defaultColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600),
+                        color: AppColors.defaultColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      course.courseTitle ?? '',
+                      '${history.className ?? ''} • ${history.mode ?? ''}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: AppColors.defaultColor,
                         fontSize: 13,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
+                    // const SizedBox(height: 4),
+                    // Text(
+                    //   history.name ?? '',
+                    //   maxLines: 1,
+                    //   overflow: TextOverflow.ellipsis,
+                    //   style: const TextStyle(
+                    //     color: AppColors.defaultColor,
+                    //     fontSize: 13,
+                    //     fontWeight: FontWeight.w500,
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
@@ -85,35 +99,32 @@ class CourseCard extends StatelessWidget {
               Column(
                 children: [
                   Text(
-                    DateTime.now().friendlyTime(),
+                    history.attendanceDate?.friendlyTime() ?? '',
                     style: const TextStyle(
                       color: AppColors.defaultColor,
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Visibility(
-                    visible: course.showStatus,
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                              color: AppColors.primaryTeal,
-                              borderRadius: BorderRadius.circular(8)),
-                          child: Text(
-                            course.status ?? '',
-                            style: TextStyle(
-                              color: course.getStatusColor,
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                            ),
+                  Column(
+                    children: [
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                            color: AppColors.primaryTeal,
+                            borderRadius: BorderRadius.circular(8)),
+                        child: Text(
+                          history.attendanceStatus?.toSentenceCase() ?? '',
+                          style: TextStyle(
+                            color: history.getStatusColor,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ],
               ),

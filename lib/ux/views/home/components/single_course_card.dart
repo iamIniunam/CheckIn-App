@@ -40,7 +40,7 @@ class SingleCourseCard extends StatelessWidget {
             ),
           ),
           Text(
-            course.courseCode,
+            course.courseCode ?? '',
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: AppColors.defaultColor,

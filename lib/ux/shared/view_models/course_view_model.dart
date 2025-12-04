@@ -348,25 +348,25 @@ class CourseViewModel extends ChangeNotifier {
       if (existingById != null) {
         duplicateDetails.add(
             '$courseCode is already registered${existingById.school != null && (existingById.school ?? '').isNotEmpty ? ' under ${existingById.school}' : ''}');
-        seenCourseCodes.add(courseCode);
+        seenCourseCodes.add(courseCode ?? '');
         continue;
       }
 
-      final existingSameSchool = findExistingSameSchool(courseCode, school);
+      final existingSameSchool = findExistingSameSchool(courseCode ?? '', school);
       if (existingSameSchool != null) {
         duplicateDetails
             .add('$courseCode${school.isNotEmpty ? ' — $school' : ''}');
-        seenCourseCodes.add(courseCode);
+        seenCourseCodes.add(courseCode ?? '');
         continue;
       }
 
-      final existingOtherSchools = existingOtherSchoolsForCode(courseCode);
+      final existingOtherSchools = existingOtherSchoolsForCode(courseCode ?? '');
       if (existingOtherSchools.isNotEmpty &&
           !(existingOtherSchools.length == 1 &&
               existingOtherSchools.contains(school))) {
         duplicateDetails.add(
             '$courseCode is already registered under ${existingOtherSchools.join(', ')}');
-        seenCourseCodes.add(courseCode);
+        seenCourseCodes.add(courseCode ?? '');
         continue;
       }
     }
@@ -400,7 +400,7 @@ class CourseViewModel extends ChangeNotifier {
     for (final course in courses) {
       final code = course.courseCode;
       final school = (course.school ?? '').trim();
-      codeToSchools.putIfAbsent(code, () => <String>{});
+      codeToSchools.putIfAbsent(code ?? '', () => <String>{});
       codeToSchools[code]?.add(school);
     }
 

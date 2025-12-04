@@ -28,7 +28,7 @@ class SessionHistory extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${record.attendanceClass.date.friendlyDate()} | ${record.attendanceClass.date.friendlyTime()}',
+                  '${record.attendanceClass.date?.friendlyDate()} | ${record.attendanceClass.date?.friendlyTime()}',
                   style: TextStyle(
                     color: Colors.grey.shade600,
                     fontWeight: FontWeight.w600,

@@ -4,18 +4,18 @@ import 'package:attendance_app/ux/shared/components/global_functions.dart';
 import 'package:flutter/material.dart';
 
 class AttendanceClass extends Serializable {
-  final int id;
-  final String name;
-  final int courseId;
-  final String mode;
-  final DateTime date;
+  final int? id;
+  final String? name;
+  final int? courseId;
+  final String? mode;
+  final DateTime? date;
 
   AttendanceClass({
-    required this.id,
-    required this.name,
-    required this.courseId,
-    required this.mode,
-    required this.date,
+    this.id,
+    this.name,
+    this.courseId,
+    this.mode,
+    this.date,
   });
 
   factory AttendanceClass.fromJson(Map<String, dynamic> json) {
@@ -35,23 +35,23 @@ class AttendanceClass extends Serializable {
       'name': name,
       'course_id': courseId,
       'mode': mode,
-      'date': date.toIso8601String(),
+      'date': date?.toIso8601String(),
     };
   }
 }
 
 class AttendanceRecord extends Serializable {
-  final int id;
-  final String studentId;
-  final int classId;
-  final DateTime date;
+  final int? id;
+  final String? studentId;
+  final int? classId;
+  final DateTime? date;
   final String? status;
 
   AttendanceRecord({
-    required this.id,
-    required this.studentId,
-    required this.classId,
-    required this.date,
+    this.id,
+    this.studentId,
+    this.classId,
+    this.date,
     this.status,
   });
 
@@ -71,7 +71,7 @@ class AttendanceRecord extends Serializable {
       'id': id,
       'student_id': studentId,
       'class_id': classId,
-      'date': date.toIso8601String(),
+      'date': date?.toIso8601String(),
       'status': status,
     };
   }
@@ -140,6 +140,76 @@ class MarkAttendanceResponse extends Serializable {
     return {
       'success': success,
       'message': message,
+    };
+  }
+}
+
+class AttendanceHistory extends Serializable {
+  final int? classId;
+  final String? className;
+  final DateTime? classDate;
+  final String? mode;
+  final int? courseId;
+  final String? code;
+  final String? name;
+
+  final int? attendanceId;
+  final String? status;
+  final String? location;
+  final DateTime? attendanceDate;
+  final String? attendanceStatus;
+
+  Color get getStatusColor => statusColor(attendanceStatus ?? '');
+
+  AttendanceHistory({
+    this.classId,
+    this.className,
+    this.classDate,
+    this.mode,
+    this.courseId,
+    this.code,
+    this.name,
+    this.attendanceId,
+    this.status,
+    this.location,
+    this.attendanceDate,
+    this.attendanceStatus,
+  });
+
+  factory AttendanceHistory.fromJson(Map<String, dynamic> json) {
+    return AttendanceHistory(
+      classId: json['class_id'],
+      className: json['class_name'],
+      classDate: DateTime.parse(json['class_date']),
+      mode: json['mode'],
+      courseId: json['course_id'],
+      code: json['code'],
+      name: json['name'],
+      attendanceId: json['attendance_id'],
+      status: json['status'],
+      location: json['location'],
+      attendanceDate: json['attendance_date'] != null
+          ? DateTime.parse(json['attendance_date'])
+          : null,
+      attendanceStatus: json['attendance'],
+    );
+  }
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'class_id': classId,
+      'class_name': className,
+      'class_date': classDate?.toIso8601String(),
+      'mode': mode,
+      'course_id': courseId,
+      'code': code,
+      'name': name,
+      'attendance_id': attendanceId,
+      'status': status,
+      'location': location,
+      'attendance_date': attendanceDate?.toIso8601String(),
+      'attendance': attendanceStatus,
     };
   }
 }

@@ -9,6 +9,7 @@ class AttendanceApi extends ApiCore {
 
   final _courseAttendanceBasePath = '/student/getCourseAttendanceRecord';
   final _markAttendanceBasePath = '/student/markAttendance';
+  final _getAttendanceHistoryBasePath = '/student/getAttendanceHistory';
 
   Future<ApiResponse<List<CourseAttendanceRecord>>> getCourseAttendanceRecord(
     GetCourseAttendanceRequest request,
@@ -99,6 +100,47 @@ class AttendanceApi extends ApiCore {
       status: response.status,
       statusCode: response.statusCode,
       message: response.message ?? 'Failed to mark attendance',
+    );
+  }
+
+  Future<ApiResponse<List<AttendanceHistory>>> getAttendanceHistory(
+      GetAttendanceHistoryRequest request) async {
+    final response = await requester.makeAppRequest(
+      apiEndPoint: ApiEndPoint.createApiEndpoint(
+        path: _getAttendanceHistoryBasePath,
+        requestType: HttpVerb.GET,
+        body: request.toJson(),
+      ),
+    );
+
+    if (response.status == ApiResponseStatus.Success) {
+      try {
+        final data = response.response['data'];
+        if (data != null && data is List) {
+          final history = (data)
+              .map((json) =>
+                  AttendanceHistory.fromJson(json as Map<String, dynamic>))
+              .toList();
+
+          return ApiResponse(
+            response: history,
+            status: response.status,
+            statusCode: response.statusCode,
+            message: response.message,
+          );
+        }
+      } catch (e) {
+        return ApiResponse(
+          status: ApiResponseStatus.Error,
+          message: 'Failed to parse attendance history',
+        );
+      }
+    }
+
+    return ApiResponse(
+      status: response.status,
+      statusCode: response.statusCode,
+      message: response.message ?? 'Failed to get attendance history',
     );
   }
 }

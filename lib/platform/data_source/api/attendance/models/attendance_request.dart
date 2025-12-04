@@ -57,6 +57,16 @@ class MarkAttendanceRequest {
   }
 }
 
+class GetAttendanceHistoryRequest {
+  final String studentId;
+
+  GetAttendanceHistoryRequest({required this.studentId});
+
+  Map<String, dynamic> toJson() => {
+        'student_id': studentId,
+      };
+}
+
 enum AttendanceStatus {
   authorized,
   unauthorized;

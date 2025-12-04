@@ -7,6 +7,7 @@ import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/resources/app_theme.dart';
+import 'package:attendance_app/ux/shared/view_models/attendance/attendance_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
 import 'package:attendance_app/ux/views/onboarding/login_page.dart';
@@ -68,6 +69,8 @@ class _EntryPageState extends State<EntryPage> {
           try {
             await AppDI.getIt<CourseViewModel>()
                 .loadRegisteredCourses(studentId);
+            await AppDI.getIt<AttendanceViewModel>()
+                .loadAttendanceHistory(studentId);
           } catch (e) {
             // ignore background errors; UI can surface retries
           }
