@@ -71,9 +71,7 @@ class _EntryPageState extends State<EntryPage> {
                 .loadRegisteredCourses(studentId);
             AppDI.getIt<AttendanceViewModel>()
                 .initializeAttendanceHistoryPagination(studentId);
-          } catch (e) {
-            // ignore background errors; UI can surface retries
-          }
+          } catch (_) {}
         });
       }
 
