@@ -76,6 +76,22 @@ class _DropCoursesPageState extends State<DropCoursesPage> {
     });
   }
 
+  void toggleSelectAllCourses() {
+    setState(() {
+      final allCourseIds = courseViewModel.displayedCourses
+          .map((course) => course.id)
+          .whereType<int>()
+          .toSet();
+      if (_selectedCourseIds.length == allCourseIds.length) {
+        _selectedCourseIds.clear();
+      } else {
+        _selectedCourseIds
+          ..clear()
+          ..addAll(allCourseIds);
+      }
+    });
+  }
+
   bool isCourseSelected(int courseId) {
     return _selectedCourseIds.contains(courseId);
   }
@@ -278,6 +294,7 @@ class _DropCoursesPageState extends State<DropCoursesPage> {
                         selectedCourseIds: _selectedCourseIds,
                         onCourseToggle: toggleCourseSelection,
                         isCourseSelected: isCourseSelected,
+                        onSelectAllToggle: toggleSelectAllCourses,
                       ),
                       ConfirmationSection(
                         isSelected: _selectedCourseIds.isNotEmpty,
