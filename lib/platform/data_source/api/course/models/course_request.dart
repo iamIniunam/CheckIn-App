@@ -75,7 +75,7 @@ class DropCourseRequest {
   Map<String, dynamic> toMap() {
     return {
       'course_id': courseId,
-      'idnumber': studentId,
+      'student_id': studentId,
     };
   }
 

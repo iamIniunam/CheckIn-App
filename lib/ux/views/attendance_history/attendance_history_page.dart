@@ -141,7 +141,7 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
                   message: 'No attendance history found',
                 ),
                 noMoreItemsIndicatorBuilder: (context) =>
-                    const SizedBox(height: 16),
+                    const SizedBox.shrink(),
                 // Padding(
                 //   padding: const EdgeInsets.all(16.0),
                 //   child: Column(
