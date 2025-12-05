@@ -50,8 +50,7 @@ class _HomePageState extends State<HomePage> {
     return RefreshIndicator(
       displacement: 60,
       onRefresh: refreshData,
-      child:
-          Column(
+      child: Column(
         children: [
           const InformationBanner(text: AppStrings.qrCodeExpirationWarning),
           Expanded(
