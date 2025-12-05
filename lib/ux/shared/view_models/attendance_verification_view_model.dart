@@ -213,8 +213,48 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void onQrCodeScanned(String code) {
-    _qrScanViewModel.setScannedCode(code);
+  QrScanResult validateAndSetQrCode(String code) {
+    final result = _qrScanViewModel.validateAndSetCode(code);
+
+    if (result.isValid) {
+      notifyListeners();
+    }
+
+    return result;
+  }
+
+  bool isValidQrCode(String code) {
+    return _qrScanViewModel.isValidCode(code);
+  }
+
+  String? getQrValidationError(String code) {
+    return _qrScanViewModel.getValidationError(code);
+  }
+
+  // void onQrCodeScanned(String code) {
+  //   final result = _qrScanViewModel.validateAndSetCode(code);
+
+  //   if (result.isValid) {
+  //     notifyListeners();
+  //   }
+  // }
+
+  OnlineCodeResult validateAndSetOnlineCode(String code) {
+    final result = _onlineCodeViewModel.validateAndSetCode(code);
+
+    if (result.isValid) {
+      notifyListeners();
+    }
+
+    return result;
+  }
+
+  bool isValidOnlineCode(String code) {
+    return _onlineCodeViewModel.isValidCode(code);
+  }
+
+  String? getOnlineCodeValidationError(String code) {
+    return _onlineCodeViewModel.getValidationError(code);
   }
 
   void onOnlineCodeEntered(String code) {
@@ -463,22 +503,8 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
       notifyListeners();
       return true;
     } else {
-      String message = result.message ?? 'Unable to submit attendance';
-      final lower = message.toLowerCase();
-      final onlineCodeValue = onlineCode.trim();
-      final isPlainCode =
-          RegExp(r'^[A-Za-z0-9\-]{3,20}$').hasMatch(onlineCodeValue);
-
-      if (lower.contains('unable to find class') && isPlainCode) {
-        message = '$message\nPlease check the code and try again.';
-      }
-      if (lower.contains('student is not registered to this course') &&
-          isPlainCode) {
-        message =
-            'You are not registered for the course linked to this attendance code. Check your enrollment and try again.';
-      }
-
-      attendanceSubmissionResult.value = UIResult.error(message: message);
+      attendanceSubmissionResult.value = UIResult.error(
+          message: result.message ?? 'Failed to submit attendance');
       notifyListeners();
       return false;
     }

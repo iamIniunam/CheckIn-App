@@ -34,6 +34,7 @@ class _DropCoursesPageState extends State<DropCoursesPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      courseViewModel.clearSearch();
       loadRegisteredCourses();
     });
   }

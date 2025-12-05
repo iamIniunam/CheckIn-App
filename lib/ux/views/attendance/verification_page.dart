@@ -70,10 +70,13 @@ class _VerificationPageState extends State<VerificationPage> {
       return;
     }
 
-    if (entered.length < 6) {
+    final validationResult = viewModel.validateAndSetOnlineCode(entered);
+
+    if (!validationResult.isValid) {
       AppDialogs.showErrorDialog(
-          context: context,
-          message: 'The attendance code must be 6 characters long.');
+        context: context,
+        message: validationResult.errorMessage ?? 'Invalid attendance code',
+      );
       return;
     }
 
@@ -184,16 +187,8 @@ class _VerificationPageState extends State<VerificationPage> {
   }
 
   VoidCallback retrySubmissionCallback() {
-    return () {
-      viewModel.submitAttendance().then((success) {
-        if (success) {
-          viewModel.moveToNextStep();
-        } else {
-          final message = viewModel.attendanceSubmissionResult.value.message ??
-              'Unable to submit attendance. Please try again.';
-          AppDialogs.showErrorDialog(context: context, message: message);
-        }
-      });
+    return () async {
+      handleOnlineCodeSubmission();
     };
   }
 }

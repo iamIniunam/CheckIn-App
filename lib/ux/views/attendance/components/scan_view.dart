@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
+import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance_verification_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +55,24 @@ class _ScanViewState extends State<ScanView> {
     final viewModel =
         Provider.of<AttendanceVerificationViewModel>(context, listen: false);
 
-    viewModel.onQrCodeScanned(code);
+    final validationResult = viewModel.validateAndSetQrCode(code);
+
+    if (!validationResult.isValid) {
+      if (!mounted) return;
+
+      setState(() {
+        isProcessing = false;
+      });
+
+      await AppDialogs.showErrorDialog(
+        context: context,
+        message: validationResult.errorMessage ?? 'Invalid QR code',
+      );
+
+      controller.start();
+      return;
+    }
+
     viewModel.moveToNextStep();
 
     final flowResult = await viewModel.proceedWithAutomaticFlow();
@@ -70,7 +88,21 @@ class _ScanViewState extends State<ScanView> {
     } else {
       debugPrint(
           'ScanView: proceedWithAutomaticFlow returned failed — staying on scanner');
+      await showAttendanceErrorDialog(viewModel);
+      controller.start();
     }
+  }
+
+  Future<void> showAttendanceErrorDialog(
+      AttendanceVerificationViewModel viewModel) async {
+    final errorMessage = viewModel.attendanceSubmissionResult.value.message ??
+        viewModel.locationCheckResult.value.message ??
+        'Unable to process attendance. Please try again.';
+
+    await AppDialogs.showErrorDialog(
+      context: context,
+      message: errorMessage,
+    );
   }
 
   @override

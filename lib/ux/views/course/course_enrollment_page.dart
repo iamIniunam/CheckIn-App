@@ -50,6 +50,9 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
     searchViewModel = context.read<CourseSearchViewModel>();
     courseViewModel = context.read<CourseViewModel>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      searchViewModel.clearSearch();
+      searchViewModel.clearFilter();
+      searchViewModel.clearSelectedCourses();
       searchViewModel.loadAllCourses();
     });
   }
@@ -91,8 +94,7 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
     final success = await registerCourses(studentId);
 
     if (!mounted) return;
-
-    dismissLoadingDialog();
+    Navigation.back(context: context);
     handleRegistrationResult(success);
   }
 
@@ -125,16 +127,8 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
     );
   }
 
-  void dismissLoadingDialog() {
-    try {
-      Navigator.of(context, rootNavigator: true).pop();
-    } catch (_) {}
-  }
-
   void handleRegistrationResult(UIResult<RegisterCoursesProgress> result) {
     if (result.state == UIState.success) {
-      searchViewModel.clearSelectedCourses();
-
       final progress = result.data;
       if (progress != null && progress.hasFailures) {
         showPartialSuccessDialog(progress);

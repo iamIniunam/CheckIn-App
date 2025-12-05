@@ -1,15 +1,16 @@
-import 'dart:convert';
 import 'package:attendance_app/platform/data_source/api/api.dart';
 import 'package:attendance_app/platform/data_source/api/api_base_models.dart';
 import 'package:attendance_app/platform/data_source/api/attendance/models/attedance_response.dart';
 import 'package:attendance_app/platform/data_source/api/attendance/models/attendance_request.dart';
 import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
+import 'package:attendance_app/ux/shared/view_models/attendance/qr_scan_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 class AttendanceViewModel extends ChangeNotifier {
   final Api _api = AppDI.getIt<Api>();
+  final QrScanViewModel _qrScanViewModel = AppDI.getIt<QrScanViewModel>();
 
   final Map<int, List<CourseAttendanceRecord>> _courseAttendanceCache = {};
   ValueNotifier<UIResult<List<CourseAttendanceRecord>>> courseAttendanceResult =
@@ -249,34 +250,8 @@ class AttendanceViewModel extends ChangeNotifier {
   }
 
   String _extractSessionId(String code) {
-    try {
-      dynamic parsed;
-      try {
-        parsed = jsonDecode(code);
-      } catch (_) {
-        try {
-          final decoded = Uri.decodeFull(code);
-          parsed = jsonDecode(decoded);
-        } catch (_) {
-          parsed = null;
-        }
-      }
-
-      if (parsed is Map<String, dynamic>) {
-        if (parsed.containsKey('sessionId')) {
-          return parsed['sessionId'].toString();
-        } else if (parsed.containsKey('session_id')) {
-          return parsed['session_id'].toString();
-        } else if (parsed.containsKey('id')) {
-          return parsed['id'].toString();
-        } else {
-          return jsonEncode(parsed);
-        }
-      }
-    } catch (_) {
-      // Ignore parse errors
-    }
-    return code;
+    final uuid = _qrScanViewModel.extractUuid(code);
+    return uuid ?? code;
   }
 
   Map<String, List<AttendanceHistory>> groupHistoryByDate(

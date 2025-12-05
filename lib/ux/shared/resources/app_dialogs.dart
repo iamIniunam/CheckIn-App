@@ -92,12 +92,12 @@ class AppDialogs {
     );
   }
 
-  static void showErrorDialog(
+  static Future showErrorDialog(
       {required BuildContext context,
       required String message,
       String? title,
       VoidCallback? action}) {
-    showAlertDialog(
+    return showAlertDialog(
         context: context,
         title: title ?? AppStrings.alert,
         message: message,

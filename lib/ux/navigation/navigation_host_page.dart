@@ -21,7 +21,8 @@ class NavigationHostPage extends StatefulWidget {
   State<NavigationHostPage> createState() => _NavigationHostPageState();
 }
 
-class _NavigationHostPageState extends State<NavigationHostPage> {
+class _NavigationHostPageState extends State<NavigationHostPage>
+    with WidgetsBindingObserver {
   final AuthViewModel _authViewModel = AppDI.getIt<AuthViewModel>();
   int currentPageIndex = 0;
 
@@ -38,6 +39,20 @@ class _NavigationHostPageState extends State<NavigationHostPage> {
     ];
   }
 
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Rebuild when app comes to foreground
+    if (state == AppLifecycleState.resumed) {
+      setState(() {});
+    }
+  }
+
   final List<Map<String, dynamic>> bottomNavItems = [
     {'icon': Iconsax.home5, 'text': AppStrings.home},
     {'icon': Iconsax.profile_tick5, 'text': AppStrings.attendance},
@@ -46,14 +61,17 @@ class _NavigationHostPageState extends State<NavigationHostPage> {
 
   @override
   Widget build(BuildContext context) {
+    final pageTitle = getPageTitle(currentPageIndex);
+    final pageSubtitle = getPageSubtitle(currentPageIndex);
+
     return AppPage(
       hideAppBar: true,
       hasBottomPadding: currentPageIndex != 2,
       body: Column(
         children: [
           CustomAppBar(
-            title: getPageTitle(currentPageIndex),
-            subtitle: getPageSubtitle(currentPageIndex),
+            title: pageTitle,
+            subtitle: pageSubtitle,
           ),
           Expanded(
             child: pages[currentPageIndex],
