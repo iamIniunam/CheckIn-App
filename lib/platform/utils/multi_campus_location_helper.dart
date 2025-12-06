@@ -1,16 +1,14 @@
+import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance/attendance_location_view_model.dart';
 import 'package:flutter/material.dart';
 
 class MultiCampusLocationHelper {
-  final AttendanceLocationViewModel locationViewModel;
+  final AttendanceLocationViewModel _locationViewModel =
+      AppDI.getIt<AttendanceLocationViewModel>();
 
-  MultiCampusLocationHelper({required this.locationViewModel});
-
-  Future<MultiCampusResult> checkMultipleCampuses({
-    required List<String> campusIds,
-    bool showSettingsOption = true,
-  }) async {
+  Future<MultiCampusResult> checkMultipleCampuses(
+      {required List<String> campusIds, bool showSettingsOption = true}) async {
     if (campusIds.isEmpty) {
       return MultiCampusResult(
         isWithinRange: false,
@@ -29,10 +27,10 @@ class MultiCampusLocationHelper {
       debugPrint(
           'MultiCampusHelper: checking campus [$i]: $campusId (showSettings=${showSettingsOption && i == 0})');
 
-      await locationViewModel.checkAttendance(
+      await _locationViewModel.checkAttendance(
           campusId: campusId, showSettingsOption: showSettingsOption && i == 0);
 
-      final result = locationViewModel.checkAttendanceResult.value;
+      final result = _locationViewModel.checkAttendanceResult.value;
       debugPrint(
           'MultiCampusHelper: result for $campusId -> isSuccess=${result.isSuccess}, isError=${result.isError}, message=${result.message}');
 
@@ -68,13 +66,15 @@ class MultiCampusLocationHelper {
           // Non-fatal: out-of-range check with available distance info.
           debugPrint(
               'MultiCampusHelper: out-of-range for $campusId -> ${result.message} (continuing)');
-          allResults.add(CampusCheckResult(
-            campusId: campusId,
-            distance: data.distance,
-            canAttend: data.canAttend,
-            method: data.method,
-            formattedDistance: data.formattedDistance,
-          ));
+          allResults.add(
+            CampusCheckResult(
+              campusId: campusId,
+              distance: data.distance,
+              canAttend: data.canAttend,
+              method: data.method,
+              formattedDistance: data.formattedDistance,
+            ),
+          );
           // continue to next campus
         } else {
           // Fatal error (no data) - abort and return the error

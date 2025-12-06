@@ -59,10 +59,7 @@ class AppDI {
         () => AttendanceValidator());
     getIt.registerLazySingleton<LocalAuthService>(() => LocalAuthService());
     getIt.registerLazySingleton<MultiCampusLocationHelper>(
-      () => MultiCampusLocationHelper(
-        locationViewModel: getIt<AttendanceLocationViewModel>(),
-      ),
-    );
+        () => MultiCampusLocationHelper());
   }
 }
 
