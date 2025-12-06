@@ -1,18 +1,21 @@
-class SignUpRequest {
-  final String idNumber;
-  final String firstName;
-  final String lastName;
-  final String program;
-  final String password;
+import 'package:attendance_app/platform/data_source/api/api_base_models.dart';
+
+class SignUpRequest extends Serializable {
+  final String? idNumber;
+  final String? firstName;
+  final String? lastName;
+  final String? program;
+  final String? password;
 
   SignUpRequest({
-    required this.idNumber,
-    required this.firstName,
-    required this.lastName,
-    required this.program,
-    required this.password,
+    this.idNumber,
+    this.firstName,
+    this.lastName,
+    this.program,
+    this.password,
   });
 
+  @override
   Map<String, dynamic> toMap() {
     return {
       'idnumber': idNumber,
@@ -24,37 +27,38 @@ class SignUpRequest {
   }
 
   String? validate() {
-    if (idNumber.trim().isEmpty) {
+    if ((idNumber ?? '').trim().isEmpty) {
       return 'ID number is required';
     }
-    if (firstName.trim().isEmpty) {
+    if ((firstName ?? '').trim().isEmpty) {
       return 'First name is required';
     }
-    if (lastName.trim().isEmpty) {
+    if ((lastName ?? '').trim().isEmpty) {
       return 'Last name is required';
     }
-    if (program.trim().isEmpty) {
+    if ((program ?? '').trim().isEmpty) {
       return 'Program is required';
     }
-    if (password.trim().isEmpty) {
+    if ((password ?? '').trim().isEmpty) {
       return 'Password is required';
     }
-    if (password.length < 6) {
+    if ((password ?? '').length < 6) {
       return 'Password must be at least 6 characters';
     }
     return null;
   }
 }
 
-class LoginRequest {
-  final String idNumber;
-  final String password;
+class LoginRequest extends Serializable {
+  final String? idNumber;
+  final String? password;
 
   LoginRequest({
-    required this.idNumber,
-    required this.password,
+    this.idNumber,
+    this.password,
   });
 
+  @override
   Map<String, dynamic> toMap() {
     return {
       'idnumber': idNumber,
@@ -63,10 +67,10 @@ class LoginRequest {
   }
 
   String? validate() {
-    if (idNumber.trim().isEmpty) {
+    if ((idNumber ?? '').trim().isEmpty) {
       return 'ID number is required';
     }
-    if (password.trim().isEmpty) {
+    if ((password ?? '').trim().isEmpty) {
       return 'Password is required';
     }
     return null;

@@ -145,12 +145,8 @@ class _VerificationPageState extends State<VerificationPage> {
                   VerificationButton(
                     viewModel: verificationViewModel,
                     onVerify: viewModel.attendanceSubmissionResult.value.isError
-                        ? retrySubmissionCallback()
-                        : getOnVerify(
-                            verificationStep,
-                            locationStatus ??
-                                LocationVerificationStatus.successInRange,
-                          ),
+                        ? retrySubmissionCallback(widget.attendanceType)
+                        : getOnVerify(verificationStep, locationStatus),
                   ),
 
                   if (verificationStep == VerificationStep.locationCheck &&
@@ -171,9 +167,10 @@ class _VerificationPageState extends State<VerificationPage> {
   }
 
   VoidCallback getOnVerify(VerificationStep verificationStep,
-      LocationVerificationStatus locationStatus) {
+      LocationVerificationStatus? locationStatus) {
     if (locationStatus == LocationVerificationStatus.outOfRange) {
-      return () => handleOutOfRange(locationStatus);
+      return () => handleOutOfRange(
+          locationStatus ?? LocationVerificationStatus.outOfRange);
     }
 
     if (verificationStep == VerificationStep.onlineCodeEntry) {
@@ -186,7 +183,12 @@ class _VerificationPageState extends State<VerificationPage> {
     return () {};
   }
 
-  VoidCallback retrySubmissionCallback() {
+  VoidCallback retrySubmissionCallback(AttendanceType attendanceType) {
+    if (attendanceType == AttendanceType.inPerson) {
+      return () async {
+        viewModel.proceedWithAutomaticFlow();
+      };
+    }
     return () async {
       handleOnlineCodeSubmission();
     };

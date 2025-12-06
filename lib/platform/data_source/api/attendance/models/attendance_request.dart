@@ -1,12 +1,15 @@
-class GetCourseAttendanceRequest {
-  final int courseId;
-  final String studentId;
+import 'package:attendance_app/platform/data_source/api/api_base_models.dart';
+
+class GetCourseAttendanceRequest extends Serializable {
+  final int? courseId;
+  final String? studentId;
 
   GetCourseAttendanceRequest({
-    required this.courseId,
-    required this.studentId,
+    this.courseId,
+    this.studentId,
   });
 
+  @override
   Map<String, dynamic> toMap() {
     return {
       'courseId': courseId,
@@ -15,23 +18,24 @@ class GetCourseAttendanceRequest {
   }
 }
 
-class MarkAttendanceRequest {
-  final String code;
-  final String studentId;
-  final String status;
+class MarkAttendanceRequest extends Serializable {
+  final String? code;
+  final String? studentId;
+  final String? status;
   final String? location;
   final double? latitude;
   final double? longitude;
 
   MarkAttendanceRequest({
-    required this.code,
-    required this.studentId,
-    required this.status,
+    this.code,
+    this.studentId,
+    this.status,
     this.location,
     this.latitude,
     this.longitude,
   });
 
+  @override
   Map<String, dynamic> toMap() {
     return {
       'code': code,
@@ -44,20 +48,20 @@ class MarkAttendanceRequest {
   }
 
   String? validate() {
-    if (code.trim().isEmpty) {
+    if ((code ?? '').trim().isEmpty) {
       return 'Code is required';
     }
-    if (studentId.trim().isEmpty) {
+    if ((studentId ?? '').trim().isEmpty) {
       return 'Student ID is required';
     }
-    if (status.trim().isEmpty) {
+    if ((status ?? '').trim().isEmpty) {
       return 'Status is required';
     }
     return null;
   }
 }
 
-class GetAttendanceHistoryRequest {
+class GetAttendanceHistoryRequest extends Serializable {
   final String studentId;
   final num? pageIndex;
   final num? pageSize;
@@ -68,16 +72,12 @@ class GetAttendanceHistoryRequest {
     this.pageSize = 10,
   });
 
-  Map<String, dynamic> toJson() => {
-        'student_id': studentId,
-        'page': pageIndex,
-        'per_page': pageSize,
-      };
-}
-
-enum AttendanceStatus {
-  authorized,
-  unauthorized;
-
-  String get value => name;
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'student_id': studentId,
+      'page': pageIndex,
+      'per_page': pageSize,
+    };
+  }
 }

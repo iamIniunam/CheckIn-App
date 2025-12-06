@@ -25,6 +25,14 @@ enum VerificationError {
   permissionDenied,
 }
 
+enum AttendanceStatus {
+  authorized,
+  unauthorized;
+
+  String get value => name;
+}
+
+
 // enum FaceQualityIssueType {
 //   noFaceDetected,
 //   multipleFaces,

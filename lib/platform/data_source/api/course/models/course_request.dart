@@ -1,12 +1,15 @@
-class GetCoursesForLevelAndSemesterRequest {
-  final String levelId;
-  final String semesterId;
+import 'package:attendance_app/platform/data_source/api/api_base_models.dart';
+
+class GetCoursesForLevelAndSemesterRequest extends Serializable {
+  final String? levelId;
+  final String? semesterId;
 
   GetCoursesForLevelAndSemesterRequest({
-    required this.levelId,
-    required this.semesterId,
+    this.levelId,
+    this.semesterId,
   });
 
+  @override
   Map<String, dynamic> toMap() {
     return {
       'levelId': levelId,
@@ -15,15 +18,16 @@ class GetCoursesForLevelAndSemesterRequest {
   }
 }
 
-class RegisterCourseRequest {
-  final int courseId;
-  final String studentId;
+class RegisterCourseRequest extends Serializable {
+  final int? courseId;
+  final String? studentId;
 
   RegisterCourseRequest({
-    required this.courseId,
-    required this.studentId,
+    this.courseId,
+    this.studentId,
   });
 
+  @override
   Map<String, dynamic> toMap() {
     return {
       'course_id': courseId,
@@ -32,46 +36,44 @@ class RegisterCourseRequest {
   }
 
   String? validate() {
-    if (courseId <= 0) {
+    if ((courseId ?? 0) <= 0) {
       return 'Invalid course ID';
     }
-    if (studentId.trim().isEmpty) {
+    if ((studentId ?? '').trim().isEmpty) {
       return 'Student ID is required';
     }
     return null;
   }
 }
 
-class GetRegisteredCoursesRequest {
-  final String studentId;
+class GetRegisteredCoursesRequest extends Serializable {
+  final String? studentId;
 
-  GetRegisteredCoursesRequest({
-    required this.studentId,
-  });
+  GetRegisteredCoursesRequest({this.studentId});
 
+  @override
   Map<String, dynamic> toMap() {
-    return {
-      'studentId': studentId,
-    };
+    return {'studentId': studentId};
   }
 
   String? validate() {
-    if (studentId.trim().isEmpty) {
+    if ((studentId ?? '').trim().isEmpty) {
       return 'Student ID is required';
     }
     return null;
   }
 }
 
-class DropCourseRequest {
-  final String studentId;
-  final int courseId;
+class DropCourseRequest extends Serializable {
+  final String? studentId;
+  final int? courseId;
 
   DropCourseRequest({
-    required this.studentId,
-    required this.courseId,
+    this.studentId,
+    this.courseId,
   });
 
+  @override
   Map<String, dynamic> toMap() {
     return {
       'course_id': courseId,
@@ -80,10 +82,10 @@ class DropCourseRequest {
   }
 
   String? validate() {
-    if (courseId <= 0) {
+    if ((courseId ?? 0) <= 0) {
       return 'Invalid course ID';
     }
-    if (studentId.trim().isEmpty) {
+    if ((studentId ?? '').trim().isEmpty) {
       return 'Student ID is required';
     }
     return null;

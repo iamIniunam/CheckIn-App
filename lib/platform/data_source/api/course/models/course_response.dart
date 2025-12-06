@@ -161,7 +161,6 @@ class RegisterCourseResponse extends Serializable {
   }
 }
 
-
 class DropCourseResponse extends Serializable {
   final bool success;
   final String? message;

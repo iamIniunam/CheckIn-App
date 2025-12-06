@@ -109,7 +109,7 @@ class AttendanceApi extends ApiCore {
       apiEndPoint: ApiEndPoint.createApiEndpoint(
         path: _getAttendanceHistoryBasePath,
         requestType: HttpVerb.GET,
-        body: request.toJson(),
+        body: request.toMap(),
       ),
     );
 

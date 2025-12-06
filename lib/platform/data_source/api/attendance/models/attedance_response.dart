@@ -1,6 +1,6 @@
 import 'package:attendance_app/platform/data_source/api/api_base_models.dart';
-import 'package:attendance_app/platform/data_source/api/attendance/models/attendance_request.dart';
 import 'package:attendance_app/ux/shared/components/global_functions.dart';
+import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:flutter/material.dart';
 
 class AttendanceClass extends Serializable {
