@@ -46,40 +46,34 @@ class EntryPage extends StatefulWidget {
 class _EntryPageState extends State<EntryPage> {
   final _manager = AppDI.getIt<PreferenceManager>();
   final _authViewModel = AppDI.getIt<AuthViewModel>();
+  final _courseViewModel = AppDI.getIt<CourseViewModel>();
+  final _attendanceViewModel = AppDI.getIt<AttendanceViewModel>();
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       _authViewModel.saveAppUser(_manager.appUser);
-
-      final savedUser = _manager.appUser;
-
-      if (savedUser == null) {
-        await Future.delayed(const Duration(seconds: 1));
-        if (!mounted) return;
-        Navigation.navigateToScreenAndClearAllPrevious(
-            context: context, screen: const LoginPage());
-        return;
-      }
-
-      final studentId = savedUser.studentProfile?.idNumber ?? '';
+      final studentId = _manager.appUser?.studentProfile?.idNumber ?? '';
       if (studentId.isNotEmpty) {
-        Future.microtask(() async {
-          try {
-            await AppDI.getIt<CourseViewModel>()
-                .loadRegisteredCourses(studentId);
-            AppDI.getIt<AttendanceViewModel>()
-                .initializeAttendanceHistoryPagination(studentId);
-          } catch (_) {}
-        });
+        try {
+          await _courseViewModel.loadRegisteredCourses(studentId);
+          _attendanceViewModel.initializeAttendanceHistoryPagination(studentId);
+        } catch (e, stack) {
+          debugPrint(
+              'Error loading courses or initializing attendance history: $e\n$stack');
+        }
       }
 
       await Future.delayed(const Duration(seconds: 1));
       if (!mounted) return;
+      if (_manager.appUser == null) {
+        Navigation.navigateToScreenAndClearAllPrevious(
+            context: context, screen: const LoginPage());
+        return;
+      }
       Navigation.navigateToScreenAndClearAllPrevious(
           context: context, screen: const NavigationHostPage());
-      return;
     });
   }
 

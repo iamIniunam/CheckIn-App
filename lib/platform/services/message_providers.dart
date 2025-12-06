@@ -7,8 +7,8 @@ abstract class VerificationMessageProvider {
       VerificationStep step, AttendanceType? attendanceType, bool isLoading);
   String getButtonText(VerificationStep step,
       {LocationVerificationStatus? locationStatus});
-  String getLocationStatusHeaderMessage(LocationVerificationStatus status);
-  String getLocationStatusMessage(LocationVerificationStatus status);
+  String getLocationStatusHeaderMessage(LocationVerificationStatus? status);
+  String getLocationStatusMessage(LocationVerificationStatus? status);
   String getErrorMessage(VerificationError error,
       {Map<String, dynamic>? context});
   String getAttendanceTypeDisplayName(AttendanceType? type);
@@ -62,8 +62,9 @@ class DefaultVerificationMessageProvider
   }
 
   @override
-  String getLocationStatusHeaderMessage(LocationVerificationStatus status) {
-    switch (status) {
+  String getLocationStatusHeaderMessage(LocationVerificationStatus? status) {
+    switch (status ?? LocationVerificationStatus.failed) {
+      //TODO: check this logic
       case LocationVerificationStatus.successInRange:
       case LocationVerificationStatus.outOfRange:
         return 'Location verified';
@@ -73,8 +74,9 @@ class DefaultVerificationMessageProvider
   }
 
   @override
-  String getLocationStatusMessage(LocationVerificationStatus status) {
-    switch (status) {
+  String getLocationStatusMessage(LocationVerificationStatus? status) {
+    switch (status ?? LocationVerificationStatus.failed) {
+      //TODO: check this logic
       case LocationVerificationStatus.successInRange:
         return 'Great! You’re at the right location.';
       case LocationVerificationStatus.outOfRange:

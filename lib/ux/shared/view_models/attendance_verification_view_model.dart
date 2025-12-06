@@ -655,16 +655,14 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
     if (locationStatus == null) {
       return 'Verifying Location';
     }
-    return _messageProvider.getLocationStatusHeaderMessage(locationStatus ??
-        LocationVerificationStatus.failed); //TODO: check this logic
+    return _messageProvider.getLocationStatusHeaderMessage(locationStatus);
   }
 
   String locationStatusMessage() {
     if (locationStatus == null) {
       return 'Checking if you\'re on campus...';
     }
-    return _messageProvider.getLocationStatusMessage(locationStatus ??
-        LocationVerificationStatus.failed); //TODO: check this logic
+    return _messageProvider.getLocationStatusMessage(locationStatus);
   }
 
   @override
