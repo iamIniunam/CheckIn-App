@@ -10,7 +10,6 @@ import 'package:attendance_app/ux/views/attendance_history/components/period.dar
 import 'package:attendance_app/ux/views/course/components/attendance_history_card.dart';
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import 'package:provider/provider.dart';
 
 class AttendanceHistoryPage extends StatefulWidget {
   const AttendanceHistoryPage({super.key});
@@ -21,21 +20,19 @@ class AttendanceHistoryPage extends StatefulWidget {
 
 class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
   final AuthViewModel _authViewModel = AppDI.getIt<AuthViewModel>();
-  late final AttendanceViewModel attendanceViewModel;
+  final AttendanceViewModel _attendanceViewModel =
+      AppDI.getIt<AttendanceViewModel>();
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    attendanceViewModel = context.read<AttendanceViewModel>();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      initializePagination();
-    });
+  void initState() {
+    super.initState();
+    initializePagination();
   }
 
   void initializePagination() {
     final studentId = _authViewModel.appUser?.studentProfile?.idNumber;
     if (studentId != null) {
-      attendanceViewModel.initializeAttendanceHistoryPagination(studentId);
+      _attendanceViewModel.initializeAttendanceHistoryPagination(studentId);
     }
   }
 
@@ -48,20 +45,20 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
         Expanded(
           child: RefreshIndicator(
             onRefresh: () async {
-              attendanceViewModel.refreshAttendanceHistory();
+              _attendanceViewModel.refreshAttendanceHistory();
               return Future.value();
             },
             child: PagedListView<int, AttendanceHistory>(
               pagingController:
-                  attendanceViewModel.attendanceHistoryPagingController,
+                  _attendanceViewModel.attendanceHistoryPagingController,
               padding: const EdgeInsets.symmetric(vertical: 16),
               builderDelegate: PagedChildBuilderDelegate<AttendanceHistory>(
                 itemBuilder: (context, item, index) {
-                  final allItems = attendanceViewModel
+                  final allItems = _attendanceViewModel
                           .attendanceHistoryPagingController.itemList ??
                       [];
                   final groupedRecords =
-                      attendanceViewModel.groupHistoryByDate(allItems);
+                      _attendanceViewModel.groupHistoryByDate(allItems);
 
                   String? itemPeriod;
                   for (final entry in groupedRecords.entries) {
@@ -99,7 +96,7 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
                   );
                 },
                 firstPageErrorIndicatorBuilder: (context) => PageErrorIndicator(
-                  text: attendanceViewModel
+                  text: _attendanceViewModel
                           .attendanceHistoryPagingController.error
                           ?.toString() ??
                       'Error loading attendance history',
@@ -109,7 +106,7 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
                   child: Column(
                     children: [
                       PageErrorIndicator(
-                        text: attendanceViewModel
+                        text: _attendanceViewModel
                                 .attendanceHistoryPagingController.error
                                 ?.toString() ??
                             'Error loading more items',
@@ -119,7 +116,7 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
                         padding: const EdgeInsets.symmetric(horizontal: 100),
                         child: PrimaryButton(
                           onTap: () {
-                            attendanceViewModel
+                            _attendanceViewModel
                                 .attendanceHistoryPagingController
                                 .retryLastFailedRequest();
                           },
@@ -171,10 +168,10 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
       padding: const EdgeInsets.all(8),
       color: Colors.yellow[100],
       child: ListenableBuilder(
-        listenable: attendanceViewModel.attendanceHistoryPagingController,
+        listenable: _attendanceViewModel.attendanceHistoryPagingController,
         builder: (context, _) {
           final controller =
-              attendanceViewModel.attendanceHistoryPagingController;
+              _attendanceViewModel.attendanceHistoryPagingController;
           final itemCount = controller.itemList?.length ?? 0;
           final nextPageKey = controller.nextPageKey;
           final hasError = controller.error != null;
