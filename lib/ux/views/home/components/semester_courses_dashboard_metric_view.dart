@@ -3,7 +3,6 @@ import 'package:attendance_app/ux/shared/components/dashboard_metric_grid_view.d
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/components/page_state_indicator.dart';
 import 'package:attendance_app/ux/shared/components/shimmer_widget.dart';
-import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
@@ -23,10 +22,10 @@ class SemesterCoursesDashboardMetricView extends StatelessWidget {
         return ValueListenableBuilder(
           valueListenable: courseViewModel.registeredCoursesResult,
           builder: (context, result, _) {
-            if (result.state == UIState.loading) {
+            if (result.isLoading) {
               return loadingState(context);
             }
-            if (result.state == UIState.error) {
+            if (result.isError) {
               return Column(
                 children: [
                   const SectionHeader(

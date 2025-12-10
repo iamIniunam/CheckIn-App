@@ -5,7 +5,6 @@ import 'package:attendance_app/platform/utils/general_utils.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/shared/components/app_form_fields.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
-import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_dialogs.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
@@ -24,31 +23,24 @@ class DropCoursesPage extends StatefulWidget {
 
 class _DropCoursesPageState extends State<DropCoursesPage> {
   final AuthViewModel _authViewModel = AppDI.getIt<AuthViewModel>();
+  final CourseViewModel _courseViewModel = AppDI.getIt<CourseViewModel>();
   final TextEditingController searchController = TextEditingController();
   final Set<int> _selectedCourseIds = {};
   Timer? _searchDebounce;
-
-  late final CourseViewModel courseViewModel;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      courseViewModel.clearSearch();
+      _courseViewModel.clearSearch();
       loadRegisteredCourses();
     });
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    courseViewModel = context.read<CourseViewModel>();
   }
 
   Future<void> loadRegisteredCourses({bool? forceRefresh}) async {
     final studentId = _authViewModel.appUser?.studentProfile?.idNumber;
     if (studentId != null) {
-      await courseViewModel.loadRegisteredCourses(studentId,
+      await _courseViewModel.loadRegisteredCourses(studentId,
           forceRefresh: forceRefresh ?? false);
     }
   }
@@ -57,13 +49,13 @@ class _DropCoursesPageState extends State<DropCoursesPage> {
     _searchDebounce?.cancel();
     _searchDebounce = Timer(const Duration(milliseconds: 300), () {
       if (!mounted) return;
-      courseViewModel.updateSearchQuery(value.trim());
+      _courseViewModel.updateSearchQuery(value.trim());
     });
   }
 
   void clearSearch() {
     searchController.clear();
-    courseViewModel.clearSearch();
+    _courseViewModel.clearSearch();
   }
 
   void toggleCourseSelection(int courseId) {
@@ -78,7 +70,7 @@ class _DropCoursesPageState extends State<DropCoursesPage> {
 
   void toggleSelectAllCourses() {
     setState(() {
-      final allCourseIds = courseViewModel.displayedCourses
+      final allCourseIds = _courseViewModel.displayedCourses
           .map((course) => course.id)
           .whereType<int>()
           .toSet();
@@ -97,7 +89,7 @@ class _DropCoursesPageState extends State<DropCoursesPage> {
   }
 
   int getRemainingCredits() {
-    final allCourses = courseViewModel.registeredCourses;
+    final allCourses = _courseViewModel.registeredCourses;
     final total = allCourses.fold<int>(
       0,
       (sum, course) => sum + (course.creditHours ?? 0),
@@ -119,7 +111,7 @@ class _DropCoursesPageState extends State<DropCoursesPage> {
     }
 
     // Build a readable list of selected course names for the confirmation
-    final selectedCourses = courseViewModel.registeredCourses
+    final selectedCourses = _courseViewModel.registeredCourses
         .where((c) => _selectedCourseIds.contains(c.id))
         .toList();
     final names = selectedCourses.map((c) => c.courseCode).toList();
@@ -171,16 +163,16 @@ class _DropCoursesPageState extends State<DropCoursesPage> {
 
     for (final courseId in _selectedCourseIds) {
       try {
-        final result = await courseViewModel.dropCourse(
+        final result = await _courseViewModel.dropCourse(
           studentId: studentId,
           courseId: courseId,
         );
 
-        if (result.state == UIState.success) {
+        if (result.isSuccess) {
           successCount++;
         } else {
           failCount++;
-          final course = courseViewModel.registeredCourses.firstWhere(
+          final course = _courseViewModel.registeredCourses.firstWhere(
               (c) => c.id == courseId,
               orElse: () => null as dynamic);
           failedCourses.add(course.courseCode ?? '');
@@ -278,7 +270,7 @@ class _DropCoursesPageState extends State<DropCoursesPage> {
                 hintText: AppStrings.searchByCourseCodeOrTitle,
                 onSubmitted: (value) {
                   if (value.trim().isEmpty) return;
-                  courseViewModel.updateSearchQuery(value.trim());
+                  _courseViewModel.updateSearchQuery(value.trim());
                   Utils.hideKeyboard();
                 },
                 onChanged: onSearchChanged,

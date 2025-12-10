@@ -65,6 +65,7 @@ class _VerificationPageState extends State<VerificationPage> {
   Future<void> handleOnlineCodeSubmission() async {
     final entered = viewModel.enteredOnlineCode;
     if (entered == null || entered.trim().isEmpty) {
+      if (!mounted) return;
       AppDialogs.showErrorDialog(
           context: context, message: 'Please enter the attendance code');
       return;
@@ -73,6 +74,7 @@ class _VerificationPageState extends State<VerificationPage> {
     final validationResult = viewModel.validateAndSetOnlineCode(entered);
 
     if (!validationResult.isValid) {
+      if (!mounted) return;
       AppDialogs.showErrorDialog(
         context: context,
         message: validationResult.errorMessage ?? 'Invalid attendance code',
@@ -80,21 +82,16 @@ class _VerificationPageState extends State<VerificationPage> {
       return;
     }
 
+    viewModel.moveToNextStep();
+
     final success = await viewModel.submitAttendance();
 
-    if (!mounted) return;
-
     if (success) {
-      viewModel.moveToNextStep();
-
-      await Future.delayed(const Duration(milliseconds: 800));
-
-      if (!mounted) return;
-
       viewModel.moveToNextStep();
     } else {
       final message = viewModel.attendanceSubmissionResult.value.message ??
           'Unable to submit attendance. Please check your code and try again.';
+      if (!mounted) return;
       AppDialogs.showErrorDialog(
         context: context,
         message: message,

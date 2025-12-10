@@ -402,11 +402,9 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      if (_attendanceType == AttendanceType.inPerson) {
-        return await submitInPersonAttendance();
-      } else {
-        return await submitOnlineAttendance();
-      }
+      return _attendanceType == AttendanceType.inPerson
+          ? await submitInPersonAttendance()
+          : await submitOnlineAttendance();
     } catch (e) {
       attendanceSubmissionResult.value = UIResult.error(
           message: 'Failed to submit attendance: ${e.toString()}');

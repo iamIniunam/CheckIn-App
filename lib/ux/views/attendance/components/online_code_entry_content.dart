@@ -25,6 +25,7 @@ class _OnlineCodeEntryContentState extends State<OnlineCodeEntryContent> {
     final validationResult = widget.viewModel.validateAndSetOnlineCode(entered);
 
     if (!validationResult.isValid) {
+      if (!mounted) return;
       AppDialogs.showErrorDialog(
         context: context,
         message: validationResult.errorMessage ?? 'Invalid attendance code',
@@ -32,22 +33,17 @@ class _OnlineCodeEntryContentState extends State<OnlineCodeEntryContent> {
       return;
     }
 
+    widget.viewModel.moveToNextStep();
+
     final success = await widget.viewModel.submitAttendance();
 
-    if (!mounted) return;
-
     if (success) {
-      widget.viewModel.moveToNextStep();
-
-      await Future.delayed(const Duration(milliseconds: 800));
-
-      if (!mounted) return;
-
       widget.viewModel.moveToNextStep();
     } else {
       final message = widget
               .viewModel.attendanceSubmissionResult.value.message ??
           'Unable to submit attendance. Please check your code and try again.';
+      if (!mounted) return;
       AppDialogs.showErrorDialog(
         context: context,
         message: message,

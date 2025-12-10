@@ -296,6 +296,15 @@ class AttendanceViewModel extends ChangeNotifier {
 
     grouped.removeWhere((key, value) => value.isEmpty);
 
+    // Sort records within each period by attendance date (latest first)
+    for (final key in grouped.keys) {
+      grouped[key]?.sort((a, b) {
+        final dateA = a.attendanceDate ?? DateTime(1970);
+        final dateB = b.attendanceDate ?? DateTime(1970);
+        return dateB.compareTo(dateA); // Latest first
+      });
+    }
+
     return grouped;
   }
 

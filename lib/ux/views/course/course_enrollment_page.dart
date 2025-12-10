@@ -32,33 +32,24 @@ class CourseEnrollmentPage extends StatefulWidget {
 
 class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
   final AuthViewModel _authViewModel = AppDI.getIt<AuthViewModel>();
+  final CourseSearchViewModel _courseSearchViewModel =
+      AppDI.getIt<CourseSearchViewModel>();
+  final CourseViewModel _courseViewModel = AppDI.getIt<CourseViewModel>();
 
-  late final TextEditingController searchController;
-  late final CourseSearchViewModel searchViewModel;
-  late final CourseViewModel courseViewModel;
+  late TextEditingController searchController = TextEditingController();
   Timer? _searchDebounce;
 
   @override
   void initState() {
     super.initState();
-    searchController = TextEditingController();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    searchViewModel = context.read<CourseSearchViewModel>();
-    courseViewModel = context.read<CourseViewModel>();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      searchViewModel.clearSearch();
-      searchViewModel.clearFilter();
-      searchViewModel.clearSelectedCourses();
-      searchViewModel.loadAllCourses();
-    });
+    _courseSearchViewModel.clearSearch();
+    _courseSearchViewModel.clearFilter();
+    _courseSearchViewModel.clearSelectedCourses();
+    _courseSearchViewModel.loadAllCourses();
   }
 
   Future<void> refreshAllCourses() async {
-    searchViewModel.reloadAllCourses();
+    _courseSearchViewModel.reloadAllCourses();
   }
 
   void onSearchChanged(String value) {
@@ -66,13 +57,13 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
     _searchDebounce = null;
     _searchDebounce = Timer(const Duration(milliseconds: 300), () {
       if (!mounted) return;
-      searchViewModel.searchCourses(value.trim());
+      _courseSearchViewModel.searchCourses(value.trim());
     });
   }
 
   void clearSearch() {
     searchController.clear();
-    searchViewModel.clearSearch();
+    _courseSearchViewModel.clearSearch();
   }
 
   Future<void> onConfirmPressed() async {
@@ -99,7 +90,7 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
   }
 
   bool validateCourseSelection() {
-    if (searchViewModel.selectedCourses.isEmpty) {
+    if (_courseSearchViewModel.selectedCourses.isEmpty) {
       AppDialogs.showErrorDialog(
         context: context,
         message: 'Please select at least one course',
@@ -107,7 +98,8 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
       return false;
     }
 
-    if (searchViewModel.totalCreditHours > AppConstants.requiredCreditHours) {
+    if (_courseSearchViewModel.totalCreditHours >
+        AppConstants.requiredCreditHours) {
       AppDialogs.showErrorDialog(
         context: context,
         message: 'Total credit hours exceeds the maximum allowed',
@@ -120,15 +112,15 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
 
   Future<UIResult<RegisterCoursesProgress>> registerCourses(
       String studentId) async {
-    return await courseViewModel.registerCourses(
+    return await _courseViewModel.registerCourses(
       studentId: studentId,
-      courses: searchViewModel.selectedCourses.toList(),
+      courses: _courseSearchViewModel.selectedCourses.toList(),
       isAdding: widget.isEdit,
     );
   }
 
   void handleRegistrationResult(UIResult<RegisterCoursesProgress> result) {
-    if (result.state == UIState.success) {
+    if (result.isSuccess) {
       final progress = result.data;
       if (progress != null && progress.hasFailures) {
         showPartialSuccessDialog(progress);
@@ -137,7 +129,7 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
             ? showSuccessDialog()
             : Navigation.navigateToHomePage(context: context);
       }
-    } else if (result.state == UIState.error) {
+    } else if (result.isError) {
       AppDialogs.showErrorDialog(
         context: context,
         message: result.message ?? 'Failed to register courses',
@@ -237,7 +229,7 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
               onChanged: onSearchChanged,
               onSearchSubmitted: (value) {
                 if (value.trim().isEmpty) return;
-                searchViewModel.searchCourses(value.trim());
+                _courseSearchViewModel.searchCourses(value.trim());
                 FocusScope.of(context).unfocus();
               },
               onFilterTap: () {
@@ -245,15 +237,16 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
                   context: context,
                   title: 'Filter Courses',
                   child: FilterCoursesBottomSheet(
-                    initialLevel: searchViewModel.selectedLevel,
-                    initialSemester: searchViewModel.selectedSemester,
-                    initialSchool: searchViewModel.selectedSchool,
+                    initialLevel: _courseSearchViewModel.selectedLevel,
+                    initialSemester: _courseSearchViewModel.selectedSemester,
+                    initialSchool: _courseSearchViewModel.selectedSchool,
                     onApply: (level, semester, school) {
-                      searchViewModel.applyFilter(level, semester, school);
+                      _courseSearchViewModel.applyFilter(
+                          level, semester, school);
                       Navigation.back(context: context);
                     },
                     onReset: () {
-                      searchViewModel.clearFilter();
+                      _courseSearchViewModel.clearFilter();
                       Navigation.back(context: context);
                     },
                   ),
@@ -267,7 +260,7 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
                     children: [
                       CourseListContent(
                         viewModel: searchViewModel,
-                        courseViewModel: courseViewModel,
+                        courseViewModel: _courseViewModel,
                       ),
                       ConfirmationSection(
                         totalCreditHours: searchViewModel.totalCreditHours,

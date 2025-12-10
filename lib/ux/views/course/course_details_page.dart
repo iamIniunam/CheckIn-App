@@ -1,7 +1,6 @@
 import 'package:attendance_app/platform/data_source/api/course/models/course_response.dart';
 import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/ux/shared/components/page_state_indicator.dart';
-import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/components/app_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
@@ -23,18 +22,20 @@ class CourseDetailsPage extends StatefulWidget {
 }
 
 class _CourseDetailsPageState extends State<CourseDetailsPage> {
+  final AuthViewModel _authViewModel = AppDI.getIt<AuthViewModel>();
+  final AttendanceViewModel _attendanceViewModel =
+      AppDI.getIt<AttendanceViewModel>();
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final authViewModel = AppDI.getIt<AuthViewModel>();
-      final studentId = authViewModel.appUser?.studentProfile?.idNumber ?? '';
-      final attendanceViewModel = context.read<AttendanceViewModel>();
+      final studentId = _authViewModel.appUser?.studentProfile?.idNumber ?? '';
 
       if (studentId.isNotEmpty && widget.course.id != null) {
-        attendanceViewModel.fetchCourseAttendanceRecords(
-          widget.course.id!,
+        _attendanceViewModel.fetchCourseAttendanceRecords(
+          widget.course.id ?? 0,
           studentId,
         );
       }
@@ -84,11 +85,17 @@ class CourseDetailsBody extends StatelessWidget {
           final records =
               attendanceViewModel.getCourseAttendanceRecords(course.id ?? 0);
 
+          if (course.id == null) {
+            return const PageErrorIndicator(
+              text: 'Invalid course ID',
+              useTopPadding: true,
+            );
+          }
+
           return RefreshIndicator(
             displacement: 20,
             onRefresh: () async {
               await attendanceViewModel.refreshCourseAttendance();
-              // return Future.value();
             },
             child: Column(
               children: [
@@ -146,9 +153,9 @@ class CourseDetailsBody extends StatelessWidget {
                 AttendanceSummaryCard(
                     courseId: course.id ?? 0, viewModel: attendanceViewModel),
                 const SizedBox(height: 12),
-                if (result.state == UIState.loading)
+                if (result.isLoading)
                   const PageLoadingIndicator(useTopPadding: true)
-                else if (result.state == UIState.error)
+                else if (result.isError)
                   PageErrorIndicator(
                     text: result.message ?? 'Error loading attendance records',
                     useTopPadding: true,
@@ -178,7 +185,8 @@ class CourseDetailsBody extends StatelessWidget {
                           child: ListView(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             children: [
-                              ...records
+                              ...records.reversed
+                                  .toList()
                                   .map((record) =>
                                       SessionHistory(record: record))
                                   .toList(),

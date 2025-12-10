@@ -1,7 +1,6 @@
 import 'package:attendance_app/platform/data_source/api/course/models/course_response.dart';
 import 'package:attendance_app/ux/shared/components/empty_state_widget.dart';
 import 'package:attendance_app/ux/shared/components/page_state_indicator.dart';
-import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
 import 'package:attendance_app/ux/views/course/components/course_search_state_widgets.dart';
@@ -29,11 +28,11 @@ class RegisteredCourseListContent extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: viewModel.registeredCoursesResult,
       builder: (context, result, _) {
-        if (result.state == UIState.loading) {
+        if (result.isLoading) {
           return const Expanded(child: PageLoadingIndicator());
         }
 
-        if (result.state == UIState.error) {
+        if (result.isError) {
           return Expanded(
             child: PageErrorIndicator(
               text: result.message ?? 'Error loading registered courses',
