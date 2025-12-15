@@ -1,4 +1,5 @@
 import 'package:attendance_app/platform/di/dependency_injection.dart';
+import 'package:attendance_app/platform/utils/general_utils.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
 import 'package:attendance_app/ux/shared/bottom_sheets/show_app_bottom_sheet.dart';
@@ -224,13 +225,13 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
         child: Column(
           children: [
             SearchAndFilterBar(
-              searchController: searchController,
               onClearSearch: clearSearch,
+              searchController: searchController,
               onChanged: onSearchChanged,
               onSearchSubmitted: (value) {
                 if (value.trim().isEmpty) return;
                 _courseSearchViewModel.searchCourses(value.trim());
-                FocusScope.of(context).unfocus();
+                Utils.hideKeyboard();
               },
               onFilterTap: () {
                 showAppBottomSheet(

@@ -264,7 +264,7 @@ class _DropCoursesPageState extends State<DropCoursesPage> {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: SearchTextFormField(
+              child: CupertinoSearchTextFormField(
                 controller: searchController,
                 onClear: clearSearch,
                 hintText: AppStrings.searchByCourseCodeOrTitle,

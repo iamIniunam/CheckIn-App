@@ -1,6 +1,7 @@
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/resources/app_images.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -88,7 +89,8 @@ class _SearchTextFormFieldState extends State<SearchTextFormField> {
             fontSize: 16,
             fontWeight: FontWeight.w500),
         decoration: InputDecoration(
-          contentPadding: const EdgeInsets.only(left: 10, top: 6, right: 10),
+          contentPadding:
+              const EdgeInsets.only(left: 10, top: 0, right: 10, bottom: 6),
           hintText: widget.hintText ?? AppStrings.search,
           hintStyle: const TextStyle(
             color: AppColors.grey,
@@ -101,7 +103,8 @@ class _SearchTextFormFieldState extends State<SearchTextFormField> {
           suffixIconConstraints:
               const BoxConstraints(maxHeight: 36, maxWidth: 36),
           prefixIcon: Padding(
-            padding: const EdgeInsets.all(10),
+            padding:
+                const EdgeInsets.only(left: 10, top: 7, right: 10, bottom: 5),
             child: AppImages.svgSearchIcon,
           ),
           suffixIcon: Visibility(
@@ -275,6 +278,121 @@ class PrimaryTextFormField extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class CupertinoSearchTextFormField extends StatefulWidget {
+  final TextEditingController? controller;
+  final String? hintText;
+  final Widget? prefixWidget;
+  final Widget? suffixWidget;
+  final void Function(String)? onChanged;
+  final void Function(String)? onSubmitted;
+  final void Function()? onTap;
+  final String? Function(String?)? validator;
+  final List<TextInputFormatter>? inputFormatters;
+  final TextInputType? keyboardType;
+  final int maxLines;
+  final int? maxLength;
+  final bool? obscureText;
+  final bool autofocus;
+  final bool enabled;
+  final VoidCallback onClear;
+
+  const CupertinoSearchTextFormField({
+    super.key,
+    this.controller,
+    this.hintText = '',
+    this.prefixWidget,
+    this.suffixWidget,
+    this.onChanged,
+    this.validator,
+    this.inputFormatters,
+    this.keyboardType,
+    this.maxLines = 1,
+    this.autofocus = false,
+    this.maxLength,
+    this.obscureText,
+    this.onTap,
+    this.onSubmitted,
+    this.enabled = true,
+    required this.onClear,
+  });
+
+  @override
+  State<CupertinoSearchTextFormField> createState() =>
+      _CupertinoSearchTextFormFieldState();
+}
+
+class _CupertinoSearchTextFormFieldState
+    extends State<CupertinoSearchTextFormField> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller ?? TextEditingController();
+    _controller.addListener(_onTextChanged);
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onTextChanged);
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
+    super.dispose();
+  }
+
+  void _onTextChanged() {
+    setState(() {});
+    widget.onChanged?.call(_controller.text.trim());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoTextField.borderless(
+      padding: const EdgeInsets.only(left: 8, top: 11, bottom: 11),
+      autofocus: widget.autofocus,
+      cursorColor: AppColors.defaultColor,
+      style: const TextStyle(
+        color: AppColors.defaultColor,
+        fontFamily: 'Nunito',
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+      ),
+      placeholder: widget.hintText ?? AppStrings.search,
+      decoration: BoxDecoration(
+        color: AppColors.field,
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      prefix: Padding(
+        padding: const EdgeInsets.only(left: 10),
+        child: AppImages.svgSearchIcon,
+      ),
+      // clearButtonMode: OverlayVisibilityMode.editing,
+      suffix: Visibility(
+        visible: widget.controller?.text.isNotEmpty ?? false,
+        child: InkWell(
+          onTap: widget.onClear,
+          child: const Padding(
+            padding: EdgeInsets.all(10.0),
+            child: Icon(
+              Icons.cancel,
+              color: AppColors.defaultColor,
+              size: 16,
+            ),
+          ),
+        ),
+      ),
+      inputFormatters: widget.inputFormatters,
+      keyboardType: TextInputType.text,
+      controller: widget.controller,
+      onChanged: widget.onChanged,
+      onSubmitted: widget.onSubmitted,
+      textInputAction: TextInputAction.search,
+      textCapitalization: TextCapitalization.sentences,
     );
   }
 }

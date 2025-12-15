@@ -1,3 +1,4 @@
+import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -28,7 +29,10 @@ class AppImages {
   static SvgPicture svgChatIcon2 =
       SvgPicture.asset('assets/svgs/chat_icon_2.svg');
   static SvgPicture svgSearchIcon =
-      SvgPicture.asset('assets/svgs/search_icon.svg');
+      SvgPicture.asset('assets/svgs/search_icon.svg',
+    colorFilter:
+        const ColorFilter.mode(AppColors.defaultColor, BlendMode.srcIn),
+  );
   static SvgPicture svgSuccessDialogIcon =
       SvgPicture.asset('assets/svgs/success_dialog_icon.svg');
   static SvgPicture svgErrorDialogIcon =
@@ -36,7 +40,10 @@ class AppImages {
   static SvgPicture svgExclamationCircle =
       SvgPicture.asset('assets/svgs/exclamation_circle.svg');
   static SvgPicture svgFilterIcon =
-      SvgPicture.asset('assets/svgs/filter_icon.svg');
+      SvgPicture.asset('assets/svgs/filter_icon.svg',
+    colorFilter:
+        const ColorFilter.mode(AppColors.defaultColor, BlendMode.srcIn),
+  );
   static SvgPicture svgLine = SvgPicture.asset('assets/svgs/line.svg');
   static SvgPicture svgSplashScreen =
       SvgPicture.asset('assets/svgs/splash_screen.svg');

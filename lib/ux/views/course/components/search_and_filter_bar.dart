@@ -30,7 +30,7 @@ class SearchAndFilterBar extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: SearchTextFormField(
+            child: CupertinoSearchTextFormField(
               controller: searchController,
               onClear: onClearSearch,
               hintText: AppStrings.searchByCourseCodeOrTitle,
