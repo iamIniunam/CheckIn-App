@@ -39,9 +39,7 @@ dependencies:
   shared_preferences: ^2.2.3
   iconsax: ^0.0.8
   flutter_svg: ^2.0.10+1
-  # camera: ^0.11.0+1
   permission_handler: ^11.3.1
-  # fluttertoast: ^8.2.5
   provider: ^6.1.5
   geolocator:
   geolocator_android: 4.6.1
@@ -57,6 +55,7 @@ dependencies:
     git:
       url: https://github.com/Maampeaw/infinite_scroll_pagination.git
       ref: fix-null-checker-crash-issue
+  fluttertoast: ^8.2.5
 
 
 
