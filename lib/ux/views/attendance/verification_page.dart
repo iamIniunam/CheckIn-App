@@ -82,27 +82,34 @@ class _VerificationPageState extends State<VerificationPage> {
       return;
     }
 
-    viewModel.moveToNextStep();
-
     final success = await viewModel.submitAttendance();
 
     if (success) {
+      // Move through submission and completion steps on success only
       viewModel.moveToNextStep();
-    } else {
-      final message = viewModel.attendanceSubmissionResult.value.message ??
-          'Unable to submit attendance. Please check your code and try again.';
-      if (!mounted) return;
-      AppDialogs.showErrorDialog(
-        context: context,
-        message: message,
-        action: () {
-          if (message.contains(
-              'You are not registered for the course linked to this attendance code.')) {
-            Navigation.navigateToHomePage(context: context);
-          }
-        },
-      );
+      viewModel.moveToNextStep();
+      return;
     }
+
+    final message =
+        '${viewModel.attendanceSubmissionResult.value.message}. Please check your code and try again.';
+
+    // Skip dialog for terminal errors (they show on completion)
+    if (viewModel.isTerminalSubmissionMessage(message)) {
+      return;
+    }
+
+    if (!mounted) return;
+    AppDialogs.showErrorDialog(
+      context: context,
+      message: message,
+      action: () {
+        if (message.contains(
+            'You are not registered for the course linked to this attendance code.')) {
+          Navigation.navigateToHomePage(context: context);
+        }
+      },
+    );
   }
 
   @override
@@ -141,9 +148,12 @@ class _VerificationPageState extends State<VerificationPage> {
 
                   VerificationButton(
                     viewModel: verificationViewModel,
-                    onVerify: viewModel.attendanceSubmissionResult.value.isError
-                        ? retrySubmissionCallback(widget.attendanceType)
-                        : getOnVerify(verificationStep, locationStatus),
+                    onVerify: (verificationStep == VerificationStep.completed &&
+                            viewModel.attendanceSubmissionResult.value.isError)
+                        ? () => Navigation.navigateToHomePage(context: context)
+                        : viewModel.attendanceSubmissionResult.value.isError
+                            ? retrySubmissionCallback(widget.attendanceType)
+                            : getOnVerify(verificationStep, locationStatus),
                   ),
 
                   if (verificationStep == VerificationStep.locationCheck &&

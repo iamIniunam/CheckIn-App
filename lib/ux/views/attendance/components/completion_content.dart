@@ -27,48 +27,118 @@ class CompletionContent extends StatelessWidget {
             ),
           ],
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              height: 150,
-              width: 150,
-              child: Image(image: AppImages.successLogo),
-            ),
-            const Text(
-              AppStrings.attendanceRecorded,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  color: AppColors.defaultColor,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              AppStrings.thanksForShowingUpToday,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppColors.defaultColor,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            if (viewModel.requiresLocationCheck)
-              ValueListenableBuilder<UIResult<AttendanceResult>>(
-                valueListenable: viewModel.attendanceLocationResult,
-                builder: (context, result, child) {
-                  if (result.isSuccess && result.data != null) {
-                    final data = result.data;
-                    return LocationVerifiedBadge(
-                      distance: data?.distance ?? 0.0,
-                      formattedDistance: data?.formattedDistance,
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
-          ],
+        child: ValueListenableBuilder<UIResult<bool>>(
+          valueListenable: viewModel.attendanceSubmissionResult,
+          builder: (context, result, _) {
+            return result.isSuccess ? successContent() : failureContent();
+          },
         ),
       ),
+    );
+  }
+
+  Widget successContent() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          height: 150,
+          width: 150,
+          child: Image(image: AppImages.successLogo),
+        ),
+        const Text(
+          AppStrings.attendanceRecorded,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+              color: AppColors.defaultColor,
+              fontSize: 20,
+              fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          AppStrings.thanksForShowingUpToday,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: AppColors.defaultColor,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        if (viewModel.requiresLocationCheck)
+          ValueListenableBuilder<UIResult<AttendanceResult>>(
+            valueListenable: viewModel.attendanceLocationResult,
+            builder: (context, result, child) {
+              if (result.isSuccess && result.data != null) {
+                final data = result.data;
+                return LocationVerifiedBadge(
+                  distance: data?.distance ?? 0.0,
+                  formattedDistance: data?.formattedDistance,
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+      ],
+    );
+  }
+
+  Widget failureContent() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          height: 120,
+          width: 120,
+          child: AppImages.svgErrorDialogIcon,
+        ),
+        ValueListenableBuilder<UIResult<bool>>(
+          valueListenable: viewModel.attendanceSubmissionResult,
+          builder: (context, result, child) {
+            final message = result.message;
+            if (message == null || message.isEmpty) {
+              return const SizedBox.shrink();
+            }
+            return Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Column(
+                children: [
+                  const Text(
+                    'Attendance Submission failed',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.defaultColor,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    message,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: AppColors.defaultColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+        if (viewModel.requiresLocationCheck)
+          ValueListenableBuilder<UIResult<AttendanceResult>>(
+            valueListenable: viewModel.attendanceLocationResult,
+            builder: (context, result, child) {
+              if (result.isSuccess && result.data != null) {
+                final data = result.data;
+                return LocationVerifiedBadge(
+                  distance: data?.distance ?? 0.0,
+                  formattedDistance: data?.formattedDistance,
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+      ],
     );
   }
 }

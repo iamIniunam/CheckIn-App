@@ -3,6 +3,7 @@ import 'package:attendance_app/ux/shared/components/app_buttons.dart';
 import 'package:attendance_app/ux/shared/components/app_material.dart';
 import 'package:attendance_app/ux/shared/components/back_and_next_button_row.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
+import 'package:attendance_app/ux/shared/enums.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance_verification_view_model.dart';
 import 'package:flutter/material.dart';
 
@@ -76,9 +77,12 @@ class VerificationButton extends StatelessWidget {
                 enabled: viewModel.shouldEnableButton(),
                 onTap: onVerify,
                 child: Text(
-                  submissionResult.isError
-                      ? 'Retry'
-                      : viewModel.getButtonText(),
+                  viewModel.currentStep == VerificationStep.completed &&
+                          submissionResult.isError
+                      ? 'Return Home'
+                      : submissionResult.isError
+                          ? 'Retry'
+                          : viewModel.getButtonText(),
                 ),
               ),
             );

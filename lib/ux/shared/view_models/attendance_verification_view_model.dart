@@ -24,6 +24,13 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
       AppDI.getIt<MultiCampusLocationHelper>();
   final VerificationMessageProvider _messageProvider;
 
+  static const Set<String> _terminalSubmissionMessages = {
+    'qr code has expired',
+    'online code has expired',
+    'you are not registered for this course',
+    'attendance already marked for this class',
+  };
+
   ValueNotifier<UIResult<bool>> locationCheckResult =
       ValueNotifier<UIResult<bool>>(UIResult.empty());
 
@@ -40,6 +47,20 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
             messageProvider ?? DefaultVerificationMessageProvider() {
     _attendanceLocationViewModel.checkAttendanceResult
         .addListener(_onLocationResultChanged);
+  }
+
+  bool _isTerminalSubmissionError(String? message) {
+    if (message == null) return false;
+    return _terminalSubmissionMessages.contains(message.toLowerCase().trim());
+  }
+
+  bool isTerminalSubmissionMessage(String? message) =>
+      _isTerminalSubmissionError(message);
+
+  void _completeWithError(String message) {
+    attendanceSubmissionResult.value = UIResult.error(message: message);
+    _currentStep = VerificationStep.completed;
+    notifyListeners();
   }
 
   AttendanceType get attendanceType => _attendanceType;
@@ -443,9 +464,13 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        attendanceSubmissionResult.value = UIResult.error(
-            message: result.message ?? 'Failed to mark attendance');
-        notifyListeners();
+        final message = result.message ?? 'Failed to mark attendance';
+        if (_isTerminalSubmissionError(message)) {
+          _completeWithError(message);
+        } else {
+          attendanceSubmissionResult.value = UIResult.error(message: message);
+          notifyListeners();
+        }
         return false;
       }
     } else if (locStatus == LocationVerificationStatus.outOfRange) {
@@ -501,9 +526,13 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
       notifyListeners();
       return true;
     } else {
-      attendanceSubmissionResult.value = UIResult.error(
-          message: result.message ?? 'Failed to submit attendance');
-      notifyListeners();
+      final message = result.message ?? 'Failed to submit attendance';
+      if (_isTerminalSubmissionError(message)) {
+        _completeWithError(message);
+      } else {
+        attendanceSubmissionResult.value = UIResult.error(message: message);
+        notifyListeners();
+      }
       return false;
     }
   }

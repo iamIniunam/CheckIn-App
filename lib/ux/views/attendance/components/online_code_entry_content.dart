@@ -14,6 +14,8 @@ class OnlineCodeEntryContent extends StatefulWidget {
 }
 
 class _OnlineCodeEntryContentState extends State<OnlineCodeEntryContent> {
+  bool _isSubmitting = false;
+
   Future<void> handleOnlineCodeSubmission() async {
     final entered = widget.viewModel.enteredOnlineCode;
     if (entered == null || entered.trim().isEmpty) {
@@ -32,29 +34,38 @@ class _OnlineCodeEntryContentState extends State<OnlineCodeEntryContent> {
       );
       return;
     }
-
-    widget.viewModel.moveToNextStep();
+    setState(() => _isSubmitting = true);
 
     final success = await widget.viewModel.submitAttendance();
 
+    if (!mounted) return;
+    setState(() => _isSubmitting = false);
+
     if (success) {
+      // Advance through submission and completion steps
       widget.viewModel.moveToNextStep();
-    } else {
-      final message = widget
-              .viewModel.attendanceSubmissionResult.value.message ??
-          'Unable to submit attendance. Please check your code and try again.';
-      if (!mounted) return;
-      AppDialogs.showErrorDialog(
-        context: context,
-        message: message,
-        action: () {
-          if (message.contains(
-              'You are not registered for the course linked to this attendance code.')) {
-            Navigation.navigateToHomePage(context: context);
-          }
-        },
-      );
+      widget.viewModel.moveToNextStep();
+      return;
     }
+
+    final message =
+        '${widget.viewModel.attendanceSubmissionResult.value.message}. Please check your code and try again.';
+
+    // Skip dialog for terminal errors (shown on completion)
+    if (widget.viewModel.isTerminalSubmissionMessage(message)) {
+      return;
+    }
+
+    AppDialogs.showErrorDialog(
+      context: context,
+      message: message,
+      action: () {
+        if (message.contains(
+            'You are not registered for the course linked to this attendance code.')) {
+          Navigation.navigateToHomePage(context: context);
+        }
+      },
+    );
   }
 
   @override
@@ -62,25 +73,40 @@ class _OnlineCodeEntryContentState extends State<OnlineCodeEntryContent> {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 36),
-        child: TextField(
-          autofocus: true,
-          maxLength: 6,
-          decoration: const InputDecoration(
-            border: InputBorder.none,
-            hintText: 'Enter Attendance Code',
-            counterStyle: TextStyle(
-              color: AppColors.defaultColor,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              autofocus: true,
+              maxLength: 6,
+              enabled: !_isSubmitting,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                hintText: 'Enter Attendance Code',
+                counterStyle: TextStyle(
+                  color: AppColors.defaultColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              textAlign: TextAlign.center,
+              style:
+                  const TextStyle(color: AppColors.defaultColor, fontSize: 32),
+              textInputAction: TextInputAction.done,
+              textCapitalization: TextCapitalization.characters,
+              keyboardType: TextInputType.visiblePassword,
+              onChanged: (value) => widget.viewModel.onOnlineCodeEntered(value),
+              onSubmitted: (value) => handleOnlineCodeSubmission(),
             ),
-          ),
-          textAlign: TextAlign.center,
-          style: const TextStyle(color: AppColors.defaultColor, fontSize: 32),
-          textInputAction: TextInputAction.done,
-          textCapitalization: TextCapitalization.characters,
-          keyboardType: TextInputType.visiblePassword,
-          onChanged: (value) => widget.viewModel.onOnlineCodeEntered(value),
-          onSubmitted: (value) => handleOnlineCodeSubmission(),
+            if (_isSubmitting)
+              const Padding(
+                padding: EdgeInsets.only(top: 16),
+                child: CircularProgressIndicator(
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(AppColors.defaultColor),
+                ),
+              ),
+          ],
         ),
       ),
     );
