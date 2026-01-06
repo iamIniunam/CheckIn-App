@@ -48,7 +48,6 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
     super.initState();
     // Defer state changes until after the build phase completes
     WidgetsBinding.instance.addPostFrameCallback((_) {
-
       clearSearch();
       _courseSearchViewModel.clearFilter();
       _courseSearchViewModel.clearSelectedCourses();
@@ -73,7 +72,8 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
         _courseSearchViewModel.firstPageAllCourses =
             response.response?.data ?? [];
       }
-      _courseSearchViewModel.coursesPagingController.itemList?.clear(); //TODO: ask Chisom why he did this
+      _courseSearchViewModel.coursesPagingController.itemList
+          ?.clear(); //TODO: ask Chisom why he did this
       _courseSearchViewModel.coursesPagingController.itemList = [];
       _courseSearchViewModel.coursesPagingController.appendPage(
           response.response?.data ?? [],
