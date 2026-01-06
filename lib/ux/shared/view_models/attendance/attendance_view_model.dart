@@ -13,83 +13,68 @@ class AttendanceViewModel extends ChangeNotifier {
   final Api _api = AppDI.getIt<Api>();
   final QrScanViewModel _qrScanViewModel = AppDI.getIt<QrScanViewModel>();
 
-  final Map<int, List<CourseAttendanceRecord>> _courseAttendanceCache = {};
   ValueNotifier<UIResult<List<CourseAttendanceRecord>>> courseAttendanceResult =
       ValueNotifier(UIResult.empty());
-  int? _lastCourseId;
-  String? _lastStudentIdForCourse;
+
   final PagingController<int, AttendanceHistory>
       attendanceHistoryPagingController = PagingController(firstPageKey: 1);
   int currentPageForAttendanceHistory = 1;
+
+  PagingController<int, CourseAttendanceRecord>
+      courseAttendancePagingController = PagingController(firstPageKey: 1);
+  int currentPageForCourseAttendance = 1;
+
+  ValueNotifier<UIResult<AttendanceSummary>> attendanceSummaryResult =
+      ValueNotifier(UIResult.empty());
+
   ValueNotifier<UIResult<String>> markAttendanceResult =
       ValueNotifier(UIResult.empty());
 
-  Future<void> fetchCourseAttendanceRecords(
-      int courseId, String studentId) async {
-    courseAttendanceResult.value = UIResult.loading();
+  void resetCourseAttendancePaging() {
+    currentPageForCourseAttendance = 1;
+    courseAttendancePagingController.dispose();
+    courseAttendancePagingController =
+        PagingController<int, CourseAttendanceRecord>(firstPageKey: 1);
+  }
 
-    _lastCourseId = courseId;
-    _lastStudentIdForCourse = studentId;
+  Future<ApiResponse<ListDataResponse<CourseAttendanceRecord>>>
+      getPaginatedCourseAttendanceRecords(
+          {required GetCourseAttendanceRequest
+              getCourseAttendanceRequest}) async {
+    var response = await _api.attendanceApi
+        .getCourseAttendanceRecord(getCourseAttendanceRequest);
+    return response;
+  }
 
-    try {
-      final request = GetCourseAttendanceRequest(
+  Future<ApiResponse<ListDataResponse<CourseAttendanceRecord>>>
+      getAttendanceSummary({
+    required int courseId,
+    required String studentId,
+  }) async {
+    attendanceSummaryResult.value = UIResult.loading();
+    final response = await _api.attendanceApi.getCourseAttendanceRecord(
+      GetCourseAttendanceRequest(
         courseId: courseId,
         studentId: studentId,
+        pageIndex: 1,
+        pageSize: 1,
+      ),
+    );
+
+    if (response.extra != null) {
+      attendanceSummaryResult.value = UIResult.success(
+        data: response.extra as AttendanceSummary,
       );
-
-      final response =
-          await _api.attendanceApi.getCourseAttendanceRecord(request);
-
-      if (response.status == ApiResponseStatus.Success &&
-          response.response != null) {
-        final records = response.response as List<CourseAttendanceRecord>;
-        _courseAttendanceCache[courseId] = records;
-
-        courseAttendanceResult.value =
-            UIResult.success(data: records, message: response.message);
-        notifyListeners();
-      } else {
-        _courseAttendanceCache[courseId] = [];
-        courseAttendanceResult.value = UIResult.error(
-          message: response.message ?? 'Failed to load attendance records',
-        );
-      }
-    } catch (e) {
-      _courseAttendanceCache[courseId] = [];
-      courseAttendanceResult.value = UIResult.error(
-        message: 'An unexpected error occurred: ${e.toString()}',
-      );
+    } else {
+      attendanceSummaryResult.value =
+          UIResult.error(message: 'Failed to load attendance summary');
     }
+
+    return response;
   }
 
-  List<CourseAttendanceRecord> getCourseAttendanceRecords(int courseId) {
-    return _courseAttendanceCache[courseId] ?? [];
-  }
-
-  int totalClasses(int courseId) {
-    return getCourseAttendanceRecords(courseId).length;
-  }
-
-  int attendedClasses(int courseId) {
-    return getCourseAttendanceRecords(courseId)
-        .where((record) => record.isPresent)
-        .length;
-  }
-
-  int missedClasses(int courseId) {
-    return totalClasses(courseId) - attendedClasses(courseId);
-  }
-
-  int attendancePercentage(int courseId) {
-    final total = totalClasses(courseId);
-    final attended = attendedClasses(courseId);
-    return total > 0 ? ((attended / total) * 100).toInt() : 0;
-  }
-
-  Future<void> refreshCourseAttendance() async {
-    if (_lastCourseId == null || _lastStudentIdForCourse == null) return;
-    await fetchCourseAttendanceRecords(
-        _lastCourseId ?? 0, _lastStudentIdForCourse ?? '');
+  void resetAttendanceSummary() {
+    attendanceSummaryResult.value = UIResult.empty();
   }
 
   Future<ApiResponse<ListDataResponse<AttendanceHistory>>>
@@ -190,17 +175,8 @@ class AttendanceViewModel extends ChangeNotifier {
   }
 
   void clear() {
-    _courseAttendanceCache.clear();
-    _lastCourseId = null;
-    _lastStudentIdForCourse = null;
     courseAttendanceResult.value = UIResult.empty();
-
-    // if (_isListenerAttachedForAttendanceHistory) {
-    //   attendanceHistoryPagingController
-    //       .removePageRequestListener(_fetchAttendanceHistoryPage);
-    // }
     currentPageForAttendanceHistory = 1;
-
     markAttendanceResult.value = UIResult.empty();
     notifyListeners();
   }

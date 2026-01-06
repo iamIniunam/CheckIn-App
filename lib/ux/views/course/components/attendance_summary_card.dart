@@ -1,3 +1,4 @@
+import 'package:attendance_app/ux/shared/components/small_circular_progress_indicator.dart';
 import 'package:attendance_app/ux/shared/resources/app_colors.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance/attendance_view_model.dart';
 import 'package:flutter/material.dart';
@@ -14,62 +15,78 @@ class AttendanceSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final totalClasses = viewModel.totalClasses(courseId);
-    final attendedClasses = viewModel.attendedClasses(courseId);
-    final missedClasses = viewModel.missedClasses(courseId);
-    final attendancePercentage = viewModel.attendancePercentage(courseId);
+    return ValueListenableBuilder(
+      valueListenable: viewModel.attendanceSummaryResult,
+      builder: (context, result, _) {
+        if (result.isLoading) {
+          return const Padding(
+            padding: EdgeInsets.all(16),
+            child: SmallCircularProgressIndicator(),
+          );
+        }
 
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.defaultColor),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
+        if (result.isError) {
+          return const SizedBox.shrink();
+        }
+
+        final summary = result.data;
+        if (summary == null) {
+          return const SizedBox.shrink();
+        }
+
+        return Container(
+          margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.defaultColor),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '$attendancePercentage%',
-                style: const TextStyle(
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.defaultColor,
-                ),
+              Column(
+                children: [
+                  Text(
+                    '${summary.attendancePercentage}%',
+                    style: const TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.defaultColor,
+                    ),
+                  ),
+                  const Text(
+                    'Attendance Rate',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: AppColors.defaultColor,
+                    ),
+                  ),
+                ],
               ),
-              const Text(
-                'Attendance Rate',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: AppColors.defaultColor,
-                ),
+              const SizedBox(width: 8),
+              StatColumn(
+                icon: Icons.class_rounded,
+                value: summary.totalClasses.toString(),
+                label: 'Total',
+                color: AppColors.totalClassesColor,
+              ),
+              StatColumn(
+                icon: Icons.check_circle_rounded,
+                value: summary.attendedClasses.toString(),
+                label: 'Present',
+                color: AppColors.presentColor,
+              ),
+              StatColumn(
+                icon: Icons.cancel_rounded,
+                value: summary.missedClasses.toString(),
+                label: 'Absent',
+                color: AppColors.absentColor,
               ),
             ],
           ),
-          const SizedBox(width: 8),
-          StatColumn(
-            icon: Icons.class_rounded,
-            value: totalClasses.toString(),
-            label: 'Total',
-            color: AppColors.totalClassesColor,
-          ),
-          StatColumn(
-            icon: Icons.check_circle_rounded,
-            value: attendedClasses.toString(),
-            label: 'Present',
-            color: AppColors.presentColor,
-          ),
-          StatColumn(
-            icon: Icons.cancel_rounded,
-            value: missedClasses.toString(),
-            label: 'Absent',
-            color: AppColors.absentColor,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

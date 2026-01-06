@@ -5,6 +5,7 @@ import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/ux/shared/components/empty_state_widget.dart';
 import 'package:attendance_app/ux/shared/components/page_state_indicator.dart';
 import 'package:attendance_app/ux/shared/components/small_circular_progress_indicator.dart';
+import 'package:attendance_app/ux/shared/resources/app_constants.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance/attendance_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
@@ -42,7 +43,7 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
       getAttendanceHistoryRequest: GetAttendanceHistoryRequest(
         studentId: studentId ?? '',
         pageIndex: _attendanceViewModel.currentPageForAttendanceHistory,
-        pageSize: 10,
+        pageSize: AppConstants.defaultPageSize,
       ),
     );
     if (response.status == ApiResponseStatus.Success) {
@@ -60,7 +61,7 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
       getAttendanceHistoryRequest: GetAttendanceHistoryRequest(
         studentId: studentId ?? '',
         pageIndex: _attendanceViewModel.currentPageForAttendanceHistory,
-        pageSize: 10,
+        pageSize: AppConstants.defaultPageSize,
       ),
     );
     if (response.status == ApiResponseStatus.Success) {

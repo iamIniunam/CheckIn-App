@@ -8,6 +8,7 @@ class ApiResponse<T> {
   ApiResponseStatus? status;
   int? statusCode;
   String? message;
+  dynamic extra;
 
   ApiResponse({
     this.response,

@@ -239,3 +239,26 @@ class AttendanceHistory extends Serializable {
     };
   }
 }
+
+class AttendanceSummary {
+  final int totalClasses;
+  final int attendedClasses;
+  final int missedClasses;
+  final int attendancePercentage;
+
+  AttendanceSummary({
+    required this.totalClasses,
+    required this.attendedClasses,
+    required this.missedClasses,
+    required this.attendancePercentage,
+  });
+
+  factory AttendanceSummary.fromJson(Map<String, dynamic> json) {
+    return AttendanceSummary(
+      totalClasses: json['totalClasses'] ?? 0,
+      attendedClasses: json['attendedClasses'] ?? 0,
+      missedClasses: json['missedClasses'] ?? 0,
+      attendancePercentage: json['attendancePercentage'] ?? 0,
+    );
+  }
+}

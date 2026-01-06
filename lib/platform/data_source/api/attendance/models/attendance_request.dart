@@ -3,10 +3,14 @@ import 'package:attendance_app/platform/data_source/api/api_base_models.dart';
 class GetCourseAttendanceRequest extends Serializable {
   final int? courseId;
   final String? studentId;
+  final num? pageIndex;
+  final num? pageSize;
 
   GetCourseAttendanceRequest({
     this.courseId,
     this.studentId,
+    this.pageIndex,
+    this.pageSize,
   });
 
   @override
@@ -14,6 +18,8 @@ class GetCourseAttendanceRequest extends Serializable {
     return {
       'courseId': courseId,
       'studentId': studentId,
+      'pageIndex': pageIndex,
+      'pageSize': pageSize,
     };
   }
 }

@@ -11,7 +11,8 @@ class AttendanceApi extends ApiCore {
   final _markAttendanceBasePath = '/student/markAttendance';
   final _getAttendanceHistoryBasePath = '/student/getAttendanceHistory';
 
-  Future<ApiResponse<List<CourseAttendanceRecord>>> getCourseAttendanceRecord(
+  Future<ApiResponse<ListDataResponse<CourseAttendanceRecord>>>
+      getCourseAttendanceRecord(
     GetCourseAttendanceRequest request,
   ) async {
     final response = await requester.makeAppRequest(
@@ -19,39 +20,27 @@ class AttendanceApi extends ApiCore {
         path:
             '$_courseAttendanceBasePath/${request.courseId}/${request.studentId}',
         requestType: HttpVerb.GET,
-        body: {},
+        body: request.toMap(),
       ),
     );
 
-    if (response.status == ApiResponseStatus.Success) {
-      try {
-        final data = response.response['data'];
-        if (data != null && data is List) {
-          final records = (data)
-              .map((json) =>
-                  CourseAttendanceRecord.fromJson(json as Map<String, dynamic>))
-              .toList();
-
-          return ApiResponse(
-            response: records,
-            status: response.status,
-            statusCode: response.statusCode,
-            message: response.message,
-          );
-        }
-      } catch (e) {
-        return ApiResponse(
-          status: ApiResponseStatus.Error,
-          message: 'Failed to parse attendance records',
-        );
-      }
+    AttendanceSummary? summary;
+    final rawSummary = response.response?['summary'];
+    if (rawSummary is Map<String, dynamic>) {
+      summary = AttendanceSummary.fromJson(rawSummary);
     }
 
+    final data = ListDataResponse<CourseAttendanceRecord>.fromJson(
+      response.response,
+      (json) => CourseAttendanceRecord.fromJson(json),
+    );
+
     return ApiResponse(
+      response: data,
       status: response.status,
       statusCode: response.statusCode,
       message: response.message ?? 'Failed to get attendance record',
-    );
+    )..extra = summary;
   }
 
   Future<ApiResponse<MarkAttendanceResponse>> markAttendance(
