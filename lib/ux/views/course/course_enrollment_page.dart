@@ -46,18 +46,17 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
   @override
   void initState() {
     super.initState();
-    // Defer state changes until after the build phase completes
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      clearSearch();
-      _courseSearchViewModel.clearFilter();
-      _courseSearchViewModel.clearSelectedCourses();
-    });
     _courseSearchViewModel.coursesPagingController
         .addPageRequestListener((pageKey) {
       _courseSearchViewModel.currentPageForCourses = pageKey;
       if (searchController.text.isEmpty || pageKey != 1) {
         loadNextPageForCourses();
       }
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      clearSearch();
+      _courseSearchViewModel.clearFilter();
+      _courseSearchViewModel.clearSelectedCourses();
     });
   }
 
@@ -66,18 +65,25 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
     var response = await _courseSearchViewModel.getPagedCourses(
         getAllCoursesRequest: getAllCoursesRequest());
     if (response.status == ApiResponseStatus.Success) {
+      final data = response.response?.data ?? [];
+      final isLastPage = response.response?.isLastPage() ?? true;
+
       if (searchController.text.isEmpty &&
           !_courseSearchViewModel.hasActiveFilter &&
-          (response.response?.data?.isNotEmpty ?? false)) {
-        _courseSearchViewModel.firstPageAllCourses =
-            response.response?.data ?? [];
+          data.isNotEmpty) {
+        _courseSearchViewModel.firstPageAllCourses = data;
       }
       _courseSearchViewModel.coursesPagingController.itemList
           ?.clear(); //TODO: ask Chisom why he did this
       _courseSearchViewModel.coursesPagingController.itemList = [];
-      _courseSearchViewModel.coursesPagingController.appendPage(
-          response.response?.data ?? [],
-          _courseSearchViewModel.currentPageForCourses + 1);
+      if (isLastPage) {
+        _courseSearchViewModel.coursesPagingController.appendLastPage(data);
+      } else {
+        _courseSearchViewModel.coursesPagingController.appendPage(
+          data,
+          _courseSearchViewModel.currentPageForCourses + 1,
+        );
+      }
     }
   }
 
@@ -85,33 +91,32 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
     var response = await _courseSearchViewModel.getPagedCourses(
         getAllCoursesRequest: getAllCoursesRequest());
     if (response.status == ApiResponseStatus.Success) {
-      if (response.response?.data?.isNotEmpty == true) {
-        try {
-          if (_courseSearchViewModel.currentPageForCourses == 1) {
-            _courseSearchViewModel.coursesPagingController.itemList?.clear();
-            _courseSearchViewModel.coursesPagingController.itemList = [];
-            if (_courseSearchViewModel.firstPageAllCourses.isEmpty &&
-                searchController.text.isEmpty &&
-                !_courseSearchViewModel.hasActiveFilter) {
-              _courseSearchViewModel.firstPageAllCourses =
-                  response.response?.data ?? [];
-            }
-          }
-          _courseSearchViewModel.coursesPagingController.appendPage(
-              response.response?.data ?? [],
-              _courseSearchViewModel.currentPageForCourses + 1);
-        } catch (e) {
-          if (kDebugMode) {
-            print(e);
+      final data = response.response?.data ?? [];
+      final isLastPage = response.response?.isLastPage() ?? true;
+
+      try {
+        if (_courseSearchViewModel.currentPageForCourses == 1) {
+          _courseSearchViewModel.coursesPagingController.itemList?.clear();
+          _courseSearchViewModel.coursesPagingController.itemList = [];
+
+          if (_courseSearchViewModel.firstPageAllCourses.isEmpty &&
+              searchController.text.isEmpty &&
+              !_courseSearchViewModel.hasActiveFilter) {
+            _courseSearchViewModel.firstPageAllCourses = data;
           }
         }
-      } else {
-        _courseSearchViewModel.coursesPagingController
-            .appendLastPage(response.response?.data ?? []);
-      }
-      if (response.response?.isLastPage() == true) {
-        _courseSearchViewModel.coursesPagingController
-            .appendLastPage(response.response?.data ?? []);
+        if (isLastPage || data.isEmpty) {
+          _courseSearchViewModel.coursesPagingController.appendLastPage(data);
+        } else {
+          _courseSearchViewModel.coursesPagingController.appendPage(
+            data,
+            _courseSearchViewModel.currentPageForCourses + 1,
+          );
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print(e);
+        }
       }
     } else {
       _courseSearchViewModel.coursesPagingController.error =
@@ -142,7 +147,12 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
 
   void onSearchChanged(String value) {
     _searchDebounce?.cancel();
-    if (value.length < AppConstants.defaultMinCharactersToSearch) {
+    final trimmedValue = value.trim();
+    if (trimmedValue.isEmpty) {
+      clearSearch();
+      return;
+    }
+    if (trimmedValue.length < AppConstants.defaultMinCharactersToSearch) {
       return;
     }
     _searchDebounce = Timer(
@@ -150,11 +160,7 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
           milliseconds: AppConstants.defaultSearchDebounceTimeInMilliSeconds),
       () async {
         if (!mounted) return;
-        if (value.trim().isEmpty) {
-          resetCourses();
-        } else {
-          searchCourses();
-        }
+        searchCourses();
       },
     );
   }
@@ -163,17 +169,12 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
     _searchDebounce?.cancel();
     searchController.clear();
     resetCourses();
+    if (mounted) setState(() {});
   }
 
   void resetCourses() {
-    if (_courseSearchViewModel.firstPageAllCourses.isNotEmpty &&
-        searchController.text.isEmpty &&
-        !_courseSearchViewModel.hasActiveFilter) {
-      _courseSearchViewModel.coursesPagingController.itemList =
-          _courseSearchViewModel.firstPageAllCourses;
-    } else {
-      refreshCourses();
-    }
+    _courseSearchViewModel.currentPageForCourses = 1;
+    _courseSearchViewModel.coursesPagingController.refresh();
     setState(() {});
   }
 
@@ -331,7 +332,11 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
         ),
       ],
       body: RefreshIndicator(
-        onRefresh: refreshCourses,
+        onRefresh: () async {
+          _courseSearchViewModel.currentPageForCourses = 1;
+          _courseSearchViewModel.coursesPagingController.refresh();
+        },
+        // onRefresh: refreshCourses,
         child: Column(
           children: [
             SearchAndFilterBar(
@@ -340,7 +345,9 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
               onChanged: onSearchChanged,
               onSearchSubmitted: (value) {
                 _searchDebounce?.cancel();
-                searchCourses();
+                if (value.trim().isNotEmpty) {
+                  searchCourses();
+                }
                 Utils.hideKeyboard();
               },
               onFilterTap: () {
@@ -354,13 +361,15 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
                     onApply: (level, semester, school) {
                       _courseSearchViewModel.applyFilter(
                           level, semester, school);
-                      refreshCourses();
+                      _courseSearchViewModel.currentPageForCourses = 1;
+                      _courseSearchViewModel.coursesPagingController.refresh();
                       Navigation.back(context: context);
                     },
                     onReset: () {
                       _courseSearchViewModel.clearFilter();
                       Navigation.back(context: context);
-                      refreshCourses();
+                      _courseSearchViewModel.currentPageForCourses = 1;
+                      _courseSearchViewModel.coursesPagingController.refresh();
                     },
                   ),
                 );
