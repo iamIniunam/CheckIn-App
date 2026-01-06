@@ -20,9 +20,7 @@ class AttendanceViewModel extends ChangeNotifier {
   String? _lastStudentIdForCourse;
   final PagingController<int, AttendanceHistory>
       attendanceHistoryPagingController = PagingController(firstPageKey: 1);
-  int _currentPageForAttendanceHistory = 1;
-  bool _isListenerAttachedForAttendanceHistory = false;
-  String? _lastStudentIdForHistory;
+  int currentPageForAttendanceHistory = 1;
   ValueNotifier<UIResult<String>> markAttendanceResult =
       ValueNotifier(UIResult.empty());
 
@@ -95,76 +93,12 @@ class AttendanceViewModel extends ChangeNotifier {
   }
 
   Future<ApiResponse<ListDataResponse<AttendanceHistory>>>
-      getPagedAttendanceHistory({
-    required String studentId,
-    required int pageIndex,
-    int pageSize = 10,
-  }) async {
-    final request = GetAttendanceHistoryRequest(
-      studentId: studentId,
-      pageIndex: pageIndex,
-      pageSize: pageSize,
-    );
-
-    return await _api.attendanceApi.getAttendanceHistory(request);
-  }
-
-  void initializeAttendanceHistoryPagination(String studentId) {
-    if (_isListenerAttachedForAttendanceHistory &&
-        _lastStudentIdForHistory == studentId) {
-      return;
-    }
-
-    _lastStudentIdForHistory = studentId;
-    _currentPageForAttendanceHistory = 1;
-
-    if (_isListenerAttachedForAttendanceHistory) {
-      attendanceHistoryPagingController
-          .removePageRequestListener(_fetchAttendanceHistoryPage);
-    }
-
-    attendanceHistoryPagingController.refresh();
-    attendanceHistoryPagingController
-        .addPageRequestListener(_fetchAttendanceHistoryPage);
-    _isListenerAttachedForAttendanceHistory = true;
-  }
-
-  Future<void> _fetchAttendanceHistoryPage(int pageKey) async {
-    if (_lastStudentIdForHistory == null) return;
-
-    try {
-      final response = await getPagedAttendanceHistory(
-        studentId: _lastStudentIdForHistory ?? '',
-        pageIndex: pageKey,
-        pageSize: 10,
-      );
-
-      if (response.status == ApiResponseStatus.Success) {
-        final listResponse = response.response;
-        final isLastPage = listResponse?.isLastPage() ?? true;
-        final newItems = listResponse?.data ?? [];
-
-        if (isLastPage) {
-          attendanceHistoryPagingController.appendLastPage(newItems);
-        } else {
-          _currentPageForAttendanceHistory = pageKey + 1;
-          attendanceHistoryPagingController.appendPage(
-            newItems,
-            _currentPageForAttendanceHistory,
-          );
-        }
-      } else {
-        attendanceHistoryPagingController.error =
-            response.message ?? 'Failed to load attendance history';
-      }
-    } catch (e) {
-      attendanceHistoryPagingController.error = e;
-    }
-  }
-
-  void refreshAttendanceHistory() async {
-    _currentPageForAttendanceHistory = 1;
-    attendanceHistoryPagingController.refresh();
+      getPaginatedAttendanceHistory(
+          {required GetAttendanceHistoryRequest
+              getAttendanceHistoryRequest}) async {
+    var response = await _api.attendanceApi
+        .getAttendanceHistory(getAttendanceHistoryRequest);
+    return response;
   }
 
   Future<void> markAttendanceAuthorized({
@@ -255,72 +189,17 @@ class AttendanceViewModel extends ChangeNotifier {
     return uuid ?? code;
   }
 
-  Map<String, List<AttendanceHistory>> groupHistoryByDate(
-      List<AttendanceHistory> hsitory) {
-    final Map<String, List<AttendanceHistory>> grouped = {
-      'Today': [],
-      'Yesterday': [],
-      'Past Week': [],
-      'Older': [],
-    };
-
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-    final sevenDaysAgo = today.subtract(const Duration(days: 7));
-
-    for (final record in hsitory) {
-      final recordDate = record.attendanceDate;
-      if (recordDate == null) {
-        grouped['Older']?.add(record);
-        continue;
-      }
-
-      final recordDay = DateTime(
-        recordDate.year,
-        recordDate.month,
-        recordDate.day,
-      );
-
-      if (recordDay.isAtSameMomentAs(today)) {
-        grouped['Today']?.add(record);
-      } else if (recordDay.isAtSameMomentAs(yesterday)) {
-        grouped['Yesterday']?.add(record);
-      } else if (recordDay.isAfter(sevenDaysAgo) &&
-          recordDay.isBefore(yesterday)) {
-        grouped['Past Week']?.add(record);
-      } else {
-        grouped['Older']?.add(record);
-      }
-    }
-
-    grouped.removeWhere((key, value) => value.isEmpty);
-
-    // Sort records within each period by attendance date (latest first)
-    for (final key in grouped.keys) {
-      grouped[key]?.sort((a, b) {
-        final dateA = a.attendanceDate ?? DateTime(1970);
-        final dateB = b.attendanceDate ?? DateTime(1970);
-        return dateB.compareTo(dateA); // Latest first
-      });
-    }
-
-    return grouped;
-  }
-
   void clear() {
     _courseAttendanceCache.clear();
     _lastCourseId = null;
     _lastStudentIdForCourse = null;
     courseAttendanceResult.value = UIResult.empty();
 
-    if (_isListenerAttachedForAttendanceHistory) {
-      attendanceHistoryPagingController
-          .removePageRequestListener(_fetchAttendanceHistoryPage);
-    }
-    _isListenerAttachedForAttendanceHistory = false;
-    _currentPageForAttendanceHistory = 1;
-    _lastStudentIdForHistory = null;
+    // if (_isListenerAttachedForAttendanceHistory) {
+    //   attendanceHistoryPagingController
+    //       .removePageRequestListener(_fetchAttendanceHistoryPage);
+    // }
+    currentPageForAttendanceHistory = 1;
 
     markAttendanceResult.value = UIResult.empty();
     notifyListeners();

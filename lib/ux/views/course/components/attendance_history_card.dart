@@ -15,12 +15,6 @@ class AttendanceHistoryCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
       child: AppMaterial(
-        // onTap: () {
-        //   Navigation.navigateToScreen(
-        //     context: context,
-        //     screen: CourseDetailsPage(course: course),
-        //   );
-        // },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
@@ -34,9 +28,7 @@ class AttendanceHistoryCard extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      history.attendanceDate
-                              ?.friendlyMonthShort()
-                              .toUpperCase() ??
+                      history.classDate?.friendlyMonthShort().toUpperCase() ??
                           '',
                       style: const TextStyle(
                           color: AppColors.defaultColor,
@@ -45,7 +37,7 @@ class AttendanceHistoryCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      history.attendanceDate?.day.toString() ?? '',
+                      history.classDate?.day.toString() ?? '',
                       style: const TextStyle(
                         color: AppColors.defaultColor,
                         fontSize: 16,

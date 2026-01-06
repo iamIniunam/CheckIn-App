@@ -7,7 +7,6 @@ import 'package:attendance_app/ux/navigation/navigation.dart';
 import 'package:attendance_app/ux/navigation/navigation_host_page.dart';
 import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/resources/app_theme.dart';
-import 'package:attendance_app/ux/shared/view_models/attendance/attendance_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
 import 'package:attendance_app/ux/views/onboarding/login_page.dart';
@@ -47,7 +46,6 @@ class _EntryPageState extends State<EntryPage> {
   final _manager = AppDI.getIt<PreferenceManager>();
   final _authViewModel = AppDI.getIt<AuthViewModel>();
   final _courseViewModel = AppDI.getIt<CourseViewModel>();
-  final _attendanceViewModel = AppDI.getIt<AttendanceViewModel>();
 
   @override
   void initState() {
@@ -58,7 +56,6 @@ class _EntryPageState extends State<EntryPage> {
       if (studentId.isNotEmpty) {
         try {
           await _courseViewModel.loadRegisteredCourses(studentId);
-          _attendanceViewModel.initializeAttendanceHistoryPagination(studentId);
         } catch (e, stack) {
           debugPrint(
               'Error loading courses or initializing attendance history: $e\n$stack');

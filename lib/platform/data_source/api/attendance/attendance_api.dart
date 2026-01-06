@@ -113,28 +113,13 @@ class AttendanceApi extends ApiCore {
       ),
     );
 
-    if (response.status == ApiResponseStatus.Success) {
-      try {
-        final listResponse = ListDataResponse<AttendanceHistory>.fromJson(
-          response.response,
-          (json) => AttendanceHistory.fromJson(json),
-        );
-
-        return ApiResponse(
-          response: listResponse,
-          status: response.status,
-          statusCode: response.statusCode,
-          message: response.message,
-        );
-      } catch (e) {
-        return ApiResponse(
-          status: ApiResponseStatus.Error,
-          message: 'Failed to parse attendance history',
-        );
-      }
-    }
+    final data = ListDataResponse<AttendanceHistory>.fromJson(
+      response.response,
+      (json) => AttendanceHistory.fromJson(json),
+    );
 
     return ApiResponse(
+      response: data,
       status: response.status,
       statusCode: response.statusCode,
       message: response.message ?? 'Failed to get attendance history',

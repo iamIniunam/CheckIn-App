@@ -163,4 +163,5 @@ class AppStrings {
 
   static const cancel = 'Cancel';
   static const alert = 'Alert';
+  static const somethingWentWrong = "Something went wrong";
 }
