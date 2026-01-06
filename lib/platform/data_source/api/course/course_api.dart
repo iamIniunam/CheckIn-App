@@ -13,34 +13,39 @@ class CourseApi extends ApiCore {
   final _registeredCoursesBasePath = '/student/getRegisteredCourses';
   final _dropCourseBasePath = '/student/dropCourse';
 
-  Future<ApiResponse<List<Course>>> getAllCourses() async {
+  Future<ApiResponse<ListDataResponse<Course>>> getAllCourses(
+      {required GetAllCoursesRequest getAllCoursesRequest}) async {
     final response = await requester.makeAppRequest(
       apiEndPoint: ApiEndPoint.createApiEndpoint(
         path: _courseBasePath,
         requestType: HttpVerb.GET,
-        body: {},
+        body: getAllCoursesRequest.toMap(),
       ),
     );
 
     if (response.status == ApiResponseStatus.Success) {
       try {
-        final data = response.response['data'];
-        if (data != null && data is List) {
-          final courses = (data)
-              .map((json) => Course.fromJson(json as Map<String, dynamic>))
-              .toList();
+        final data = ListDataResponse<Course>.fromJson(
+          response.response,
+          (json) => Course.fromJson(json),
+        );
 
-          // Assign stable, visually-distinct colors to courses so the UI
-          // doesn't render every course with the same background color.
-          final coloredCourses = Course.assignUniqueColors(courses);
+        final colouredCourses = Course.assignUniqueColors(data.data ?? []);
 
-          return ApiResponse(
-            response: coloredCourses,
-            status: response.status,
-            statusCode: response.statusCode,
-            message: response.message,
-          );
-        }
+        final colouredData = ListDataResponse<Course>(
+          data: colouredCourses,
+          pageSize: data.pageSize,
+          totalNumberOfPages: data.totalNumberOfPages,
+          totalNumberOfRecords: data.totalNumberOfRecords,
+          pageNumber: data.pageNumber,
+        );
+
+        return ApiResponse(
+          response: colouredData,
+          status: response.status,
+          statusCode: response.statusCode,
+          message: response.message,
+        );
       } catch (e) {
         return ApiResponse(
           status: ApiResponseStatus.Error,

@@ -2,6 +2,9 @@ class AppConstants {
   AppConstants._();
 
   static const appUser = 'app.user';
+  static const defaultPageSize = 10;
+  static const defaultMinCharactersToSearch = 3;
+  static const defaultSearchDebounceTimeInMilliSeconds = 300;
 
   static const int requiredCreditHours = 18;
   static const List<String> schools = [

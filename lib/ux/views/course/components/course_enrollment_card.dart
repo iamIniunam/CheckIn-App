@@ -7,12 +7,12 @@ import 'package:flutter/material.dart';
 class CourseEnrollmentCard extends StatelessWidget {
   const CourseEnrollmentCard({
     super.key,
-    required this.semesterCourse,
+    required this.course,
     this.isSelected = false,
     required this.onTap,
   });
 
-  final Course semesterCourse;
+  final Course course;
   final bool isSelected;
   final VoidCallback? onTap;
 
@@ -33,7 +33,7 @@ class CourseEnrollmentCard extends StatelessWidget {
           padding: const EdgeInsets.all(8),
           children: [
             Text(
-              '${semesterCourse.courseCode} (${(semesterCourse.creditHours).toString()})',
+              '${course.courseCode} (${(course.creditHours).toString()})',
               style: const TextStyle(
                 color: AppColors.defaultColor,
                 fontSize: 16,
@@ -41,14 +41,14 @@ class CourseEnrollmentCard extends StatelessWidget {
               ),
             ),
             Text(
-              semesterCourse.courseTitle ?? '',
+              course.courseTitle ?? '',
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 color: AppColors.defaultColor,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            SingleSchool(school: semesterCourse.school ?? ''),
+            SingleSchool(school: course.school ?? ''),
           ],
         ),
       ),

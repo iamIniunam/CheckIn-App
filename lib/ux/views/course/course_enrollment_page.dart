@@ -1,3 +1,5 @@
+import 'package:attendance_app/platform/data_source/api/api.dart';
+import 'package:attendance_app/platform/data_source/api/course/models/course_request.dart';
 import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/platform/utils/general_utils.dart';
 import 'package:attendance_app/ux/navigation/navigation.dart';
@@ -17,6 +19,7 @@ import 'package:attendance_app/ux/views/course/components/course_search_state_wi
 import 'package:attendance_app/ux/views/course/components/search_and_filter_bar.dart';
 import 'package:attendance_app/ux/views/course/course_registration_info_bottom_sheet.dart';
 import 'package:attendance_app/ux/views/course/filter_courses_bottom_page.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -43,28 +46,135 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
   @override
   void initState() {
     super.initState();
-    _courseSearchViewModel.clearSearch();
-    _courseSearchViewModel.clearFilter();
-    _courseSearchViewModel.clearSelectedCourses();
-    _courseSearchViewModel.loadAllCourses();
+    // Defer state changes until after the build phase completes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+
+      clearSearch();
+      _courseSearchViewModel.clearFilter();
+      _courseSearchViewModel.clearSelectedCourses();
+    });
+    _courseSearchViewModel.coursesPagingController
+        .addPageRequestListener((pageKey) {
+      _courseSearchViewModel.currentPageForCourses = pageKey;
+      if (searchController.text.isEmpty || pageKey != 1) {
+        loadNextPageForCourses();
+      }
+    });
   }
 
-  Future<void> refreshAllCourses() async {
-    _courseSearchViewModel.reloadAllCourses();
+  Future<void> refreshCourses() async {
+    _courseSearchViewModel.currentPageForCourses = 1;
+    var response = await _courseSearchViewModel.getPagedCourses(
+        getAllCoursesRequest: getAllCoursesRequest());
+    if (response.status == ApiResponseStatus.Success) {
+      if (searchController.text.isEmpty &&
+          !_courseSearchViewModel.hasActiveFilter &&
+          (response.response?.data?.isNotEmpty ?? false)) {
+        _courseSearchViewModel.firstPageAllCourses =
+            response.response?.data ?? [];
+      }
+      _courseSearchViewModel.coursesPagingController.itemList?.clear(); //TODO: ask Chisom why he did this
+      _courseSearchViewModel.coursesPagingController.itemList = [];
+      _courseSearchViewModel.coursesPagingController.appendPage(
+          response.response?.data ?? [],
+          _courseSearchViewModel.currentPageForCourses + 1);
+    }
+  }
+
+  Future<void> loadNextPageForCourses() async {
+    var response = await _courseSearchViewModel.getPagedCourses(
+        getAllCoursesRequest: getAllCoursesRequest());
+    if (response.status == ApiResponseStatus.Success) {
+      if (response.response?.data?.isNotEmpty == true) {
+        try {
+          if (_courseSearchViewModel.currentPageForCourses == 1) {
+            _courseSearchViewModel.coursesPagingController.itemList?.clear();
+            _courseSearchViewModel.coursesPagingController.itemList = [];
+            if (_courseSearchViewModel.firstPageAllCourses.isEmpty &&
+                searchController.text.isEmpty &&
+                !_courseSearchViewModel.hasActiveFilter) {
+              _courseSearchViewModel.firstPageAllCourses =
+                  response.response?.data ?? [];
+            }
+          }
+          _courseSearchViewModel.coursesPagingController.appendPage(
+              response.response?.data ?? [],
+              _courseSearchViewModel.currentPageForCourses + 1);
+        } catch (e) {
+          if (kDebugMode) {
+            print(e);
+          }
+        }
+      } else {
+        _courseSearchViewModel.coursesPagingController
+            .appendLastPage(response.response?.data ?? []);
+      }
+      if (response.response?.isLastPage() == true) {
+        _courseSearchViewModel.coursesPagingController
+            .appendLastPage(response.response?.data ?? []);
+      }
+    } else {
+      _courseSearchViewModel.coursesPagingController.error =
+          response.response?.message ?? AppStrings.somethingWentWrong;
+    }
+  }
+
+  GetAllCoursesRequest getAllCoursesRequest() {
+    return GetAllCoursesRequest(
+      pageIndex: _courseSearchViewModel.currentPageForCourses,
+      pageSize: AppConstants.defaultPageSize,
+      searchQuery: searchController.text.trim(),
+      level: _courseSearchViewModel.selectedLevel,
+      semester: _courseSearchViewModel.selectedSemester,
+      school: _courseSearchViewModel.selectedSchool,
+    );
+  }
+
+  bool isSearching = false;
+
+  Future<void> searchCourses() async {
+    if (isSearching) return;
+    isSearching = true;
+    await refreshCourses();
+    setState(() {});
+    isSearching = false;
   }
 
   void onSearchChanged(String value) {
     _searchDebounce?.cancel();
-    _searchDebounce = null;
-    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
-      if (!mounted) return;
-      _courseSearchViewModel.searchCourses(value.trim());
-    });
+    if (value.length < AppConstants.defaultMinCharactersToSearch) {
+      return;
+    }
+    _searchDebounce = Timer(
+      const Duration(
+          milliseconds: AppConstants.defaultSearchDebounceTimeInMilliSeconds),
+      () async {
+        if (!mounted) return;
+        if (value.trim().isEmpty) {
+          resetCourses();
+        } else {
+          searchCourses();
+        }
+      },
+    );
   }
 
   void clearSearch() {
+    _searchDebounce?.cancel();
     searchController.clear();
-    _courseSearchViewModel.clearSearch();
+    resetCourses();
+  }
+
+  void resetCourses() {
+    if (_courseSearchViewModel.firstPageAllCourses.isNotEmpty &&
+        searchController.text.isEmpty &&
+        !_courseSearchViewModel.hasActiveFilter) {
+      _courseSearchViewModel.coursesPagingController.itemList =
+          _courseSearchViewModel.firstPageAllCourses;
+    } else {
+      refreshCourses();
+    }
+    setState(() {});
   }
 
   Future<void> onConfirmPressed() async {
@@ -221,7 +331,7 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
         ),
       ],
       body: RefreshIndicator(
-        onRefresh: refreshAllCourses,
+        onRefresh: refreshCourses,
         child: Column(
           children: [
             SearchAndFilterBar(
@@ -229,8 +339,8 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
               searchController: searchController,
               onChanged: onSearchChanged,
               onSearchSubmitted: (value) {
-                if (value.trim().isEmpty) return;
-                _courseSearchViewModel.searchCourses(value.trim());
+                _searchDebounce?.cancel();
+                searchCourses();
                 Utils.hideKeyboard();
               },
               onFilterTap: () {
@@ -244,27 +354,30 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
                     onApply: (level, semester, school) {
                       _courseSearchViewModel.applyFilter(
                           level, semester, school);
+                      refreshCourses();
                       Navigation.back(context: context);
                     },
                     onReset: () {
                       _courseSearchViewModel.clearFilter();
                       Navigation.back(context: context);
+                      refreshCourses();
                     },
                   ),
                 );
               },
             ),
             Consumer<CourseSearchViewModel>(
-              builder: (context, searchViewModel, _) {
+              builder: (context, courseSearchViewModel, _) {
                 return Expanded(
                   child: Column(
                     children: [
                       CourseListContent(
-                        viewModel: searchViewModel,
+                        viewModel: courseSearchViewModel,
                         courseViewModel: _courseViewModel,
                       ),
                       ConfirmationSection(
-                        totalCreditHours: searchViewModel.totalCreditHours,
+                        totalCreditHours:
+                            courseSearchViewModel.totalCreditHours,
                         onConfirmPressed: onConfirmPressed,
                       ),
                     ],

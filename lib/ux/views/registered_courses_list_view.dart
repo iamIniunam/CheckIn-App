@@ -28,7 +28,7 @@ class RegisteredCourseListView extends StatelessWidget {
         final isSelected =
             course.id != null && isCourseSelected(course.id ?? 0);
         return CourseEnrollmentCard(
-          semesterCourse: course,
+          course: course,
           isSelected: isSelected,
           onTap: () {
             if (course.id != null) {

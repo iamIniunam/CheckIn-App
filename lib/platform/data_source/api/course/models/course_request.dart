@@ -1,5 +1,35 @@
 import 'package:attendance_app/platform/data_source/api/api_base_models.dart';
 
+class GetAllCoursesRequest extends Serializable {
+  final num? pageIndex;
+  final num? pageSize;
+  final String? searchQuery;
+  final int? level;
+  final int? semester;
+  final String? school;
+
+  GetAllCoursesRequest({
+    this.pageIndex,
+    this.pageSize,
+    this.searchQuery,
+    this.level,
+    this.semester,
+    this.school,
+  });
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'pageIndex': pageIndex,
+      'pageSize': pageSize,
+      if (searchQuery != null) 'searchQuery': searchQuery,
+      if (level != null) 'level': level,
+      if (semester != null) 'semester': semester,
+      if (school != null) 'school': school,
+    };
+  }
+}
+
 class GetCoursesForLevelAndSemesterRequest extends Serializable {
   final String? levelId;
   final String? semesterId;

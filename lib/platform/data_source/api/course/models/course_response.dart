@@ -82,15 +82,18 @@ class Course extends Serializable {
     int? index,
   }) : color = Course.getColorByIndex(index ?? 0);
 
-  factory Course.fromJson(Map<String, dynamic> json) {
+  factory Course.fromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      throw ArgumentError('json cannot be null');
+    }
     return Course(
-      id: json['id'] as int?,
-      courseCode: json['code'] as String,
-      courseTitle: json['name'] as String?,
-      creditHours: json['credit_hours'] as int?,
+      id: json['id'],
+      courseCode: json['code'],
+      courseTitle: json['name'],
+      creditHours: json['credit_hours'],
       level: json['level']?.toString(),
-      semester: json['semester'] as int?,
-      school: json['school'] as String?,
+      semester: json['semester'],
+      school: json['school'],
     );
   }
 

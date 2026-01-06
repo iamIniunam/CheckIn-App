@@ -139,7 +139,7 @@ class AuthViewModel extends ChangeNotifier {
       final courseSearchVm = AppDI.getIt<CourseSearchViewModel>();
       courseSearchVm.clearSelectedCourses();
       courseSearchVm.clearFilter();
-      courseSearchVm.clearSearch();
+      // courseSearchVm.clearSearch();
     } catch (_) {}
 
     try {

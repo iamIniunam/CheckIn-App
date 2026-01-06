@@ -1,44 +1,48 @@
-import 'package:attendance_app/ux/shared/components/dashboard_metric_grid_view.dart';
+import 'package:attendance_app/platform/data_source/api/course/models/course_response.dart';
+import 'package:attendance_app/ux/shared/components/empty_state_widget.dart';
+import 'package:attendance_app/ux/shared/components/page_state_indicator.dart';
+import 'package:attendance_app/ux/shared/components/pagination/custom_lazy_paging_grid.dart';
 import 'package:attendance_app/ux/shared/view_models/course_search_view_model.dart';
 import 'package:attendance_app/ux/views/course/components/course_enrollment_card.dart';
 import 'package:flutter/material.dart';
 
 class CourseListView extends StatelessWidget {
-  const CourseListView({
-    super.key,
-    required this.courses,
-    required this.viewModel,
-  });
+  const CourseListView({super.key, required this.viewModel});
 
-  final List courses;
   final CourseSearchViewModel viewModel;
 
   @override
   Widget build(BuildContext context) {
-    // return ListView.builder(
-    //   padding: const EdgeInsets.symmetric(horizontal: 12),
-    //   itemCount: courses.length,
-    //   itemBuilder: (context, index) {
-    //     final course = courses[index];
-    //     final selectedSchool = viewModel.getChosenSchoolForCourse(course);
-
-    return DashboardMetricGridView(
+    return CustomLazyPagingGrid<int, Course>(
+      pagingController: viewModel.coursesPagingController,
       padding: const EdgeInsets.only(left: 16, top: 12, right: 16),
-      crossAxisCount: 2,
-      mainAxisSpacing: 10,
-      physics: const AlwaysScrollableScrollPhysics(),
-      children: courses.map((course) {
-        final isSelected = viewModel.isCourseSelected(course);
+      primary: false,
+      shrinkWrap: true,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 10,
+        crossAxisSpacing: 10,
+        mainAxisExtent: 72,
+      ),
+      itemBuilder: (context, item, index) {
         return CourseEnrollmentCard(
-          semesterCourse: course,
-          isSelected: isSelected,
+          course: item,
+          isSelected: viewModel.isCourseSelected(item),
           onTap: () {
-            viewModel.toggleCourseSelection(course);
+            viewModel.toggleCourseSelection(item);
           },
         );
-      }).toList(),
+      },
+      errorPageWidget: const PageErrorIndicator(),
+      emptyPageWidget: EmptyStateWidget(
+        icon: viewModel.isSearching
+            ? Icons.search_off_rounded
+            : Icons.school_rounded,
+        message: viewModel.isSearching
+            ? 'No courses found'
+            : 'No courses found for the selected filters:\n${viewModel.filterSummary}',
+      ),
+      errorText: 'Failed to load courses',
     );
-    //   },
-    // );
   }
 }
