@@ -15,7 +15,7 @@ class PreferenceManager {
     return _preference.getBool(key ?? "");
   }
 
-  void setPreference({String? key, String? value}) async {
+  Future<void> setPreference({String? key, String? value}) async {
     await _preference.setString(key ?? "", value ?? "");
   }
 

@@ -1,3 +1,5 @@
+import 'package:attendance_app/ux/shared/view_models/remote_config_view_model.dart';
+
 class AttendanceConstants {
   static const double acceptableGPSAccuracy = 50.0; // meters
   static const double maxAccuracyBuffer = 100.0; // meters
@@ -18,7 +20,7 @@ class AttendanceConstants {
   static const double seaviewLong = -0.3328;
   static const double kccLat = 5.6037;
   static const double kccLong = -0.1870;
-  static const double maxDistanceMeters = 13.38;
+  // static const double maxDistanceMeters = 13.38;
 }
 
 class CampusLocation {
@@ -38,37 +40,45 @@ class CampusLocation {
 }
 
 class CampusLocations {
-  static const List<CampusLocation> campuses = [
-    CampusLocation(
-      id: 'house',
-      name: 'House Campus',
-      latitude: AttendanceConstants.houseLat,
-      longitude: AttendanceConstants.houseLong,
-      maxDistanceMeters: AttendanceConstants.maxDistanceMeters,
-    ),
-    CampusLocation(
-      id: 'seaview',
-      name: 'Seaview Campus',
-      latitude: AttendanceConstants.seaviewLat,
-      longitude: AttendanceConstants.seaviewLong,
-      maxDistanceMeters: AttendanceConstants.maxDistanceMeters,
-    ),
-    CampusLocation(
-      id: 'kcc',
-      name: 'KCC Campus',
-      latitude: AttendanceConstants.kccLat,
-      longitude: AttendanceConstants.kccLong,
-      maxDistanceMeters: AttendanceConstants.maxDistanceMeters,
-    ),
-  ];
+  final RemoteConfigViewModel remoteConfigViewModel;
 
-  static CampusLocation? getCampus(String id) {
+  CampusLocations({required this.remoteConfigViewModel});
+
+  List<CampusLocation> get campuses {
+    final maxDistance = remoteConfigViewModel.maxCheckInDistance;
+
+    return [
+      CampusLocation(
+        id: 'house',
+        name: 'House Campus',
+        latitude: AttendanceConstants.houseLat,
+        longitude: AttendanceConstants.houseLong,
+        maxDistanceMeters: maxDistance,
+      ),
+      CampusLocation(
+        id: 'seaview',
+        name: 'Seaview Campus',
+        latitude: AttendanceConstants.seaviewLat,
+        longitude: AttendanceConstants.seaviewLong,
+        maxDistanceMeters: maxDistance,
+      ),
+      CampusLocation(
+        id: 'kcc',
+        name: 'KCC Campus',
+        latitude: AttendanceConstants.kccLat,
+        longitude: AttendanceConstants.kccLong,
+        maxDistanceMeters: maxDistance,
+      ),
+    ];
+  }
+
+  CampusLocation? getCampus(String id) {
     try {
       return campuses.firstWhere((c) => c.id == id);
-    } catch (e) {
+    } catch (_) {
       return null;
     }
   }
 
-  static List<String> get campusIds => campuses.map((c) => c.id).toList();
+  List<String> get campusIds => campuses.map((c) => c.id).toList();
 }

@@ -56,6 +56,9 @@ dependencies:
       url: https://github.com/Maampeaw/infinite_scroll_pagination.git
       ref: fix-null-checker-crash-issue
   fluttertoast: ^8.2.5
+  firebase_remote_config: ^4.3.17
+  firebase_core: ^2.27.0
+  firebase_analytics: ^10.8.9
 
 
 

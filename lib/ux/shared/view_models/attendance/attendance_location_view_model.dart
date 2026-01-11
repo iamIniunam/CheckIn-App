@@ -4,6 +4,7 @@ import 'package:attendance_app/platform/utils/location_utils.dart';
 import 'package:attendance_app/ux/shared/models/ui_models.dart';
 import 'package:attendance_app/ux/shared/resources/constants/attendance_constants.dart';
 import 'package:attendance_app/ux/shared/resources/constants/attendance_validator.dart';
+import 'package:attendance_app/ux/shared/view_models/remote_config_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -20,7 +21,10 @@ class AttendanceLocationViewModel extends ChangeNotifier {
     checkAttendanceResult.value = UIResult.loading();
 
     try {
-      final campus = CampusLocations.getCampus(campusId);
+      final campusLocations = CampusLocations(
+        remoteConfigViewModel: AppDI.getIt<RemoteConfigViewModel>(),
+      );
+      final campus = campusLocations.getCampus(campusId);
       if (campus == null) {
         checkAttendanceResult.value =
             UIResult.error(message: 'Invalid campus ID: $campusId');

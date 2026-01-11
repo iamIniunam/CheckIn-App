@@ -9,6 +9,7 @@ import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/resources/app_theme.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/remote_config_view_model.dart';
 import 'package:attendance_app/ux/views/onboarding/login_page.dart';
 import 'package:attendance_app/ux/views/splash_screen.dart';
 import 'package:flutter/material.dart';
@@ -44,14 +45,18 @@ class EntryPage extends StatefulWidget {
 
 class _EntryPageState extends State<EntryPage> {
   final _manager = AppDI.getIt<PreferenceManager>();
-  final _authViewModel = AppDI.getIt<AuthViewModel>();
-  final _courseViewModel = AppDI.getIt<CourseViewModel>();
+  final AuthViewModel _authViewModel = AppDI.getIt<AuthViewModel>();
+  final CourseViewModel _courseViewModel = AppDI.getIt<CourseViewModel>();
+  final RemoteConfigViewModel _remoteConfigViewModel =
+      AppDI.getIt<RemoteConfigViewModel>();
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       _authViewModel.saveAppUser(_manager.appUser);
+      await _remoteConfigViewModel.initialize();
+
       final studentId = _manager.appUser?.studentProfile?.idNumber ?? '';
       if (studentId.isNotEmpty) {
         try {

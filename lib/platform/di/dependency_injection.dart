@@ -15,6 +15,7 @@ import 'package:attendance_app/ux/shared/view_models/attendance/attendance_locat
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_search_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/course_view_model.dart';
+import 'package:attendance_app/ux/shared/view_models/remote_config_view_model.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -52,6 +53,8 @@ class AppDI {
         () => OnlineCodeViewModel());
     getIt.registerLazySingleton<AttendanceLocationViewModel>(
         () => AttendanceLocationViewModel());
+    getIt.registerLazySingleton<RemoteConfigViewModel>(
+        () => RemoteConfigViewModel());
 
     // Services
     getIt.registerLazySingleton<LocationProvider>(() => LocationProvider());

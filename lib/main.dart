@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:attendance_app/app.dart';
+import 'package:attendance_app/firebase_options.dart';
+import 'package:attendance_app/platform/data_source/persistence/remote_config.dart';
 import 'package:attendance_app/platform/di/dependency_injection.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance/attendance_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
@@ -12,6 +14,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   runAppWithZone();
@@ -60,11 +63,20 @@ Future<SharedPreferences> initializeApp() async {
   SharedPreferences preferences = await SharedPreferences.getInstance();
 
   try {
-    await AppDI.init(sharedPreferences: preferences);
+    await Future.wait([
+      Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
+    ]);
   } catch (e) {
-    if (kDebugMode) {
-      print('Initialization error: $e');
-    }
+    if (kDebugMode) print('Error during independent services init: $e');
+  }
+
+  try {
+    await Future.wait([
+      AppRemoteConfig.init(),
+      AppDI.init(sharedPreferences: preferences),
+    ]);
+  } catch (e) {
+    if (kDebugMode) print('Error during dependent services init: $e');
   }
   return preferences;
 }
