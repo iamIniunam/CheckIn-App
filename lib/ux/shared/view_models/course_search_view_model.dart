@@ -9,7 +9,7 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 class CourseSearchViewModel extends ChangeNotifier {
   final Api _api = AppDI.getIt<Api>();
 
-  final PagingController<int, Course> coursesPagingController =
+  PagingController<int, Course> coursesPagingController =
       PagingController(firstPageKey: 1);
   int currentPageForCourses = 1;
   List<Course> firstPageAllCourses = [];
@@ -87,6 +87,18 @@ class CourseSearchViewModel extends ChangeNotifier {
     } else {
       _selectedCourses.add(course);
     }
+    notifyListeners();
+  }
+
+  void resetPaging() {
+    firstPageAllCourses = [];
+    currentPageForCourses = 1;
+    coursesPagingController.itemList?.clear();
+
+    // Dispose and recreate the controller to clear all listeners
+    coursesPagingController.dispose();
+    coursesPagingController = PagingController(firstPageKey: 1);
+
     notifyListeners();
   }
 

@@ -10,7 +10,6 @@ import 'package:attendance_app/ux/shared/resources/app_strings.dart';
 import 'package:attendance_app/ux/shared/view_models/attendance/attendance_view_model.dart';
 import 'package:attendance_app/ux/shared/view_models/auth_view_model.dart';
 import 'package:attendance_app/ux/views/course/components/attendance_history_card.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
@@ -26,13 +25,30 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
   final AttendanceViewModel _attendanceViewModel =
       AppDI.getIt<AttendanceViewModel>();
 
+  bool _isLoadingPage = false;
+
   @override
   void initState() {
     super.initState();
     _attendanceViewModel.attendanceHistoryPagingController
-        .addPageRequestListener((pageKey) {
-      _attendanceViewModel.currentPageForAttendanceHistory = pageKey;
-      loadNextPage();
+        .removePageRequestListener(_onPageRequest);
+    _attendanceViewModel.attendanceHistoryPagingController
+        .addPageRequestListener(_onPageRequest);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _attendanceViewModel.currentPageForAttendanceHistory = 1;
+      _attendanceViewModel.attendanceHistoryPagingController.refresh();
+    });
+  }
+
+  void _onPageRequest(int pageKey) {
+    if (_isLoadingPage) return;
+    _isLoadingPage = true;
+
+    _attendanceViewModel.currentPageForAttendanceHistory = pageKey;
+    loadNextPage().then((_) {
+      _isLoadingPage = false;
+    }).catchError((error) {
+      _isLoadingPage = false;
     });
   }
 
@@ -64,36 +80,61 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
         pageSize: AppConstants.defaultPageSize,
       ),
     );
-    if (response.status == ApiResponseStatus.Success) {
-      if (response.response?.data?.isNotEmpty == true) {
-        try {
-          if (_attendanceViewModel.currentPageForAttendanceHistory == 1) {
-            _attendanceViewModel.attendanceHistoryPagingController.itemList
-                ?.clear();
-            _attendanceViewModel.attendanceHistoryPagingController.itemList =
-                [];
-          }
-          _attendanceViewModel.attendanceHistoryPagingController.appendPage(
-              response.response?.data ?? [],
-              _attendanceViewModel.currentPageForAttendanceHistory + 1);
-        } catch (e) {
-          if (kDebugMode) {
-            print(e);
-          }
-        }
-      } else {
-        _attendanceViewModel.attendanceHistoryPagingController
-            .appendLastPage([]);
-      }
+    // if (response.status == ApiResponseStatus.Success) {
+    //   if (response.response?.data?.isNotEmpty == true) {
+    //     try {
+    //       if (_attendanceViewModel.currentPageForAttendanceHistory == 1) {
+    //         _attendanceViewModel.attendanceHistoryPagingController.itemList
+    //             ?.clear();
+    //         _attendanceViewModel.attendanceHistoryPagingController.itemList =
+    //             [];
+    //       }
+    //       _attendanceViewModel.attendanceHistoryPagingController.appendPage(
+    //           response.response?.data ?? [],
+    //           _attendanceViewModel.currentPageForAttendanceHistory + 1);
+    //     } catch (e) {
+    //       if (kDebugMode) {
+    //         print(e);
+    //       }
+    //     }
+    //   } else {
+    //     _attendanceViewModel.attendanceHistoryPagingController
+    //         .appendLastPage([]);
+    //   }
 
-      if (response.response?.isLastPage() == true) {
+    //   if (response.response?.isLastPage() == true) {
+    //     _attendanceViewModel.attendanceHistoryPagingController
+    //         .appendLastPage([]);
+    //   } else {
+    //     _attendanceViewModel.attendanceHistoryPagingController.error =
+    //         response.response?.message ?? AppStrings.somethingWentWrong;
+    //   }
+    // }
+
+    if (response.status == ApiResponseStatus.Success) {
+      final data = response.response?.data ?? [];
+      final isLastPage = response.response?.isLastPage() ?? true;
+
+      if (isLastPage) {
         _attendanceViewModel.attendanceHistoryPagingController
-            .appendLastPage([]);
+            .appendLastPage(data);
       } else {
-        _attendanceViewModel.attendanceHistoryPagingController.error =
-            response.response?.message ?? AppStrings.somethingWentWrong;
+        _attendanceViewModel.attendanceHistoryPagingController.appendPage(
+          data,
+          _attendanceViewModel.currentPageForAttendanceHistory + 1,
+        );
       }
+    } else {
+      _attendanceViewModel.attendanceHistoryPagingController.error =
+          response.response?.message ?? AppStrings.somethingWentWrong;
     }
+  }
+
+  @override
+  void dispose() {
+    _attendanceViewModel.attendanceHistoryPagingController
+        .removePageRequestListener(_onPageRequest);
+    super.dispose();
   }
 
   @override
@@ -103,7 +144,9 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
         Expanded(
           child: RefreshIndicator(
             onRefresh: () async {
-              await refresh();
+              // await refresh();
+              _attendanceViewModel.currentPageForAttendanceHistory = 1;
+              _attendanceViewModel.attendanceHistoryPagingController.refresh();
             },
             child: PagedListView<int, AttendanceHistory>(
               pagingController:

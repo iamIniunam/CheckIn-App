@@ -8,11 +8,16 @@ class RemoteConfigViewModel {
   final AppRemoteConfig remoteConfig = AppRemoteConfig();
 
   double? _cachedMaxDistance;
+  bool? _cachedShowLogoutButton;
 
   Future<void> initialize() async {
-    remoteConfig
+    await remoteConfig
         .fetchRemoteConfigNumericalData(RemoteConfigKeys.maxCheckInDistance);
+    await AppRemoteConfig.fetchRemoteConfigBooleanData(
+        RemoteConfigKeys.showLogoutButton);
+
     _cachedMaxDistance = await getMaxCheckInDistance();
+    _cachedShowLogoutButton = await getShowLogoutButton();
   }
 
   Future<double> getMaxCheckInDistance() async {
@@ -24,5 +29,16 @@ class RemoteConfigViewModel {
 
   double get maxCheckInDistance {
     return _cachedMaxDistance ?? 13.38;
+  }
+
+  Future<bool> getShowLogoutButton() async {
+    final cachedValue = await manager.getBoolPreference(
+      key: RemoteConfigKeys.showLogoutButton,
+    );
+    return cachedValue ?? true;
+  }
+
+  bool get showLogoutButton {
+    return _cachedShowLogoutButton ?? true;
   }
 }

@@ -19,7 +19,6 @@ import 'package:attendance_app/ux/views/course/components/course_search_state_wi
 import 'package:attendance_app/ux/views/course/components/search_and_filter_bar.dart';
 import 'package:attendance_app/ux/views/course/course_registration_info_bottom_sheet.dart';
 import 'package:attendance_app/ux/views/course/filter_courses_bottom_page.dart';
-import 'package:flutter/foundation.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -42,17 +41,15 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
 
   late TextEditingController searchController = TextEditingController();
   Timer? _searchDebounce;
+  bool _isLoadingPage = false;
 
   @override
   void initState() {
     super.initState();
     _courseSearchViewModel.coursesPagingController
-        .addPageRequestListener((pageKey) {
-      _courseSearchViewModel.currentPageForCourses = pageKey;
-      if (searchController.text.isEmpty || pageKey != 1) {
-        loadNextPageForCourses();
-      }
-    });
+        .removePageRequestListener(_onPageRequest);
+    _courseSearchViewModel.coursesPagingController
+        .addPageRequestListener(_onPageRequest);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       clearSearch();
       _courseSearchViewModel.clearFilter();
@@ -73,9 +70,7 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
           data.isNotEmpty) {
         _courseSearchViewModel.firstPageAllCourses = data;
       }
-      _courseSearchViewModel.coursesPagingController.itemList
-          ?.clear(); //TODO: ask Chisom why he did this
-      _courseSearchViewModel.coursesPagingController.itemList = [];
+      _courseSearchViewModel.coursesPagingController.itemList?.clear();
       if (isLastPage) {
         _courseSearchViewModel.coursesPagingController.appendLastPage(data);
       } else {
@@ -84,6 +79,9 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
           _courseSearchViewModel.currentPageForCourses + 1,
         );
       }
+    } else {
+      _courseSearchViewModel.coursesPagingController.error =
+          response.response?.message ?? AppStrings.somethingWentWrong;
     }
   }
 
@@ -94,34 +92,37 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
       final data = response.response?.data ?? [];
       final isLastPage = response.response?.isLastPage() ?? true;
 
-      try {
-        if (_courseSearchViewModel.currentPageForCourses == 1) {
-          _courseSearchViewModel.coursesPagingController.itemList?.clear();
-          _courseSearchViewModel.coursesPagingController.itemList = [];
+      if (_courseSearchViewModel.currentPageForCourses == 1 &&
+          searchController.text.isEmpty &&
+          !_courseSearchViewModel.hasActiveFilter &&
+          data.isNotEmpty) {
+        _courseSearchViewModel.firstPageAllCourses = data;
+      }
 
-          if (_courseSearchViewModel.firstPageAllCourses.isEmpty &&
-              searchController.text.isEmpty &&
-              !_courseSearchViewModel.hasActiveFilter) {
-            _courseSearchViewModel.firstPageAllCourses = data;
-          }
-        }
-        if (isLastPage || data.isEmpty) {
-          _courseSearchViewModel.coursesPagingController.appendLastPage(data);
-        } else {
-          _courseSearchViewModel.coursesPagingController.appendPage(
-            data,
-            _courseSearchViewModel.currentPageForCourses + 1,
-          );
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          print(e);
-        }
+      if (isLastPage) {
+        _courseSearchViewModel.coursesPagingController.appendLastPage(data);
+      } else {
+        _courseSearchViewModel.coursesPagingController.appendPage(
+          data,
+          _courseSearchViewModel.currentPageForCourses + 1,
+        );
       }
     } else {
       _courseSearchViewModel.coursesPagingController.error =
           response.response?.message ?? AppStrings.somethingWentWrong;
     }
+  }
+
+  void _onPageRequest(int pageKey) {
+    if (_isLoadingPage) return;
+    _isLoadingPage = true;
+
+    _courseSearchViewModel.currentPageForCourses = pageKey;
+    loadNextPageForCourses().then((_) {
+      _isLoadingPage = false;
+    }).catchError((error) {
+      _isLoadingPage = false;
+    });
   }
 
   GetAllCoursesRequest getAllCoursesRequest() {
@@ -140,8 +141,11 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
   Future<void> searchCourses() async {
     if (isSearching) return;
     isSearching = true;
-    await refreshCourses();
-    setState(() {});
+
+    _courseSearchViewModel.currentPageForCourses = 1;
+    _courseSearchViewModel.coursesPagingController.refresh();
+
+    if (mounted) setState(() {});
     isSearching = false;
   }
 
@@ -168,14 +172,29 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
   void clearSearch() {
     _searchDebounce?.cancel();
     searchController.clear();
-    resetCourses();
+
+    _courseSearchViewModel.currentPageForCourses = 1;
+
+    // If we have cached results, use them instead of making an API call
+    if (_courseSearchViewModel.firstPageAllCourses.isNotEmpty &&
+        !_courseSearchViewModel.hasActiveFilter) {
+      _courseSearchViewModel.coursesPagingController.refresh();
+      _courseSearchViewModel.coursesPagingController.appendPage(
+        _courseSearchViewModel.firstPageAllCourses,
+        2,
+      );
+    } else {
+      // Otherwise refresh from API
+      _courseSearchViewModel.coursesPagingController.refresh();
+    }
+
     if (mounted) setState(() {});
   }
 
   void resetCourses() {
     _courseSearchViewModel.currentPageForCourses = 1;
     _courseSearchViewModel.coursesPagingController.refresh();
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   Future<void> onConfirmPressed() async {
@@ -307,6 +326,8 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
   void dispose() {
     _searchDebounce?.cancel();
     searchController.dispose();
+    _courseSearchViewModel.coursesPagingController
+        .removePageRequestListener(_onPageRequest);
     super.dispose();
   }
 
@@ -321,10 +342,11 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
           child: InkWell(
             onTap: () {
               showAppBottomSheet(
-                  context: context,
-                  title: 'Course Enrollment Notice',
-                  showCloseButton: false,
-                  child: const CourseRegistrationInfoBottomSheet());
+                context: context,
+                title: 'Course Enrollment Notice',
+                showCloseButton: false,
+                child: const CourseRegistrationInfoBottomSheet(),
+              );
             },
             child: const Icon(Icons.info_outline,
                 color: AppColors.defaultColor, size: 20),
@@ -332,11 +354,7 @@ class _CourseEnrollmentPageState extends State<CourseEnrollmentPage> {
         ),
       ],
       body: RefreshIndicator(
-        onRefresh: () async {
-          _courseSearchViewModel.currentPageForCourses = 1;
-          _courseSearchViewModel.coursesPagingController.refresh();
-        },
-        // onRefresh: refreshCourses,
+        onRefresh: refreshCourses,
         child: Column(
           children: [
             SearchAndFilterBar(

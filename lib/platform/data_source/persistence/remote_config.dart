@@ -21,6 +21,21 @@ class AppRemoteConfig {
     await _firebaseRemoteConfig?.fetchAndActivate();
   }
 
+
+  static Future fetchRemoteConfigBooleanData(String remoteKey) async {
+    try {
+      var remoteConfigData = _firebaseRemoteConfig?.getBool(remoteKey);
+      if (remoteConfigData != null) {
+        manager.setBoolPreference(key: remoteKey, value: remoteConfigData);
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("fetchRemoteConfig $remoteKey $e");
+      }
+    }
+    return manager.getBoolPreference(key: remoteKey);
+  }
+  
   Future<void> fetchRemoteConfigNumericalData(String remoteKey) async {
     try {
       var remoteConfigData = _firebaseRemoteConfig?.getDouble(remoteKey) ?? 0.0;
