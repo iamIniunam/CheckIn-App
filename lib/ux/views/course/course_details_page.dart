@@ -254,10 +254,10 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
                           return const PageErrorIndicator();
                         },
                         noItemsFoundIndicatorBuilder: (context) {
-                          return const EmptyStateWidget(
+                          return EmptyStateWidget(
                             icon: Icons.calendar_today_rounded,
                             message:
-                                'No attendance history found for this course',
+                                'No attendance history found for ${widget.course.courseCode}.',
                           );
                         },
                         noMoreItemsIndicatorBuilder: (context) {
