@@ -352,7 +352,8 @@ class CourseViewModel extends ChangeNotifier {
         continue;
       }
 
-      final existingSameSchool = findExistingSameSchool(courseCode ?? '', school);
+      final existingSameSchool =
+          findExistingSameSchool(courseCode ?? '', school);
       if (existingSameSchool != null) {
         duplicateDetails
             .add('$courseCode${school.isNotEmpty ? ' — $school' : ''}');
@@ -360,7 +361,8 @@ class CourseViewModel extends ChangeNotifier {
         continue;
       }
 
-      final existingOtherSchools = existingOtherSchoolsForCode(courseCode ?? '');
+      final existingOtherSchools =
+          existingOtherSchoolsForCode(courseCode ?? '');
       if (existingOtherSchools.isNotEmpty &&
           !(existingOtherSchools.length == 1 &&
               existingOtherSchools.contains(school))) {
