@@ -366,7 +366,11 @@ class AttendanceVerificationViewModel extends ChangeNotifier {
   /// Retry location check
   Future<bool> retryLocationCheck(
       {bool useNetworkOnly = false,
-      List<String> campusIds = const ['seaview', 'kcc', 'house']}) async {
+      List<String> campusIds = const [
+        'seaview',
+        'kcc',
+        'house',
+      ]}) async {
     if (!requiresLocationCheck) return true;
 
     locationCheckResult.value = UIResult.loading();

@@ -91,7 +91,7 @@ class AttendanceHistoryCard extends StatelessWidget {
               Column(
                 children: [
                   Text(
-                    history.attendanceDate?.friendlyTime() ?? '',
+                    history.classDate?.friendlyTime() ?? '',
                     style: const TextStyle(
                       color: AppColors.defaultColor,
                       fontSize: 13,
